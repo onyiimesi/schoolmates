@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class DisciplinaryAction extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+
+        'offence_type', 
+        'offence_action',
+        'fine'
+        
+    ];
+}
