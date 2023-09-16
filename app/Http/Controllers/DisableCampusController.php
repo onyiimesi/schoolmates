@@ -13,8 +13,8 @@ class DisableCampusController extends Controller
     use HttpResponses;
 
     public function disable(DisableCampusRequest $request, Campus $campus){
-        
-        $campus = Campus::where('id', $request->id)->first();
+
+        $campus = Campus::find($request->id);
 
         if(!$campus){
             return $this->error('', 'Campus does not exist', 400);
@@ -29,6 +29,6 @@ class DisableCampusController extends Controller
             "message" => 'Disabled Successfully',
         ];
 
-        
+
     }
 }

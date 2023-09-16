@@ -17,8 +17,12 @@ class FeeResource extends JsonResource
         return [
             'id' => (string)$this->id,
             'attributes' => [
+                'sch_id' => (string)$this->sch_id,
+                'campus' => (string)$this->campus,
                 'feetype' => (string)$this->feetype,
-                'amount' => (string)$this->amount,
+                'term' => (string)$this->term,
+                'fee_status' => (string)$this->fee_status,
+                'category' => (string)$this->category,
             ]
         ];
     }

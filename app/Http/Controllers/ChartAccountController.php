@@ -6,6 +6,7 @@ use App\Http\Requests\ChartAccountRequest;
 use App\Http\Resources\ChartAccountResource;
 use App\Models\ChartAccount;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ChartAccountController extends Controller
 {
@@ -36,8 +37,11 @@ class ChartAccountController extends Controller
     {
         $request->validated($request->all());
 
+        $user = Auth::user();
 
         $chartacct = ChartAccount::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'name' => $request->name,
             'acct_type' => $request->acct_type,
         ]);

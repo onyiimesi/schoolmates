@@ -21,39 +21,73 @@ class AuthController extends Controller
     use HttpResponses;
 
     public function login(LoginUserRequest $request) {
-        
+
         $request->validated($request->all());
 
-        if(Auth::guard('staffs')->attempt($request->only(['username', 'password']))){
-            $user = Staff::where('username', $request->username)->first();
+        $staffGuard = Auth::guard('staffs');
+        $studGuard = Auth::guard('studs');
 
+        if ($staffGuard->attempt($request->only(['username', 'password']))) {
+            $user = Staff::where('username', $request->username)->first();
             $users = new LoginResource($user);
+            $token = $user->createToken('API Token of '. $user->username);
 
             return $this->success([
                 'user' => $users,
-                'token' => $user->createToken('API Token of '. $user->username)->plainTextToken
+                'token' => $token->plainTextToken,
+                'expires_at' => $token->accessToken->expires_at
             ]);
-        }
-
-        if(Auth::guard('studs')->attempt($request->only(['username', 'password']))){
+        } elseif ($studGuard->attempt($request->only(['username', 'password']))) {
             $stud = Student::where('username', $request->username)->first();
-
             $studs = new StudentLoginResource($stud);
+            $token = $stud->createToken('API Token of '. $stud->username);
 
             return $this->success([
                 'user' => $studs,
-                'token' => $stud->createToken('API Token of '. $stud->username)->plainTextToken
+                'token' => $token->plainTextToken,
+                'expires_at' => $token->accessToken->expires_at
             ]);
         }
 
-        if(!Auth::guard('staffs')->attempt($request->only(['username', 'password']))){
-            return $this->error('', 'Credentials do not match', 401);
-        }
+        return $this->error('', 'Credentials do not match', 401);
 
-        if(!Auth::guard('studs')->attempt($request->only(['username', 'password']))){
-            return $this->error('', 'Credentials do not match', 401);
-        }
-        
+
+        // if(Auth::guard('staffs')->attempt($request->only(['username', 'password']))){
+        //     $user = Staff::where('username', $request->username)->first();
+
+        //     $users = new LoginResource($user);
+
+        //     $token = $user->createToken('API Token of '. $user->username);
+
+        //     return $this->success([
+        //         'user' => $users,
+        //         'token' => $token->plainTextToken,
+        //         'expires_at' => $token->accessToken->expires_at
+        //     ]);
+        // }
+
+        // if(Auth::guard('studs')->attempt($request->only(['username', 'password']))){
+        //     $stud = Student::where('username', $request->username)->first();
+
+        //     $studs = new StudentLoginResource($stud);
+
+        //     $token = $stud->createToken('API Token of '. $stud->username);
+
+        //     return $this->success([
+        //         'user' => $studs,
+        //         'token' => $token->plainTextToken,
+        //         'expires_at' => $token->accessToken->expires_at
+        //     ]);
+        // }
+
+        // if(!Auth::guard('staffs')->attempt($request->only(['username', 'password']))){
+        //     return $this->error('', 'Credentials do not match', 401);
+        // }
+
+        // if(!Auth::guard('studs')->attempt($request->only(['username', 'password']))){
+        //     return $this->error('', 'Credentials do not match', 401);
+        // }
+
     }
 
     public function register(StoreUserRequest $request) {
@@ -73,7 +107,11 @@ class AuthController extends Controller
     }
 
     public function logout() {
-        Auth::user()->currentAccessToken()->delete();
+
+        $user = request()->user();
+        $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
+
+        // Auth::user()->currentAccessToken()->delete();
 
         return $this->success([
             'message' => 'You have successfully logged out and your token has been deleted'
@@ -95,7 +133,7 @@ class AuthController extends Controller
 
             ]);
 
-    
+
              return [
                 "status" => 'true',
                 "message" => 'Password Successfully Updated',

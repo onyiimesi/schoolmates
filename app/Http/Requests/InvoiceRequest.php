@@ -27,6 +27,7 @@ class InvoiceRequest extends FormRequest
             'sch_id' => ['string',],
             'campus' => ['string', 'max:255'],
             'admission_number' => ['required', 'string', 'max:255'],
+            'student_id' => ['required'],
             'fullname' => ['required', 'string', 'max:255'],
             'class' => ['required', 'string', 'max:255'],
             'feetype' => ['required', 'string', 'max:255'],

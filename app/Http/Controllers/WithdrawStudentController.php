@@ -9,8 +9,8 @@ use Illuminate\Http\Request;
 class WithdrawStudentController extends Controller
 {
     public function withdraw(WithdrawStudentRequest $request, Student $student){
-        
-        $student = Student::where('id', $request->id)->first();
+
+        $student = Student::find($request->id);
 
         if(!$student){
             return $this->error('', 'Student does not exist', 400);
@@ -25,6 +25,6 @@ class WithdrawStudentController extends Controller
             "message" => 'Student Withdrawn Successfully',
         ];
 
-        
+
     }
 }

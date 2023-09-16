@@ -12,8 +12,8 @@ class EnableStaffController extends Controller
     use HttpResponses;
 
     public function enable(EnableStaffRequest $request, Staff $staff){
-        
-        $staff = Staff::where('id', $request->id)->first();
+
+        $staff = Staff::find($request->id);
 
         if(!$staff){
             return $this->error('', 'Staff does not exist', 400);
@@ -28,6 +28,6 @@ class EnableStaffController extends Controller
             "message" => 'Enabled Successfully',
         ];
 
-        
+
     }
 }

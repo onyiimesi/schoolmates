@@ -6,6 +6,7 @@ use App\Http\Requests\ExpensesRequest;
 use App\Http\Resources\ExpensesResource;
 use App\Models\Expenses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExpensesController extends Controller
 {
@@ -36,8 +37,11 @@ class ExpensesController extends Controller
     {
         $request->validated($request->all());
 
+        $user = Auth::user();
 
         $expen = Expenses::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'term' => $request->term,
             'session' => $request->session,
             'expense_category' => $request->expense_category,

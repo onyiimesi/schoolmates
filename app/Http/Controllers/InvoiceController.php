@@ -6,6 +6,7 @@ use App\Http\Requests\InvoiceRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
 {
@@ -35,10 +36,15 @@ class InvoiceController extends Controller
     {
         $request->validated($request->all());
 
+        $user = Auth::user();
+
         $invoice_number = random_int(10, 9999999);
 
         $inv = Invoice::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'admission_number' => $request->admission_number,
+            'student_id' => $request->student_id,
             'fullname' => $request->fullname,
             'class' => $request->class,
             'feetype' => $request->feetype,

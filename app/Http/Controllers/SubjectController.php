@@ -36,15 +36,16 @@ class SubjectController extends Controller
     {
         $request->validated($request->all());
 
-        $subjs = Subject::create([
+        $sub = Subject::create([
             'sch_id' => '1234',
+            'class_name' => $request->class_name,
             'subject' => $request->subject,
         ]);
 
         return [
             "status" => 'true',
             "message" => 'Added Successfully',
-            "data" => $subjs
+            "data" => $sub
         ];
     }
 
@@ -54,21 +55,17 @@ class SubjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Subject $subject)
     {
-        //
+        $subjects = new SubjectResource($subject);
+
+        return [
+            'status' => 'true',
+            'message' => 'Subject Details',
+            'data' => $subjects
+        ];
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -77,9 +74,17 @@ class SubjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Subject $subject)
     {
-        //
+        $subject->update($request->all());
+
+        $sub = new SubjectResource($subject);
+
+        return [
+            "status" => 'true',
+            "message" => 'Updated Successfully',
+            "data" => $sub
+        ];
     }
 
     /**
@@ -88,8 +93,10 @@ class SubjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Subject $subject)
     {
-        //
+        $subject->delete();
+
+        return response(null, 204);
     }
 }

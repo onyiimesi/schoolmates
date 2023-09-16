@@ -6,6 +6,7 @@ use App\Http\Requests\VendorRequest;
 use App\Http\Resources\VendorResource;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class VendorController extends Controller
@@ -39,9 +40,14 @@ class VendorController extends Controller
 
         $vendorcode = Str::random(15);
 
+        $user = Auth::user();
+
         $vend = Vendor::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'vendor_code' => $vendorcode,
             'vendor_type' => $request->vendor_type,
+            'initial_balance' => $request->initial_balance,
             'vendor_name' => $request->vendor_name,
             'company_name' => $request->company_name,
             'contact_address' => $request->contact_address,

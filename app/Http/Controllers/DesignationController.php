@@ -21,13 +21,8 @@ class DesignationController extends Controller
         //     "message" => 'Designation list',
         //     "data" => $desig
         // ];
-        
-        return 
-        
-        DesignationResource::collection(
-            
-            Designation::get()
-        );
+
+        return DesignationResource::collection(Designation::get());
     }
 
     /**

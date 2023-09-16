@@ -6,6 +6,7 @@ use App\Http\Requests\FeeRequest;
 use App\Http\Resources\FeeResource;
 use App\Models\Fee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FeeController extends Controller
 {
@@ -36,9 +37,16 @@ class FeeController extends Controller
     {
         $request->validated($request->all());
 
+        $user = Auth::user();
+
         $fees = Fee::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'feetype' => $request->feetype,
-            'amount' => $request->amount
+            'amount' => $request->amount,
+            'term' => $request->term,
+            'fee_status' => $request->fee_status,
+            'category' => $request->category
         ]);
 
         return [

@@ -6,6 +6,7 @@ use App\Http\Requests\BankRequest;
 use App\Http\Resources\BankResource;
 use App\Models\Bank;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BankController extends Controller
 {
@@ -36,8 +37,11 @@ class BankController extends Controller
     {
         $request->validated($request->all());
 
+        $user = Auth::user();
 
         $bnk = Bank::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'bank_name' => $request->bank_name,
             'account_name' => $request->account_name,
             'opening_balance' => $request->opening_balance,

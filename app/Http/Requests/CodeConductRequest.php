@@ -24,7 +24,7 @@ class CodeConductRequest extends FormRequest
     public function rules()
     {
         return [
-            'rule' => ['required', 'string',],
+            'rule' => ['required', 'string'],
             'description' => ['required', 'string', 'max:255'],
             'apply_to' => ['required', 'string', 'max:255'],
         ];

@@ -19,6 +19,20 @@ class StudentCreditorsController extends Controller
             'data' => $cred
         ];
 
+    }
+
+    public function creditorsByTermSession(Request $request){
         
+        $credi = PaymentResource::collection(Payment::where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('status', 'creditor')
+        ->get());
+
+        return [
+            'status' => 'true',
+            'message' => 'Creditors List',
+            'data' => $credi
+        ];
+ 
     }
 }

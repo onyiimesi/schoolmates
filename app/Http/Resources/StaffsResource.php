@@ -17,6 +17,8 @@ class StaffsResource extends JsonResource
         return [
             'id' => (string)$this->id,
             'attributes' => [
+                'sch_id' => (string)$this->sch_id,
+                'campus' => (string)$this->campus,
                 'designation_id' => (string)$this->designation_id,
                 'department' => (string)$this->department,
                 'surname' => (string)$this->surname,
@@ -29,6 +31,7 @@ class StaffsResource extends JsonResource
                 'image' => (string)$this->image,
                 'class_assigned' => (string)$this->class_assigned,
                 'sub_class' => (string)$this->sub_class,
+                'signature' => (string)$this->signature,
                 'status' => (string)$this->status,
             ]
         ];

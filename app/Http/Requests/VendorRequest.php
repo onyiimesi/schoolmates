@@ -25,6 +25,7 @@ class VendorRequest extends FormRequest
     {
         return [
             'vendor_type' => ['required', 'string',],
+            'initial_balance' => ['required', 'string',],
             'vendor_name' => ['required', 'string', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],
             'contact_address' => ['required', 'string', 'max:255'],

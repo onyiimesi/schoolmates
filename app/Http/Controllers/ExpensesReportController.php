@@ -10,7 +10,9 @@ class ExpensesReportController extends Controller
 {
     public function expensesearch(Request $request){
 
-        $search = Expenses::where("term", $request->term)->where("session", $request->session)->get();
+        $search = Expenses::where("term", $request->term)
+        ->where("session", $request->session)
+        ->get();
 
         $s = ExpensesReportResource::collection($search);
 

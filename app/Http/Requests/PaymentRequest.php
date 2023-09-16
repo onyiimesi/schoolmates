@@ -28,6 +28,7 @@ class PaymentRequest extends FormRequest
             'session' => ['required', 'string', 'max:255'],
             'bank_name' => ['required', 'string', 'max:255'],
             'account_name' => ['required', 'string', 'max:255'],
+            'student_id' => ['required'],
             'student_fullname' => ['required', 'string', 'max:255'],
             'payment_method' => ['required', 'string', 'max:255'],
             'amount_paid' => ['required', 'string', 'max:255'],

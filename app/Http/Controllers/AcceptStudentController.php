@@ -9,8 +9,8 @@ use Illuminate\Http\Request;
 class AcceptStudentController extends Controller
 {
     public function accept(AcceptStudentRequest $request, Student $student){
-        
-        $student = Student::where('id', $request->id)->first();
+
+        $student = Student::find($request->id);
 
         if(!$student){
             return $this->error('', 'Student does not exist', 400);
@@ -25,6 +25,6 @@ class AcceptStudentController extends Controller
             "message" => 'Student Accepted Successfully',
         ];
 
-        
+
     }
 }

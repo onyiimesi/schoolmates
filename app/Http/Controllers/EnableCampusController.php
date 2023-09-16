@@ -12,8 +12,8 @@ class EnableCampusController extends Controller
     use HttpResponses;
 
     public function enable(EnableCampusRequest $request, Campus $campus){
-        
-        $campus = Campus::where('id', $request->id)->first();
+
+        $campus = Campus::find($request->id);
 
         if(!$campus){
             return $this->error('', 'Campus does not exist', 400);
@@ -28,6 +28,6 @@ class EnableCampusController extends Controller
             "message" => 'Enabled Successfully',
         ];
 
-        
+
     }
 }

@@ -55,9 +55,15 @@ class VehicleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Vehicle $vehicle)
     {
-        //
+        $vehicle = new VehicleResource($vehicle);
+
+        return [
+            'status' => 'true',
+            'message' => '',
+            'data' => $vehicle
+        ];
     }
 
     /**

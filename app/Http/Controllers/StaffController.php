@@ -6,6 +6,8 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StaffRequest;
 use App\Http\Resources\StaffsResource;
 use App\Mail\StaffWelcomeMail;
+use App\Models\Campus;
+use App\Models\Schools;
 use App\Models\Staff;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
@@ -25,12 +27,26 @@ class StaffController extends Controller
     public function index()
     {
 
-        $staff = StaffsResource::collection(Staff::where('status', 'active')->get());
+        $user = Auth::user();
+
+        $staff = Staff::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('status', 'active')
+        ->paginate(25);
+
+        $staffcollection = StaffsResource::collection($staff);
 
         return [
             'status' => 'true',
             'message' => 'Staff List',
-            'data' => $staff
+            'data' => $staffcollection,
+            'pagination' => [
+                'current_page' => $staff->currentPage(),
+                'last_page' => $staff->lastPage(),
+                'per_page' => $staff->perPage(),
+                'prev_page_url' => $staff->previousPageUrl(),
+                'next_page_url' => $staff->nextPageUrl(),
+            ],
         ];
 
     }
@@ -45,23 +61,45 @@ class StaffController extends Controller
     {
         $request->validated($request->all());
 
+        $campus = Campus::first();
+        $sch = Schools::first();
+
         if($request->image){
             $file = $request->image;
-            $folderName = 'http://127.0.0.1:8000/public/staffs';
+            $folderName = 'https://schoolmate.powershellerp.com/public/staffs';
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1); 
-            $image = str_replace($replace, '', $file); 
+            $replace = substr($file, 0, strpos($file, ',')+1);
+            $image = str_replace($replace, '', $file);
 
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
             file_put_contents(public_path().'/staffs/'.$file_name, base64_decode($image));
-            
+
             $paths = $folderName.'/'.$file_name;
         }else{
             $paths = "";
         }
 
+        if($request->signature){
+            $file = $request->signature;
+            $folderName = 'https://schoolmate.powershellerp.com/public/staffs/signature';
+            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
+            $replace = substr($file, 0, strpos($file, ',')+1);
+            $sig = str_replace($replace, '', $file);
+
+            $sig = str_replace(' ', '+', $sig);
+            $file_name = time().'.'.$extension;
+            file_put_contents(public_path().'/staffs/signature/'.$file_name, base64_decode($sig));
+
+            $pathss = $folderName.'/'.$file_name;
+        }else{
+            $pathss = "";
+        }
+
         $staff = Staff::create([
+            'sch_id' => $sch->sch_id,
+            'campus' => $campus->name,
+            'campus_type' => $campus->campus_type,
             'designation_id' => $request->designation_id,
             'department' => $request->department,
             'surname' => $request->surname,
@@ -72,6 +110,7 @@ class StaffController extends Controller
             'phoneno' => $request->phoneno,
             'address' => $request->address,
             'image' => $paths,
+            'signature' => $pathss,
             'password' => Hash::make($request->password),
             'pass_word' => $request->password,
             'status' => 'active'
@@ -95,7 +134,7 @@ class StaffController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Staff $staff)
-    {   
+    {
 
         // if($this->isNotAuthorized($staff)){
 
@@ -119,7 +158,7 @@ class StaffController extends Controller
             'message' => 'Staff Details',
             'data' => $staffs
         ];
-        
+
 
     }
 
@@ -132,7 +171,53 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
-        $staff->update($request->all());
+        if($request->image){
+            $file = $request->image;
+            $folderName = 'https://schoolmate.powershellerp.com/public/staffs';
+
+            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
+
+            $replace = substr($file, 0, strpos($file, ',')+1);
+            $image = str_replace($replace, '', $file);
+
+            $image = str_replace(' ', '+', $image);
+            $file_name = time().'.'.$extension;
+            file_put_contents(public_path().'/staffs/'.$file_name, base64_decode($image));
+
+            $paths = $folderName.'/'.$file_name;
+        }else{
+            $paths = $staff->image;
+        }
+
+        if($request->signature){
+            $file = $request->signature;
+            $folderName = 'https://schoolmate.powershellerp.com/public/staffs/signature';
+            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
+            $replace = substr($file, 0, strpos($file, ',')+1);
+            $sig = str_replace($replace, '', $file);
+
+            $sig = str_replace(' ', '+', $sig);
+            $file_name = time().'.'.$extension;
+            file_put_contents(public_path().'/staffs/signature/'.$file_name, base64_decode($sig));
+
+            $pathss = $folderName.'/'.$file_name;
+        }else{
+            $pathss = "";
+        }
+
+        $staff->update([
+            'designation_id' => $request->designation_id,
+            'department' => $request->department,
+            'surname' => $request->surname,
+            'firstname' => $request->firstname,
+            'middlename' => $request->middlename,
+            'username' => $request->username,
+            'email' => $request->email,
+            'phoneno' => $request->phoneno,
+            'address' => $request->address,
+            'image' => $paths,
+            'signature' => $pathss,
+        ]);
 
         $staffs = new StaffsResource($staff);
 

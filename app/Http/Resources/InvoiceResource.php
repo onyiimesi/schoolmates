@@ -20,6 +20,7 @@ class InvoiceResource extends JsonResource
                 'sch_id' => (string)$this->sch_id,
                 'campus' => (string)$this->campus,
                 'admission_number' => (string)$this->admission_number,
+                'student_id' => (string)$this->student_id,
                 'fullname' => (string)$this->fullname,
                 'class' => (string)$this->class,
                 'feetype' => (string)$this->feetype,

@@ -24,7 +24,7 @@ class CampusController extends Controller
             'message' => 'Campus List',
             'data' => $campus
         ];
-        
+
     }
 
     /**
@@ -39,20 +39,19 @@ class CampusController extends Controller
 
         $user = Auth::user();
 
+        $paths = "";
         if($request->image){
             $file = $request->image;
             $folderName = 'http://127.0.0.1:8000/public/campus';
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1); 
-            $image = str_replace($replace, '', $file); 
+            $replace = substr($file, 0, strpos($file, ',')+1);
+            $image = str_replace($replace, '', $file);
 
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
             file_put_contents(public_path().'/campus/'.$file_name, base64_decode($image));
-            
+
             $paths = $folderName.'/'.$file_name;
-        }else{
-            $paths = "";
         }
 
         $campus = Campus::create([
@@ -79,9 +78,15 @@ class CampusController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Campus $campus)
     {
-        //
+        $campuss = new CampusResource($campus);
+
+        return [
+            'status' => 'true',
+            'message' => 'Campus Details',
+            'data' => $campuss
+        ];
     }
 
 
@@ -94,7 +99,7 @@ class CampusController extends Controller
      */
     public function update(Request $request, Campus $campus)
     {
-        
+
         $campus->update($request->all());
 
         $campu = new CampusResource($campus);

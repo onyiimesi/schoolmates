@@ -6,6 +6,7 @@ use App\Http\Requests\ClassRequest;
 use App\Http\Resources\ClassResource;
 use App\Models\ClassModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ClassController extends Controller
 {
@@ -36,7 +37,11 @@ class ClassController extends Controller
     {
         $request->validated($request->all());
 
+        $user = Auth::user();
+
         $class = ClassModel::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'class_name' => $request->class_name,
             'sub_class' => $request->sub_class
         ]);

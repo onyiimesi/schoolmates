@@ -97,8 +97,10 @@ class GradingSystemController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(GradingSystem $grading)
     {
-        //
+        $grading->delete();
+
+        return response(null, 204);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Requests\PaymentRequest;
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -35,21 +36,27 @@ class PaymentController extends Controller
     {
         $request->validated($request->all());
 
-        if((float)$request->amount_paid == (float)$request->total_amount){
-            $due = 0;
+        $amountPaid = (float) $request->amount_paid;
+        $totalAmount = (float) $request->total_amount;
 
+        if ($amountPaid == $totalAmount) {
+            $due = 0;
             $status = "creditor";
-        }else{
-            
-            $due = (float)$request->total_amount - (float)$request->amount_paid;
+        } else {
+            $due = $totalAmount - $amountPaid;
             $status = "debtor";
         }
 
+        $user = Auth::user();
+
         $pays = Payment::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'term' => $request->term,
             'session' => $request->session,
             'bank_name' => $request->bank_name,
             'account_name' => $request->account_name,
+            'student_id' => $request->student_id,
             'student_fullname' => $request->student_fullname,
             'payment_method' => $request->payment_method,
             'amount_paid' => $request->amount_paid,

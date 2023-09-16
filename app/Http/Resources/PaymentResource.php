@@ -17,10 +17,13 @@ class PaymentResource extends JsonResource
         return [
             'id' => (string)$this->id,
             'attributes' => [
+                'sch_id' => (string)$this->sch_id,
+                'campus' => (string)$this->campus,
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
                 'bank_name' => (string)$this->bank_name,
                 'account_name' => (string)$this->account_name,
+                'student_id' => (string)$this->student_id,
                 'student_fullname' => (string)$this->student_fullname,
                 'payment_method' => (string)$this->payment_method,
                 'amount_paid' => (string)$this->amount_paid,

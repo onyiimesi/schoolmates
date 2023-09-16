@@ -17,7 +17,21 @@ class StudentDebtorController extends Controller
             'message' => 'Debtors List',
             'data' => $cred
         ];
+ 
+    }
 
+    public function debtorsByTermSession(Request $request){
         
+        $debt = PaymentResource::collection(Payment::where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('status', 'debtor')
+        ->get());
+
+        return [
+            'status' => 'true',
+            'message' => 'Debtors List',
+            'data' => $debt
+        ];
+ 
     }
 }

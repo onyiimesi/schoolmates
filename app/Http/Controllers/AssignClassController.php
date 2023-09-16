@@ -15,10 +15,9 @@ class AssignClassController extends Controller
 
     use HttpResponses;
 
-    public function assign(AssignClassRequest $request, Staff $staff, $student){
-        
+    public function assign(AssignClassRequest $request, Staff $staff){
+
         $staff = Staff::where('id', $request->id)->first();
-        $student = Student::where('present_class', $request->class_assigned)->where('sub_class', $request->sub_class);
 
         if(!$staff){
             return $this->error('', 'Staff does not exist', 400);
@@ -28,24 +27,24 @@ class AssignClassController extends Controller
         $teacher_surname = $staff->surname;
         $teacher_middlename = $staff->middlename;
 
-        if($staff){
+        $staff->update([
+            'class_assigned' => $request->class_assigned,
+            'sub_class' => $request->sub_class,
+        ]);
 
-            $staff->update([
-                'class_assigned' => $request->class_assigned,
-                'sub_class' => $request->sub_class,
-            ]);
-    
-            $student->update([
-                'teacher_surname' => $teacher_firstname,
-                'teacher_firstname' => $teacher_surname,
-                'teacher_middlename' => $teacher_middlename,
-            ]);
+        Student::where('present_class', $request->class_assigned)
+        ->where('sub_class', $request->sub_class)
+        ->update([
+            'teacher_surname' => $teacher_firstname,
+            'teacher_firstname' => $teacher_surname,
+            'teacher_middlename' => $teacher_middlename,
+        ]);
 
-            return [
-                "status" => 'true',
-                "message" => 'Class Assigned Successfully',
-            ];
-        }
-        
+        return [
+            "status" => 'true',
+            "message" => 'Class Assigned Successfully',
+        ];
+
+
     }
 }
