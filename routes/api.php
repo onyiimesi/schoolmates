@@ -205,6 +205,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
     Route::get("/school", [SchoolsController::class, 'schools']);
     Route::get("/subject/{class}", [SubjectByClassController::class, 'subjectbyclass']);
+    Route::get("/teacher-subject", [SubjectByClassController::class, 'subjectbyteacher']);
     Route::get("/student/{session}/{class}", [StudentBySessionTermClassController::class, 'studentsessionclassterm'])
     ->where('session', '.+');
 
@@ -252,7 +253,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::get('/computedresult/{period}/{term}/{session}', [GetPreschoolResultController::class, 'getComputeResult'])->where('session', '.+');
 
-    Route::post('/assignment', [AssignmentController::class, 'create']);
+    Route::post('/objective-assignment', [AssignmentController::class, 'objective']);
+    Route::post('/theory-assignment', [AssignmentController::class, 'theory']);
     Route::get('/assignment/{period}/{term}/{session}/{type}', [AssignmentController::class, 'assign'])
     ->where('session', '.+');
 

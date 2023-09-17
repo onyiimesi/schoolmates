@@ -41,4 +41,23 @@ class SubjectByClassController extends Controller
         ];
 
     }
+
+    public function subjectbyteacher(Request $request){
+
+        $user = Auth::user();
+
+        $Subject = SubjectResource::collection(
+            Subject::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('class_name', $user->class_assigned)
+            ->get()
+        );
+
+        return [
+            'status' => 'true',
+            'message' => 'Subjects',
+            'data' => $Subject
+        ];
+
+    }
 }
