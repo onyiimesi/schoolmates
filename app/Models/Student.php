@@ -46,4 +46,9 @@ class Student extends Authenticatable implements Auditable
     public function student(){
         return $this->belongsTo(Student::class);
     }
+
+    public function assignmentanswer()
+    {
+        return $this->hasMany(AssignmentAnswer::class);
+    }
 }
