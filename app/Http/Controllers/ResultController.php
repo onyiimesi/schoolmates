@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ResultRequest;
 use App\Http\Resources\ResultResource;
+use App\Models\AffectiveDisposition;
 use App\Models\GradingSystem;
+use App\Models\PsychomotorSkill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Result;
 use App\Models\Staff;
+use App\Models\StudentScore;
 use stdClass;
 
 class ResultController extends Controller
@@ -57,14 +60,17 @@ class ResultController extends Controller
                     'period' => $request->period,
                     'term' => $request->term,
                     'session' => $request->session,
-                    'results' => $request->results,
                     'computed_midterm' => 'true',
                 ]);
+
+                foreach ($request->results as $result) {
+                    $question = new StudentScore($result);
+                    $compute->studentscore()->save($question);
+                }
 
                 return [
                     "status" => 'true',
                     "message" => 'Computed Successfully',
-                    "data" => $compute
                 ];
 
             }else if(!empty($getresult)){
@@ -77,14 +83,20 @@ class ResultController extends Controller
                     'period' => $request->period,
                     'term' => $request->term,
                     'session' => $request->session,
-                    'results' => $request->results,
-                    'computed_midterm' => 'true',
+                    'computed_midterm' => 'true'
                 ]);
+
+                foreach ($request->results as $result) {
+                    $question = StudentScore::updateOrCreate(
+                        ['subject' => $result['subject']],
+                        ['score' => $result['score']]
+                    );
+                    $getresult->studentscore()->save($question);
+                }
 
                 return [
                     "status" => 'true',
-                    "message" => 'Result Updated Successfully',
-                    "data" => $getresult
+                    "message" => 'Result Updated Successfully'
                 ];
 
             }
@@ -117,9 +129,6 @@ class ResultController extends Controller
                     'school_opened' => $request->school_opened,
                     'times_present' => $request->times_present,
                     'times_absent' => $request->times_absent,
-                    'results' => $request->results,
-                    'affective_disposition' => $request->affective_disposition,
-                    'psychomotor_skills' => $request->psychomotor_skills,
                     'teacher_comment' => $request->teacher_comment,
                     'teacher_id' => $request->teacher_id,
                     'teacher_fullname' => $teacher->surname . ' '. $teacher->firstname,
@@ -129,10 +138,24 @@ class ResultController extends Controller
                     'computed_endterm' => 'true',
                 ]);
 
+                foreach ($request->results as $result) {
+                    $question = new StudentScore($result);
+                    $compute->studentscore()->save($question);
+                }
+
+                foreach ($request->affective_disposition as $affective) {
+                    $disposition = new AffectiveDisposition($affective);
+                    $compute->affectivedisposition()->save($disposition);
+                }
+
+                foreach ($request->psychomotor_skills as $skills) {
+                    $psy = new PsychomotorSkill($skills);
+                    $compute->psychomotorskill()->save($psy);
+                }
+
                 return [
                     "status" => 'true',
                     "message" => 'Computed Successfully',
-                    "data" => $compute
                 ];
 
             }else if(!empty($getsecondresult)){
@@ -148,22 +171,37 @@ class ResultController extends Controller
                     'school_opened' => $request->school_opened,
                     'times_present' => $request->times_present,
                     'times_absent' => $request->times_absent,
-                    'results' => $request->results,
-                    'affective_disposition' => $request->affective_disposition,
-                    'psychomotor_skills' => $request->psychomotor_skills,
                     'teacher_comment' => $request->teacher_comment,
                     'teacher_id' => $request->teacher_id,
                     'teacher_fullname' => $teacher->surname . ' '. $teacher->firstname,
                     'hos_comment' => $request->hos_comment,
                     'hos_id' => $request->hos_id,
                     'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
-                    'computed_endterm' => 'true',
+                    'computed_endterm' => 'true'
                 ]);
+
+
+                $getsecondresult->studentscore()->delete();
+                foreach ($request->results as $result) {
+                    $question = new StudentScore($result);
+                    $getsecondresult->studentscore()->save($question);
+                }
+
+                $getsecondresult->affectivedisposition()->delete();
+                foreach ($request->affective_disposition as $affective) {
+                    $disposition = new AffectiveDisposition($affective);
+                    $getsecondresult->affectivedisposition()->save($disposition);
+                }
+
+                $getsecondresult->psychomotorskill()->delete();
+                foreach ($request->psychomotor_skills as $skills) {
+                    $psy = new PsychomotorSkill($skills);
+                    $getsecondresult->psychomotorskill()->save($psy);
+                }
 
                 return [
                     "status" => 'true',
-                    "message" => 'Updated Successfully',
-                    "data" => $getsecondresult
+                    "message" => 'Updated Successfully'
                 ];
 
             }

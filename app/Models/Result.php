@@ -44,7 +44,9 @@ class Result extends Model implements Auditable
         'hos_fullname',
         'computed_midterm',
         'computed_endterm',
-        'status'
+        'status',
+        'computed_midterm',
+        'computed_endterm'
 
     ];
 
@@ -57,5 +59,20 @@ class Result extends Model implements Auditable
     public function results()
     {
         return $this->belongsTo(Result::class);
+    }
+
+    public function studentscore()
+    {
+        return $this->hasMany(StudentScore::class);
+    }
+
+    public function affectivedisposition()
+    {
+        return $this->hasMany(AffectiveDisposition::class);
+    }
+
+    public function psychomotorskill()
+    {
+        return $this->hasMany(PsychomotorSkill::class);
     }
 }

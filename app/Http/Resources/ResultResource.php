@@ -32,17 +32,29 @@ class ResultResource extends JsonResource
                 'school_opened' => (string)$this->school_opened,
                 'times_present' => (string)$this->times_present,
                 'times_absent' => (string)$this->times_absent,
-                'results' => json_decode($jsonString, JSON_UNESCAPED_SLASHES),
-                'affective_disposition' => json_decode($jsonStrings, JSON_UNESCAPED_SLASHES),
-                'psychomotor_skills' => json_decode($jsonStringss, JSON_UNESCAPED_SLASHES),
+                'results' => $this->studentscore->map(function($score) {
+                    return [
+                        "subject" => $score->subject,
+                        "score" => $score->score
+                    ];
+                })->toArray(),
+                'affective_disposition' => $this->affectivedisposition->map(function($score) {
+                    return [
+                        "name" => $score->name,
+                        "score" => $score->score
+                    ];
+                })->toArray(),
+                'psychomotor_skills' => $this->psychomotorskill->map(function($score) {
+                    return [
+                        "name" => $score->name,
+                        "score" => $score->score
+                    ];
+                })->toArray(),
                 'teacher_comment' => (string)$this->teacher_comment,
                 'teacher_fullname' => (string)$this->teacher_fullname,
                 'hos_comment' => (string)$this->hos_comment,
                 'hos_fullname' => (string)$this->hos_fullname,
-                'computed_endterm' => (string)$this->computed_endterm,
-                // 'total' => (string)$this->total,
-                // 'grade' => (string)$this->grade,
-                // 'remark' => (string)$this->remark,
+                'computed_endterm' => (string)$this->computed_endterm
             ]
         ];
     }

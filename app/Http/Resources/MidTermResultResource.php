@@ -25,8 +25,13 @@ class MidTermResultResource extends JsonResource
                 'period' => (string)$this->period,
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
-                'results' => json_decode($jsonString, JSON_UNESCAPED_SLASHES),
-                'computed_midterm' => (string)$this->computed_midterm,
+                'results' => $this->studentscore->map(function($score) {
+                    return [
+                        "subject" => $score->subject,
+                        "score" => $score->score
+                    ];
+                })->toArray(),
+                'computed_midterm' => (string)$this->computed_midterm
             ]
         ];
     }
