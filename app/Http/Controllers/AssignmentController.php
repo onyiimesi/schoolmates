@@ -41,7 +41,10 @@ class AssignmentController extends Controller
                 'option1' => $item['option1'],
                 'option2' => $item['option2'],
                 'option3' => $item['option3'],
-                'option4' => $item['option4']
+                'option4' => $item['option4'],
+                'total_question' => $item['total_question'],
+                'question_mark' => $item['question_mark'],
+                'total_mark' => $item['total_mark']
             ]);
 
         }
@@ -88,7 +91,10 @@ class AssignmentController extends Controller
                 'question' => $item['question'],
                 'answer' => $item['answer'],
                 'subject_id' => $item['subject_id'],
-                'image' => $paths
+                'image' => $paths,
+                'total_question' => $item['total_question'],
+                'question_mark' => $item['question_mark'],
+                'total_mark' => $item['total_mark']
             ]);
 
         }
@@ -147,7 +153,8 @@ class AssignmentController extends Controller
                 'question_type' => $item['question_type'],
                 'answer' =>  $item['answer'],
                 'correct_answer' =>  $item['correct_answer'],
-                'mark' => "not marked"
+                'mark' => "not marked",
+                'submitted' =>  $item['submitted']
             ]);
 
         }
@@ -185,7 +192,8 @@ class AssignmentController extends Controller
                 'question_type' => $item['question_type'],
                 'answer' =>  $item['answer'],
                 'correct_answer' =>  $item['correct_answer'],
-                'mark' => "not marked"
+                'mark' => "not marked",
+                'submitted' =>  $item['submitted']
             ]);
 
         }

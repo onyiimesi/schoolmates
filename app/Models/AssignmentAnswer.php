@@ -10,7 +10,7 @@ class AssignmentAnswer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'question_type', 'question', 'answer', 'subject_id', 'student_id', 'correct_answer', 'mark', 'sch_id', 'campus', 'session', 'period', 'term'
+        'question_type', 'question', 'answer', 'subject_id', 'student_id', 'correct_answer', 'mark', 'sch_id', 'campus', 'session', 'period', 'term', 'question_id', 'submitted'
     ];
 
     public function student()

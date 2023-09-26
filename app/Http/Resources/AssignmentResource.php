@@ -24,11 +24,15 @@ class AssignmentResource extends JsonResource
                 'question_type' => (string)$this->question_type,
                 'question' => (string)$this->question,
                 'answer' => (string)$this->answer,
+                'subject_id' => (string)$this->subject_id,
                 'subject' => (string)$this->subject->subject,
                 'option1' => (string)$this->option1,
                 'option2' => (string)$this->option2,
                 'option3' => (string)$this->option3,
                 'option4' => (string)$this->option4,
+                'total_question' => (string)$this->total_question,
+                'question_mark' => (string)$this->question_mark,
+                'total_mark' => (string)$this->total_mark
             ]
         ];
     }
