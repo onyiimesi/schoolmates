@@ -14,9 +14,6 @@ class ResultResource extends JsonResource
      */
     public function toArray($request)
     {
-        $jsonString = json_encode($this->results);
-        $jsonStrings = json_encode($this->affective_disposition);
-        $jsonStringss = json_encode($this->psychomotor_skills);
         return [
             'id' => (string)$this->id,
             'attributes' => [

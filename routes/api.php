@@ -218,10 +218,16 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
     ->where('date', '.+');
+
+
     Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
     ->where('session', '.+');
     Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
     ->where('session', '.+');
+    Route::get("/cumulativescore/{student_id}", [EndTermResultController::class, 'cummulative']);
+
+
+
     Route::get('/classpopulation', [ClassPopulationController::class, 'getclasspopulation']);
     Route::get('/studentpopulation', [ClassPopulationController::class, 'getallpopulation']);
     Route::get('/staffpopulation', [ClassPopulationController::class, 'getstaffpopulation']);

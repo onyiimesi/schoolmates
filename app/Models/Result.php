@@ -63,7 +63,12 @@ class Result extends Model implements Auditable
 
     public function studentscore()
     {
-        return $this->hasMany(StudentScore::class);
+        return $this->hasMany(StudentScore::class, 'result_id');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
     public function affectivedisposition()

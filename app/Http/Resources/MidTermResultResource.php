@@ -14,7 +14,6 @@ class MidTermResultResource extends JsonResource
      */
     public function toArray($request)
     {
-        $jsonString = json_encode($this->results);
         return [
             'id' => (string)$this->id,
             'attributes' => [

@@ -14,4 +14,9 @@ class StudentScore extends Model
         'score'
     ];
 
+    public function result()
+    {
+        return $this->belongsTo(Result::class);
+    }
+
 }
