@@ -271,6 +271,13 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/assignment-answer/{period}/{term}/{session}/{type}', [AssignmentController::class, 'getanswer'])
     ->where('session', '.+');
 
+    Route::post('/objective-assignment-mark', [AssignmentController::class, 'objectivemark']);
+    Route::post('/theory-assignment-mark', [AssignmentController::class, 'theorymark']);
+    Route::get('/marked-assignment/{period}/{term}/{session}/{type}', [AssignmentController::class, 'marked'])
+    ->where('session', '.+');
+    Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'markedbystudent'])
+    ->where('session', '.+');
+
 
     Route::post('/changepassword', [AuthController::class, 'change']);
     Route::post('/logout', [AuthController::class, 'logout']);

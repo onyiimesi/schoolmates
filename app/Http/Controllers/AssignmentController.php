@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AssignmentRequest;
 use App\Http\Resources\AssignmentAnswerResource;
+use App\Http\Resources\AssignmentMarkResource;
 use App\Http\Resources\AssignmentResource;
 use App\Http\Resources\TheoryResource;
-use App\Models\AcademicPeriod;
 use App\Models\Assignment;
 use App\Models\AssignmentAnswer;
+use App\Models\AssignmentMark;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\HttpResponses;
@@ -36,6 +36,7 @@ class AssignmentController extends Controller
                 'teacher_id' => $user->id,
                 'question_type' => $item['question_type'],
                 'question' => $item['question'],
+                'question_number' => $item['question_number'],
                 'answer' =>  $item['answer'],
                 'subject_id' => $item['subject_id'],
                 'option1' => $item['option1'],
@@ -89,6 +90,7 @@ class AssignmentController extends Controller
                 'teacher_id' => $user->id,
                 'question_type' => $item['question_type'],
                 'question' => $item['question'],
+                'question_number' => $item['question_number'],
                 'answer' => $item['answer'],
                 'subject_id' => $item['subject_id'],
                 'image' => $paths,
@@ -150,6 +152,7 @@ class AssignmentController extends Controller
                 'student_id' => $user->id,
                 'subject_id' => $item['subject_id'],
                 'question' => $item['question'],
+                'question_number' => $item['question_number'],
                 'question_type' => $item['question_type'],
                 'answer' =>  $item['answer'],
                 'correct_answer' =>  $item['correct_answer'],
@@ -189,6 +192,7 @@ class AssignmentController extends Controller
                 'student_id' => $user->id,
                 'subject_id' => $item['subject_id'],
                 'question' => $item['question'],
+                'question_number' => $item['question_number'],
                 'question_type' => $item['question_type'],
                 'answer' =>  $item['answer'],
                 'correct_answer' =>  $item['correct_answer'],
@@ -217,6 +221,125 @@ class AssignmentController extends Controller
             $assigns = AssignmentAnswerResource::collection($assign);
         }else{
             $assigns = AssignmentAnswerResource::collection($assign);
+        }
+
+        return [
+            "status" => 'true',
+            "message" => 'List',
+            "data" => $assigns
+        ];
+    }
+
+    public function objectivemark(Request $request)
+    {
+
+        $user = Auth::user();
+
+        $data = $request->json()->all();
+
+
+        foreach ($data as $item) {
+
+            AssignmentMark::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question_id' => $item['question_id'],
+                'question' => $item['question'],
+                'question_number' => $item['question_number'],
+                'question_type' => $item['question_type'],
+                'answer' =>  $item['answer'],
+                'correct_answer' =>  $item['correct_answer'],
+                'mark' => "marked",
+                'submitted' =>  $item['submitted'],
+                'teacher_mark' =>  $item['teacher_mark']
+            ]);
+
+        }
+
+        return [
+            "status" => 'true',
+            "message" => 'Submitted Successfully'
+        ];
+
+    }
+
+    public function theorymark(Request $request)
+    {
+
+        $user = Auth::user();
+
+        $data = $request->json()->all();
+
+
+        foreach ($data as $item) {
+
+            AssignmentMark::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question_id' => $item['question_id'],
+                'question' => $item['question'],
+                'question_number' => $item['question_number'],
+                'question_type' => $item['question_type'],
+                'answer' =>  $item['answer'],
+                'correct_answer' =>  $item['correct_answer'],
+                'mark' => "marked",
+                'submitted' =>  $item['submitted'],
+                'teacher_mark' =>  $item['teacher_mark']
+            ]);
+
+        }
+
+        return [
+            "status" => 'true',
+            "message" => 'Submitted Successfully'
+        ];
+
+    }
+
+    public function marked(Request $request)
+    {
+        $assign = AssignmentMark::where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('question_type', $request->type)
+        ->get();
+
+        if($request->type === "objective"){
+            $assigns = AssignmentMarkResource::collection($assign);
+        }else{
+            $assigns = AssignmentMarkResource::collection($assign);
+        }
+
+        return [
+            "status" => 'true',
+            "message" => 'List',
+            "data" => $assigns
+        ];
+    }
+
+    public function markedbystudent(Request $request)
+    {
+        $assign = AssignmentMark::where('student_id', $request->student_id)
+        ->where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('question_type', $request->type)
+        ->get();
+
+        if($request->type === "objective"){
+            $assigns = AssignmentMarkResource::collection($assign);
+        }else{
+            $assigns = AssignmentMarkResource::collection($assign);
         }
 
         return [
