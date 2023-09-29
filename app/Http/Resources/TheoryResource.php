@@ -29,7 +29,8 @@ class TheoryResource extends JsonResource
                 'image' => (string)$this->image,
                 'total_question' => (string)$this->total_question,
                 'question_mark' => (string)$this->question_mark,
-                'total_mark' => (string)$this->total_mark
+                'total_mark' => (string)$this->total_mark,
+                'week' => (string)$this->week
             ]
         ];
     }

@@ -6,9 +6,11 @@ use App\Http\Resources\AssignmentAnswerResource;
 use App\Http\Resources\AssignmentMarkResource;
 use App\Http\Resources\AssignmentResource;
 use App\Http\Resources\TheoryResource;
+use App\Models\AcademicPeriod;
 use App\Models\Assignment;
 use App\Models\AssignmentAnswer;
 use App\Models\AssignmentMark;
+use App\Models\AssignmentResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\HttpResponses;
@@ -21,13 +23,12 @@ class AssignmentController extends Controller
     {
 
         $user = Auth::user();
-        // $session = AcademicPeriod::first();
 
         $data = $request->json()->all();
 
         foreach ($data as $item) {
 
-            $assignment = Assignment::create([
+            Assignment::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
                 'period' => $item['period'],
@@ -45,7 +46,8 @@ class AssignmentController extends Controller
                 'option4' => $item['option4'],
                 'total_question' => $item['total_question'],
                 'question_mark' => $item['question_mark'],
-                'total_mark' => $item['total_mark']
+                'total_mark' => $item['total_mark'],
+                'week' => $item['week']
             ]);
 
         }
@@ -81,7 +83,7 @@ class AssignmentController extends Controller
                 $paths = "";
             }
 
-            $assignment = Assignment::create([
+            Assignment::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
                 'period' => $item['period'],
@@ -96,7 +98,8 @@ class AssignmentController extends Controller
                 'image' => $paths,
                 'total_question' => $item['total_question'],
                 'question_mark' => $item['question_mark'],
-                'total_mark' => $item['total_mark']
+                'total_mark' => $item['total_mark'],
+                'week' => $item['week']
             ]);
 
         }
@@ -240,24 +243,52 @@ class AssignmentController extends Controller
 
         foreach ($data as $item) {
 
-            AssignmentMark::create([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'period' => $item['period'],
-                'term' => $item['term'],
-                'session' => $item['session'],
-                'student_id' => $item['student_id'],
-                'subject_id' => $item['subject_id'],
-                'question_id' => $item['question_id'],
-                'question' => $item['question'],
-                'question_number' => $item['question_number'],
-                'question_type' => $item['question_type'],
-                'answer' =>  $item['answer'],
-                'correct_answer' =>  $item['correct_answer'],
-                'mark' => "marked",
-                'submitted' =>  $item['submitted'],
-                'teacher_mark' =>  $item['teacher_mark']
-            ]);
+            $assignment = AssignmentMark::where('question_id', $item['question_id'])->first();
+
+            if($assignment == ""){
+
+                AssignmentMark::create([
+                    'sch_id' => $user->sch_id,
+                    'campus' => $user->campus,
+                    'period' => $item['period'],
+                    'term' => $item['term'],
+                    'session' => $item['session'],
+                    'student_id' => $item['student_id'],
+                    'subject_id' => $item['subject_id'],
+                    'question_id' => $item['question_id'],
+                    'question' => $item['question'],
+                    'question_number' => $item['question_number'],
+                    'question_type' => $item['question_type'],
+                    'answer' =>  $item['answer'],
+                    'correct_answer' =>  $item['correct_answer'],
+                    'mark' => "marked",
+                    'submitted' =>  $item['submitted'],
+                    'teacher_mark' =>  $item['teacher_mark']
+                ]);
+
+            }else{
+
+                $assignment->update([
+                    'sch_id' => $user->sch_id,
+                    'campus' => $user->campus,
+                    'period' => $item['period'],
+                    'term' => $item['term'],
+                    'session' => $item['session'],
+                    'student_id' => $item['student_id'],
+                    'subject_id' => $item['subject_id'],
+                    'question_id' => $item['question_id'],
+                    'question' => $item['question'],
+                    'question_number' => $item['question_number'],
+                    'question_type' => $item['question_type'],
+                    'answer' =>  $item['answer'],
+                    'correct_answer' =>  $item['correct_answer'],
+                    'mark' => "marked",
+                    'submitted' =>  $item['submitted'],
+                    'teacher_mark' =>  $item['teacher_mark']
+                ]);
+
+            }
+
 
         }
 
@@ -278,24 +309,52 @@ class AssignmentController extends Controller
 
         foreach ($data as $item) {
 
-            AssignmentMark::create([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'period' => $item['period'],
-                'term' => $item['term'],
-                'session' => $item['session'],
-                'student_id' => $item['student_id'],
-                'subject_id' => $item['subject_id'],
-                'question_id' => $item['question_id'],
-                'question' => $item['question'],
-                'question_number' => $item['question_number'],
-                'question_type' => $item['question_type'],
-                'answer' =>  $item['answer'],
-                'correct_answer' =>  $item['correct_answer'],
-                'mark' => "marked",
-                'submitted' =>  $item['submitted'],
-                'teacher_mark' =>  $item['teacher_mark']
-            ]);
+            $assignment = AssignmentMark::where('question_id', $item['question_id'])->first();
+
+            if($assignment == ""){
+
+                AssignmentMark::create([
+                    'sch_id' => $user->sch_id,
+                    'campus' => $user->campus,
+                    'period' => $item['period'],
+                    'term' => $item['term'],
+                    'session' => $item['session'],
+                    'student_id' => $item['student_id'],
+                    'subject_id' => $item['subject_id'],
+                    'question_id' => $item['question_id'],
+                    'question' => $item['question'],
+                    'question_number' => $item['question_number'],
+                    'question_type' => $item['question_type'],
+                    'answer' =>  $item['answer'],
+                    'correct_answer' =>  $item['correct_answer'],
+                    'mark' => "marked",
+                    'submitted' =>  $item['submitted'],
+                    'teacher_mark' =>  $item['teacher_mark']
+                ]);
+
+            }else{
+
+                $assignment->update([
+                    'sch_id' => $user->sch_id,
+                    'campus' => $user->campus,
+                    'period' => $item['period'],
+                    'term' => $item['term'],
+                    'session' => $item['session'],
+                    'student_id' => $item['student_id'],
+                    'subject_id' => $item['subject_id'],
+                    'question_id' => $item['question_id'],
+                    'question' => $item['question'],
+                    'question_number' => $item['question_number'],
+                    'question_type' => $item['question_type'],
+                    'answer' =>  $item['answer'],
+                    'correct_answer' =>  $item['correct_answer'],
+                    'mark' => "marked",
+                    'submitted' =>  $item['submitted'],
+                    'teacher_mark' =>  $item['teacher_mark']
+                ]);
+
+            }
+
 
         }
 
@@ -346,6 +405,86 @@ class AssignmentController extends Controller
             "status" => 'true',
             "message" => 'List',
             "data" => $assigns
+        ];
+    }
+
+    public function editObjAssign(Request $request)
+    {
+        $assign = Assignment::where('id', $request->id)->first();
+
+        if(!$assign){
+            return $this->error('', 'Assignment does not exist', 400);
+        }
+
+        $assign->update([
+            'question' => $request->question,
+            'answer' =>  $request->answer,
+            'option1' => $request->option1,
+            'option2' => $request->option2,
+            'option3' => $request->option3,
+            'option4' => $request->option4
+        ]);
+
+        return [
+            "status" => 'true',
+            "message" => 'Updated Successfully'
+        ];
+    }
+
+    public function editTheoAssign(Request $request)
+    {
+        $assign = Assignment::where('id', $request->id)->first();
+
+        if(!$assign){
+            return $this->error('', 'Assignment does not exist', 400);
+        }
+
+        $assign->update([
+            'question' => $request->question,
+            'answer' => $request->answer
+        ]);
+
+        return [
+            "status" => 'true',
+            "message" => 'Updated Successfully'
+        ];
+    }
+
+    public function delAssign(Request $request)
+    {
+        $ass = Assignment::where('id', $request->id)->first();
+
+        if(!$ass){
+            return $this->error('', 'Assignment does not exist', 400);
+        }
+
+        $ass->delete();
+
+        return response(null, 204);
+    }
+
+    public function result (Request $request)
+    {
+        $user = Auth::user();
+
+        AssignmentResult::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'period' => $request->period,
+            'term' => $request->term,
+            'session' => $request->session,
+            'student_id' => $request->student_id,
+            'subject_id' => $request->subject_id,
+            'question_type' => $request->question_type,
+            'question_number' => $request->question_number,
+            'mark' => $request->mark,
+            'total_mark' => $request->total_mark,
+            'score' => $request->score
+        ]);
+
+        return [
+            "status" => 'true',
+            "message" => 'Submitted Successfully'
         ];
     }
 }

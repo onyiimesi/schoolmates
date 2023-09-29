@@ -32,9 +32,9 @@ class AssignmentMarkResource extends JsonResource
                 'submitted' => (string)$this->submitted,
                 'mark' => (string)$this->mark,
                 'teacher_mark' => (string)$this->teacher_mark,
-                'total_question' => (string)$this->assignment->total_question,
-                'question_mark' => (string)$this->assignment->question_mark,
-                'total_mark' => (string)$this->assignment->total_mark
+                'total_question' => (string)$this->assignment?->total_question,
+                'question_mark' => (string)$this->assignment?->question_mark,
+                'total_mark' => (string)$this->assignment?->total_mark
             ]
         ];
     }

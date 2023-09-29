@@ -260,8 +260,16 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::get('/computedresult/{period}/{term}/{session}', [GetPreschoolResultController::class, 'getComputeResult'])->where('session', '.+');
 
+
+    // Assignment
     Route::post('/objective-assignment', [AssignmentController::class, 'objective']);
     Route::post('/theory-assignment', [AssignmentController::class, 'theory']);
+
+    Route::patch("/edit-obj-assignment/{id}", [AssignmentController::class, 'editObjAssign']);
+    Route::patch("/edit-thoery-assignment/{id}", [AssignmentController::class, 'editTheoAssign']);
+
+    Route::delete("/assignment/{id}", [AssignmentController::class, 'delAssign']);
+
     Route::get('/assignment/{period}/{term}/{session}/{type}', [AssignmentController::class, 'assign'])
     ->where('session', '.+');
 
@@ -277,6 +285,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
     Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'markedbystudent'])
     ->where('session', '.+');
+
+    Route::post('/assignment-result', [AssignmentController::class, 'result']);
 
 
     Route::post('/changepassword', [AuthController::class, 'change']);

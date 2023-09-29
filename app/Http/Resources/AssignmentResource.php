@@ -32,7 +32,8 @@ class AssignmentResource extends JsonResource
                 'option4' => (string)$this->option4,
                 'total_question' => (string)$this->total_question,
                 'question_mark' => (string)$this->question_mark,
-                'total_mark' => (string)$this->total_mark
+                'total_mark' => (string)$this->total_mark,
+                'week' => (string)$this->week
             ]
         ];
     }
