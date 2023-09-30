@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\AssignmentAnswerResource;
 use App\Http\Resources\AssignmentMarkResource;
 use App\Http\Resources\AssignmentResource;
+use App\Http\Resources\AssignmentResultResource;
 use App\Http\Resources\TheoryResource;
 use App\Models\AcademicPeriod;
 use App\Models\Assignment;
@@ -243,7 +244,9 @@ class AssignmentController extends Controller
 
         foreach ($data as $item) {
 
-            $assignment = AssignmentMark::where('question_id', $item['question_id'])->first();
+            $assignment = AssignmentMark::where('student_id', $item['student_id'])
+            ->where('question_id', $item['question_id'])
+            ->first();
 
             if($assignment == ""){
 
@@ -309,7 +312,9 @@ class AssignmentController extends Controller
 
         foreach ($data as $item) {
 
-            $assignment = AssignmentMark::where('question_id', $item['question_id'])->first();
+            $assignment = AssignmentMark::where('student_id', $item['student_id'])
+            ->where('question_id', $item['question_id'])
+            ->first();
 
             if($assignment == ""){
 
@@ -476,8 +481,7 @@ class AssignmentController extends Controller
             'student_id' => $request->student_id,
             'subject_id' => $request->subject_id,
             'question_type' => $request->question_type,
-            'question_number' => $request->question_number,
-            'mark' => $request->mark,
+            'student_mark' => $request->student_mark,
             'total_mark' => $request->total_mark,
             'score' => $request->score
         ]);
@@ -485,6 +489,41 @@ class AssignmentController extends Controller
         return [
             "status" => 'true',
             "message" => 'Submitted Successfully'
+        ];
+    }
+
+    public function resultassign(Request $request)
+    {
+        $assign = AssignmentResult::where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('question_type', $request->type)
+        ->get();
+
+        $assigns = AssignmentResultResource::collection($assign);
+
+        return [
+            "status" => 'true',
+            "message" => 'List',
+            "data" => $assigns
+        ];
+    }
+
+    public function resultassignstu(Request $request)
+    {
+        $assign = AssignmentResult::where('student_id', $request->student_id)
+        ->where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('question_type', $request->type)
+        ->get();
+
+        $assigns = AssignmentResultResource::collection($assign);
+
+        return [
+            "status" => 'true',
+            "message" => 'List',
+            "data" => $assigns
         ];
     }
 }

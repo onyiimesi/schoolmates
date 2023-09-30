@@ -287,6 +287,10 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
 
     Route::post('/assignment-result', [AssignmentController::class, 'result']);
+    Route::get('/get-assignment-result/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassign'])
+    ->where('session', '.+');
+    Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassignstu'])
+    ->where('session', '.+');
 
 
     Route::post('/changepassword', [AuthController::class, 'change']);

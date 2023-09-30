@@ -18,8 +18,7 @@ class AssignmentResult extends Model
         'student_id',
         'subject_id',
         'question_type',
-        'question_number',
-        'mark',
+        'student_mark',
         'total_mark',
         'score'
     ];

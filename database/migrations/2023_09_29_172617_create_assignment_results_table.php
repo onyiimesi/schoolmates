@@ -23,8 +23,7 @@ return new class extends Migration
             $table->string('student_id');
             $table->string('subject_id');
             $table->string('question_type');
-            $table->string('question_number');
-            $table->string('mark');
+            $table->string('student_mark');
             $table->string('total_mark');
             $table->string('score');
             $table->timestamps();
