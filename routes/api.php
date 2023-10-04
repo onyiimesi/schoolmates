@@ -224,7 +224,9 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
     Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
     ->where('session', '.+');
-    Route::get("/cumulativescore/{student_id}", [EndTermResultController::class, 'cummulative']);
+
+    Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
+    ->where('session', '.+');
 
 
 

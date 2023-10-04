@@ -22,14 +22,15 @@ class AssignmentMark extends Model
         'session',
         'period',
         'term',
-        'question_id',
+        'assignment_id',
         'submitted',
         'question_number',
-        'teacher_mark'
+        'teacher_mark',
+        'week'
     ];
 
     public function assignment()
     {
-        return $this->belongsTo(Assignment::class, 'question_id');
+        return $this->belongsTo(Assignment::class, 'assignment_id');
     }
 }

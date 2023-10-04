@@ -147,12 +147,13 @@ class AssignmentController extends Controller
 
         foreach ($data as $item) {
 
-            $answer = AssignmentAnswer::create([
+            AssignmentAnswer::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
                 'period' => $item['period'],
                 'term' => $item['term'],
                 'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
                 'student_id' => $user->id,
                 'subject_id' => $item['subject_id'],
                 'question' => $item['question'],
@@ -161,7 +162,8 @@ class AssignmentController extends Controller
                 'answer' =>  $item['answer'],
                 'correct_answer' =>  $item['correct_answer'],
                 'mark' => "not marked",
-                'submitted' =>  $item['submitted']
+                'submitted' =>  $item['submitted'],
+                'week' => $item['week']
             ]);
 
         }
@@ -187,12 +189,13 @@ class AssignmentController extends Controller
 
         foreach ($data as $item) {
 
-            $answer = AssignmentAnswer::create([
+            AssignmentAnswer::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
                 'period' => $item['period'],
                 'term' => $item['term'],
                 'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
                 'student_id' => $user->id,
                 'subject_id' => $item['subject_id'],
                 'question' => $item['question'],
@@ -201,7 +204,8 @@ class AssignmentController extends Controller
                 'answer' =>  $item['answer'],
                 'correct_answer' =>  $item['correct_answer'],
                 'mark' => "not marked",
-                'submitted' =>  $item['submitted']
+                'submitted' =>  $item['submitted'],
+                'week' => $item['week']
             ]);
 
         }
@@ -244,54 +248,25 @@ class AssignmentController extends Controller
 
         foreach ($data as $item) {
 
-            $assignment = AssignmentMark::where('student_id', $item['student_id'])
-            ->where('question_id', $item['question_id'])
-            ->first();
-
-            if($assignment == ""){
-
-                AssignmentMark::create([
-                    'sch_id' => $user->sch_id,
-                    'campus' => $user->campus,
-                    'period' => $item['period'],
-                    'term' => $item['term'],
-                    'session' => $item['session'],
-                    'student_id' => $item['student_id'],
-                    'subject_id' => $item['subject_id'],
-                    'question_id' => $item['question_id'],
-                    'question' => $item['question'],
-                    'question_number' => $item['question_number'],
-                    'question_type' => $item['question_type'],
-                    'answer' =>  $item['answer'],
-                    'correct_answer' =>  $item['correct_answer'],
-                    'mark' => "marked",
-                    'submitted' =>  $item['submitted'],
-                    'teacher_mark' =>  $item['teacher_mark']
-                ]);
-
-            }else{
-
-                $assignment->update([
-                    'sch_id' => $user->sch_id,
-                    'campus' => $user->campus,
-                    'period' => $item['period'],
-                    'term' => $item['term'],
-                    'session' => $item['session'],
-                    'student_id' => $item['student_id'],
-                    'subject_id' => $item['subject_id'],
-                    'question_id' => $item['question_id'],
-                    'question' => $item['question'],
-                    'question_number' => $item['question_number'],
-                    'question_type' => $item['question_type'],
-                    'answer' =>  $item['answer'],
-                    'correct_answer' =>  $item['correct_answer'],
-                    'mark' => "marked",
-                    'submitted' =>  $item['submitted'],
-                    'teacher_mark' =>  $item['teacher_mark']
-                ]);
-
-            }
-
+            AssignmentMark::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question' => $item['question'],
+                'question_number' => $item['question_number'],
+                'question_type' => $item['question_type'],
+                'answer' =>  $item['answer'],
+                'correct_answer' =>  $item['correct_answer'],
+                'mark' => "marked",
+                'submitted' =>  $item['submitted'],
+                'teacher_mark' =>  $item['teacher_mark'],
+                'week' => $item['week']
+            ]);
 
         }
 
@@ -312,54 +287,25 @@ class AssignmentController extends Controller
 
         foreach ($data as $item) {
 
-            $assignment = AssignmentMark::where('student_id', $item['student_id'])
-            ->where('question_id', $item['question_id'])
-            ->first();
-
-            if($assignment == ""){
-
-                AssignmentMark::create([
-                    'sch_id' => $user->sch_id,
-                    'campus' => $user->campus,
-                    'period' => $item['period'],
-                    'term' => $item['term'],
-                    'session' => $item['session'],
-                    'student_id' => $item['student_id'],
-                    'subject_id' => $item['subject_id'],
-                    'question_id' => $item['question_id'],
-                    'question' => $item['question'],
-                    'question_number' => $item['question_number'],
-                    'question_type' => $item['question_type'],
-                    'answer' =>  $item['answer'],
-                    'correct_answer' =>  $item['correct_answer'],
-                    'mark' => "marked",
-                    'submitted' =>  $item['submitted'],
-                    'teacher_mark' =>  $item['teacher_mark']
-                ]);
-
-            }else{
-
-                $assignment->update([
-                    'sch_id' => $user->sch_id,
-                    'campus' => $user->campus,
-                    'period' => $item['period'],
-                    'term' => $item['term'],
-                    'session' => $item['session'],
-                    'student_id' => $item['student_id'],
-                    'subject_id' => $item['subject_id'],
-                    'question_id' => $item['question_id'],
-                    'question' => $item['question'],
-                    'question_number' => $item['question_number'],
-                    'question_type' => $item['question_type'],
-                    'answer' =>  $item['answer'],
-                    'correct_answer' =>  $item['correct_answer'],
-                    'mark' => "marked",
-                    'submitted' =>  $item['submitted'],
-                    'teacher_mark' =>  $item['teacher_mark']
-                ]);
-
-            }
-
+            AssignmentMark::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question' => $item['question'],
+                'question_number' => $item['question_number'],
+                'question_type' => $item['question_type'],
+                'answer' =>  $item['answer'],
+                'correct_answer' =>  $item['correct_answer'],
+                'mark' => "marked",
+                'submitted' =>  $item['submitted'],
+                'teacher_mark' =>  $item['teacher_mark'],
+                'week' => $item['week']
+            ]);
 
         }
 
@@ -478,12 +424,14 @@ class AssignmentController extends Controller
             'period' => $request->period,
             'term' => $request->term,
             'session' => $request->session,
+            'assignment_id' => $request->assignment_id,
             'student_id' => $request->student_id,
             'subject_id' => $request->subject_id,
             'question_type' => $request->question_type,
             'student_mark' => $request->student_mark,
             'total_mark' => $request->total_mark,
-            'score' => $request->score
+            'score' => $request->score,
+            'week' => $request->week
         ]);
 
         return [

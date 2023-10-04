@@ -24,7 +24,7 @@ class AssignmentMarkResource extends JsonResource
                 'session' => (string)$this->session,
                 'student_id' => (string)$this->student_id,
                 'subject_id' => (string)$this->subject_id,
-                'question_id' => (string)$this->question_id,
+                'assignment_id' => (string)$this->assignment_id,
                 'question_type' => (string)$this->question_type,
                 'question' => (string)$this->question,
                 'answer' => (string)$this->answer,
@@ -34,7 +34,8 @@ class AssignmentMarkResource extends JsonResource
                 'teacher_mark' => (string)$this->teacher_mark,
                 'total_question' => (string)$this->assignment?->total_question,
                 'question_mark' => (string)$this->assignment?->question_mark,
-                'total_mark' => (string)$this->assignment?->total_mark
+                'total_mark' => (string)$this->assignment?->total_mark,
+                'week' => (string)$this->week
             ]
         ];
     }

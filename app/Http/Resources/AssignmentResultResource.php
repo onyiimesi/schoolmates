@@ -22,12 +22,14 @@ class AssignmentResultResource extends JsonResource
                 'period' => (string)$this->period,
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
+                'assignment_id' => (string)$this->assignment_id,
                 'student_id' => (string)$this->student_id,
                 'subject_id' => (string)$this->subject_id,
                 'question_type' => (string)$this->question_type,
                 'student_mark' => (string)$this->student_mark,
                 'total_mark' => (string)$this->total_mark,
-                'score' => (string)$this->score
+                'score' => (string)$this->score,
+                'week' => (string)$this->week
             ]
         ];
     }

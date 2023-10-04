@@ -22,7 +22,7 @@ class AssignmentAnswerResource extends JsonResource
                 'session' => (string)$this->session,
                 'student' => (string)$this->student?->surname .' '. $this->student?->firstname,
                 'student_id' => (string)$this->student_id,
-                'question_id' => (string)$this->question_id,
+                'assignment_id' => (string)$this->assignment_id,
                 'question_type' => (string)$this->question_type,
                 'question' => (string)$this->question,
                 'question_number' => (string)$this->question_number,
@@ -34,7 +34,8 @@ class AssignmentAnswerResource extends JsonResource
                 'submitted' => (string)$this->submitted,
                 'total_question' => (string)$this->assignment?->total_question,
                 'question_mark' => (string)$this->assignment?->question_mark,
-                'total_mark' => (string)$this->assignment?->total_mark
+                'total_mark' => (string)$this->assignment?->total_mark,
+                'week' => (string)$this->week
             ]
         ];
     }

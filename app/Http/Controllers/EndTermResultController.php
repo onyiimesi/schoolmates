@@ -37,6 +37,9 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         $results = Result::where('student_id', $request->student_id)
+        ->where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
         ->with('studentscore')
         ->get();
 

@@ -20,6 +20,8 @@ class AssignmentResult extends Model
         'question_type',
         'student_mark',
         'total_mark',
-        'score'
+        'score',
+        'assignment_id',
+        'week'
     ];
 }

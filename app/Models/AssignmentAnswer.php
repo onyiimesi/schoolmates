@@ -10,7 +10,7 @@ class AssignmentAnswer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'question_type', 'question', 'answer', 'subject_id', 'student_id', 'correct_answer', 'mark', 'sch_id', 'campus', 'session', 'period', 'term', 'question_id', 'submitted', 'question_number'
+        'question_type', 'question', 'answer', 'subject_id', 'student_id', 'correct_answer', 'mark', 'sch_id', 'campus', 'session', 'period', 'term', 'assignment_id', 'submitted', 'question_number', 'week'
     ];
 
     public function student()
@@ -25,6 +25,6 @@ class AssignmentAnswer extends Model
 
     public function assignment()
     {
-        return $this->belongsTo(Assignment::class, 'question_id');
+        return $this->belongsTo(Assignment::class, 'assignment_id');
     }
 }

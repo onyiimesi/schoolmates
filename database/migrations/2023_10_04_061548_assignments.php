@@ -17,10 +17,13 @@ return new class extends Migration
             $table->id();
             $table->string('sch_id');
             $table->string('campus');
+            $table->string('period');
+            $table->string('term');
             $table->string('session');
             $table->string('teacher_id');
             $table->string('question_type');
             $table->longText('question');
+            $table->longText('question_number');
             $table->longText('answer');
             $table->unsignedBigInteger('subject_id');
             $table->string('option1')->nullable();
@@ -28,6 +31,10 @@ return new class extends Migration
             $table->string('option3')->nullable();
             $table->string('option4')->nullable();
             $table->string('image')->nullable();
+            $table->string('total_question')->nullable();
+            $table->string('question_mark')->nullable();
+            $table->string('total_mark')->nullable();
+            $table->string('week')->nullable();
 
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
             $table->timestamps();

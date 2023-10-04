@@ -13,24 +13,25 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('assignment_marks', function (Blueprint $table) {
+        Schema::create('assignment_answers', function (Blueprint $table) {
             $table->id();
             $table->string('sch_id');
             $table->string('campus');
             $table->string('period');
             $table->string('term');
             $table->string('session');
+            $table->unsignedBigInteger('assignment_id');
             $table->string('student_id');
             $table->string('subject_id');
-            $table->string('question_id');
-            $table->longText('question');
-            $table->string('question_type');
+            $table->string('question');
             $table->string('question_number');
-            $table->longText('answer');
-            $table->longText('correct_answer');
+            $table->string('question_type');
+            $table->string('answer');
+            $table->string('correct_answer');
             $table->string('mark');
-            $table->string('teacher_mark');
             $table->string('submitted');
+
+            $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -42,6 +43,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('assignment_marks');
+        Schema::dropIfExists('assignment_answers');
     }
 };
