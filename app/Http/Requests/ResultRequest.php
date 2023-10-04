@@ -30,18 +30,7 @@ class ResultRequest extends FormRequest
             'class_name' => ['required', 'string', 'max:255'],
             'period' => ['required', 'string', 'max:255'],
             'term' => ['required', 'string', 'max:255'],
-            'session' => ['required', 'string', 'max:255'],
-            'school_opened' => ['string', 'max:255'],
-            'times_present' => ['string', 'max:255'],
-            'times_absent' => ['string', 'max:255'],
-            'results' => ['required', 'array'],
-            'results.*.subject' => ['required', 'string'],
-            'results.*.score' => ['required', 'string'],
-            'affective_disposition' => ['array'],
-            'psychomotor_skills' => ['array'],
-            'teacher_comment' => ['string', 'max:255'],
-            'hos_comment' => ['string', 'max:255'],
-
+            'session' => ['required', 'string', 'max:255']
         ];
     }
 }

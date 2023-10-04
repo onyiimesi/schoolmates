@@ -47,7 +47,6 @@ class Result extends Model implements Auditable
         'status',
         'computed_midterm',
         'computed_endterm'
-
     ];
 
     protected $casts = [

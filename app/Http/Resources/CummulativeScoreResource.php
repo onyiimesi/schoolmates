@@ -22,6 +22,7 @@ class CummulativeScoreResource extends JsonResource
             'Third Term' => $this['Third Term'],
             'Total Score' => $this['Total Score'],
             'Average Score' => $this['Average Score'],
+            'Remark' => $this['Remark'],
         ];
     }
 }

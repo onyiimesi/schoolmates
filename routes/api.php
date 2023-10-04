@@ -228,6 +228,15 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
     ->where('session', '.+');
 
+    Route::get("/class-average/{class_name}/{period}/{term}/{session}", [EndTermResultController::class, 'average'])
+    ->where('session', '.+');
+
+    Route::get("/end-term-class-average/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
+    ->where('session', '.+');
+
+    Route::get("/student-average/{student_id}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
+    ->where('session', '.+');
+
 
 
     Route::get('/classpopulation', [ClassPopulationController::class, 'getclasspopulation']);
