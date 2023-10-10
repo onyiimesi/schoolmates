@@ -61,7 +61,7 @@ class StaffController extends Controller
     {
         $request->validated($request->all());
 
-        $campus = Campus::first();
+        $campus = Campus::where('name', $request->campus)->first();
         $sch = Schools::first();
 
         if($request->image){
@@ -98,7 +98,7 @@ class StaffController extends Controller
 
         $staff = Staff::create([
             'sch_id' => $sch->sch_id,
-            'campus' => $campus->name,
+            'campus' => $request->campus,
             'campus_type' => $campus->campus_type,
             'designation_id' => $request->designation_id,
             'department' => $request->department,
@@ -205,7 +205,11 @@ class StaffController extends Controller
             $pathss = "";
         }
 
+        $campus = Campus::where('name', $request->campus)->first();
+
         $staff->update([
+            'campus' => $request->campus,
+            'campus_type' => $campus->campus_type,
             'designation_id' => $request->designation_id,
             'department' => $request->department,
             'surname' => $request->surname,

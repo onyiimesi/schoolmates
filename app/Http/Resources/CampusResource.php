@@ -23,6 +23,8 @@ class CampusResource extends JsonResource
                 'phoneno' => (string)$this->phoneno,
                 'address' => (string)$this->address,
                 'state' => (string)$this->state,
+                'campus_type' => (string)$this->campus_type,
+                'is_preschool' => (string)$this->is_preschool,
                 'status' => (string)$this->status,
             ]
         ];

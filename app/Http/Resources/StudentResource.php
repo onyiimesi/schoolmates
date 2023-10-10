@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentResource extends JsonResource
@@ -14,10 +15,17 @@ class StudentResource extends JsonResource
      */
     public function toArray($request)
     {
+        try {
+            $age = Carbon::parse($this->dob)->age;
+        } catch (\Exception $e) {
+            $age = null;
+        }
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
                 'campus' => (string)$this->campus,
+                'campus_type' => (string)$this->campus_type,
                 'surname' => (string)$this->surname,
                 'firstname' => (string)$this->firstname,
                 'middlename' => (string)$this->middlename,
@@ -27,6 +35,7 @@ class StudentResource extends JsonResource
                 'blood_group' => (string)$this->blood_group,
                 'gender' => (string)$this->gender,
                 'dob' => (string)$this->dob,
+                'age' => $age,
                 'nationality' => (string)$this->nationality,
                 'state' => (string)$this->state,
                 'session_admitted' => (string)$this->session_admitted,
@@ -38,7 +47,7 @@ class StudentResource extends JsonResource
                 'home_address' => (string)$this->home_address,
                 'phone_number' => (string)$this->phone_number,
                 'email_address' => (string)$this->email_address,
-                'status' => (string)$this->status,
+                'status' => (string)$this->status
             ]
         ];
     }

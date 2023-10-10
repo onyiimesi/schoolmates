@@ -6,6 +6,7 @@ use App\Http\Requests\SubjectRequest;
 use App\Http\Resources\SubjectResource;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SubjectController extends Controller
 {
@@ -36,8 +37,10 @@ class SubjectController extends Controller
     {
         $request->validated($request->all());
 
+        $user = Auth::user();
+
         $sub = Subject::create([
-            'sch_id' => '1234',
+            'sch_id' => $user->sch_id,
             'class_name' => $request->class_name,
             'subject' => $request->subject,
         ]);

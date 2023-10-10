@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Staff;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class MidTermResultResource extends JsonResource
@@ -14,6 +15,7 @@ class MidTermResultResource extends JsonResource
      */
     public function toArray($request)
     {
+        $teacher = Staff::where('id', $this->teacher_id)->first();
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -30,7 +32,10 @@ class MidTermResultResource extends JsonResource
                         "score" => $score->score
                     ];
                 })->toArray(),
-                'computed_midterm' => (string)$this->computed_midterm
+                'computed_midterm' => (string)$this->computed_midterm,
+                'teacher_comment' => (string)$this->teacher_comment,
+                'teacher_fullname' => $teacher->surname .' '. $teacher->firstname,
+                'teacher_signature' => $teacher->signature,
             ]
         ];
     }

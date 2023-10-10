@@ -54,6 +54,7 @@ class ResultController extends Controller
                     'campus' => $teacher->campus,
                     'campus_type' => $teacher->campus_type,
                     'student_id' => $request->student_id,
+                    'teacher_id' => $teacher->id,
                     'student_fullname' => $request->student_fullname,
                     'admission_number' => $request->admission_number,
                     'class_name' => $request->class_name,

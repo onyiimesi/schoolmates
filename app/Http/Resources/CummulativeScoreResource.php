@@ -17,12 +17,16 @@ class CummulativeScoreResource extends JsonResource
 
         return [
             'subject' => $this['subject'],
-            'First Term' => $this['First term'],
+            'First Term' => $this['First Term'],
             'Second Term' => $this['Second Term'],
             'Third Term' => $this['Third Term'],
             'Total Score' => $this['Total Score'],
             'Average Score' => $this['Average Score'],
             'Remark' => $this['Remark'],
+            'Rank' => $this['Rank'],
+            'Class Average' => $this['Class Average'],
+            'Highest' => $this['Highest'],
+            'Lowest' => $this['Lowest']
         ];
     }
 }

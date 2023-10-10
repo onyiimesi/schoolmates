@@ -19,6 +19,7 @@ class PreSchoolSubject extends Model implements Auditable
         'session',
         'subject',
         'topic',
+        'category'
     ];
 
     protected $casts = [

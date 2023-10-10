@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Staff;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ResultResource extends JsonResource
@@ -14,6 +15,7 @@ class ResultResource extends JsonResource
      */
     public function toArray($request)
     {
+        $teacher = Staff::where('id', $this->teacher_id)->first();
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -47,8 +49,9 @@ class ResultResource extends JsonResource
                         "score" => $score->score
                     ];
                 })->toArray(),
-                'teacher_comment' => (string)$this->teacher_comment,
-                'teacher_fullname' => (string)$this->teacher_fullname,
+                'teacher_comment' => $teacher->teacher_comment,
+                'teacher_fullname' => $teacher->teacher_fullname,
+                'teacher_signature' => $teacher->signature,
                 'hos_comment' => (string)$this->hos_comment,
                 'hos_fullname' => (string)$this->hos_fullname,
                 'computed_endterm' => (string)$this->computed_endterm

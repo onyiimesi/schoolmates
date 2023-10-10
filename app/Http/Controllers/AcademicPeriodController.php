@@ -30,7 +30,7 @@ class AcademicPeriodController extends Controller
             AcademicSessions::create([
                 'academic_session' => $request->session,
             ]);
-    
+
             return [
                 "status" => 'true',
                 "message" => 'Academic Period Added Successfully',
@@ -40,6 +40,7 @@ class AcademicPeriodController extends Controller
         }else if(!empty($aced)){
 
             $aced->update([
+                'sch_id' => $sch->sch_id,
                 'period' => $request->period,
                 'term' => $request->term,
                 'session' => $request->session,
@@ -52,11 +53,11 @@ class AcademicPeriodController extends Controller
                 AcademicSessions::create([
                     'academic_session' => $request->session,
                 ]);
-                
+
             }
-    
+
             $aaa = new AcademicPeriodResource($aced);
-    
+
             return [
                 "status" => 'true',
                 "message" => 'Academic Period Updated Successfully',

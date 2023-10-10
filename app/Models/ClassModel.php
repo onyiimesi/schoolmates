@@ -15,6 +15,7 @@ class ClassModel extends Model implements Auditable
         'id',
         'sch_id',
         'campus',
+        'campus_type',
         'class_name',
         'sub_class',
 

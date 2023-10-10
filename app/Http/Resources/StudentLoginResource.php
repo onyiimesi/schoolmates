@@ -16,6 +16,8 @@ class StudentLoginResource extends JsonResource
     {
         return [
             'id' => (string)$this->id,
+            'sch_id' => (string)$this->sch_id,
+            'campus' => (string)$this->campus,
             'designation_id' => (string)$this->designation_id,
             'surname' => (string)$this->surname,
             'firstname' => (string)$this->firstname,
@@ -36,7 +38,6 @@ class StudentLoginResource extends JsonResource
             'present_class' => (string)$this->present_class,
             'home_address' => (string)$this->home_address,
             'status' => (string)$this->status,
-            
         ];
     }
 }

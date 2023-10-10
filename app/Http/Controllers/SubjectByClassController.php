@@ -13,7 +13,7 @@ use App\Traits\HttpResponses;
 class SubjectByClassController extends Controller
 {
     use HttpResponses;
-    
+
     public function subjectbyclass(Request $request){
 
         $user = Auth::user();

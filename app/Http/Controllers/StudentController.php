@@ -60,16 +60,8 @@ class StudentController extends Controller
     {
         $request->validated($request->all());
 
-        // if($request->image && $request->image->isValid()){
-        //     $file_name = time().'.'.$request->image->extension();
-        //     $request->image->move(public_path('images/students'), $file_name);
-        //     $path = "public/images/students/$file_name";
-        // }else{
-        //     $path = "";
-        // }
-
         $user = Auth::user();
-        $campus = Campus::first();
+        $campus = Campus::where('name', $request->campus)->first();
         $sch = Schools::first();
 
         if($request->image){
@@ -90,7 +82,8 @@ class StudentController extends Controller
 
         $student = Student::create([
             'sch_id' => $sch->sch_id,
-            'campus' => $campus->name,
+            'campus' => $request->campus,
+            'campus_type' => $campus->campus_type,
             'designation_id' => '7',
             'surname' => $request->surname,
             'firstname' => $request->firstname,
@@ -172,7 +165,11 @@ class StudentController extends Controller
             $paths = $student->image;
         }
 
+        $campus = Campus::where('name', $request->campus)->first();
+
         $student->update([
+            'campus' => $request->campus,
+            'campus_type' => $campus->campus_type,
             'surname' => $request->surname,
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,

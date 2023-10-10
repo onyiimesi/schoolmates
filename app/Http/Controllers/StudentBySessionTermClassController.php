@@ -17,7 +17,7 @@ class StudentBySessionTermClassController extends Controller
         ->where('campus', $user->campus)
         ->where("session_admitted", $request->session)
         ->where("present_class", $request->class)
-        ->all();
+        ->get();
 
         $s = StudentResource::collection($search);
 

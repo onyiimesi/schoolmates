@@ -21,7 +21,11 @@ class PreSchoolSubjectController extends Controller
 
         $subjects = PreSchoolSubject::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
-        ->where('subject', $request->subject)->first();
+        ->where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('subject', $request->subject)
+        ->first();
 
         if(empty($subjects)){
 
@@ -32,7 +36,8 @@ class PreSchoolSubjectController extends Controller
                 'term' => $request->term,
                 'session' => $request->session,
                 'subject' => $request->subject,
-                'topic' => $request->topic
+                'topic' => $request->topic,
+                'category' => $request->category,
             ]);
 
             return [
@@ -197,7 +202,7 @@ class PreSchoolSubjectController extends Controller
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('class', $request->class)
-        ->first());
+        ->get());
 
         return [
             'status' => 'success',

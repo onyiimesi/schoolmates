@@ -17,6 +17,7 @@ class Student extends Authenticatable implements Auditable
         'sch_id',
         'designation_id',
         'campus',
+        'campus_type',
         'surname',
         'firstname',
         'middlename',

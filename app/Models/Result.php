@@ -57,7 +57,7 @@ class Result extends Model implements Auditable
 
     public function results()
     {
-        return $this->belongsTo(Result::class);
+        return $this->belongsTo(Staff::class);
     }
 
     public function studentscore()

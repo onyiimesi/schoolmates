@@ -61,6 +61,8 @@ class CampusController extends Controller
             'phoneno' => $request->phoneno,
             'address' => $request->address,
             'state' => $request->state,
+            'campus_type' => $request->campus_type,
+            'is_preschool' => $request->is_preschool,
             'status' => 'active',
             'created_by' => $user->surname .' '. $user->firstname .' '. $user->middlename,
         ]);

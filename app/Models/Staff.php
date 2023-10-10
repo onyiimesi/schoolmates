@@ -16,18 +16,18 @@ class Staff extends Authenticatable implements Auditable
     protected $fillable = [
         'sch_id',
         'campus',
-        'designation_id', 
-        'department', 
-        'surname', 
-        'firstname', 
-        'middlename', 
-        'username', 
-        'email', 
-        'phoneno', 
-        'address', 
-        'image', 
-        'password', 
-        'pass_word', 
+        'designation_id',
+        'department',
+        'surname',
+        'firstname',
+        'middlename',
+        'username',
+        'email',
+        'phoneno',
+        'address',
+        'image',
+        'password',
+        'pass_word',
         'class_assigned',
         'sub_class',
         'signature',
@@ -36,5 +36,9 @@ class Staff extends Authenticatable implements Auditable
 
     public function staff(){
         return $this->belongsTo(Staff::class);
+    }
+
+    public function result(){
+        return $this->hasMany(Result::class, 'teacher_id');
     }
 }
