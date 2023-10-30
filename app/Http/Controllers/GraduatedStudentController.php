@@ -20,7 +20,6 @@ class GraduatedStudentController extends Controller
 
         $student->update([
             'status' => 'graduated'
-
         ]);
 
         return [

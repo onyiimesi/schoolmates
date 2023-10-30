@@ -193,6 +193,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::patch('/withdrawstudent/{id}', [WithdrawStudentController::class, 'withdraw']);
     Route::patch('/acceptstudent/{id}', [AcceptStudentController::class, 'accept']);
     Route::patch('/promotestudent/{id}', [PromoteStudentController::class, 'promote']);
+    Route::patch('/promote-students', [PromoteStudentController::class, 'promotestudents']);
 
     Route::get("/expectedincome", [ExpectedIncomecontroller::class, 'expected']);
     Route::get("/receivedincome", [ReceivedIncomeController::class, 'received']);
@@ -205,6 +206,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
     Route::get("/school", [SchoolsController::class, 'schools']);
     Route::get("/subject/{class}", [SubjectByClassController::class, 'subjectbyclass']);
+    Route::get("/subject", [SubjectByClassController::class, 'subjectbyCampus']);
     Route::get("/teacher-subject", [SubjectByClassController::class, 'subjectbyteacher']);
     Route::get("/student-subject", [SubjectByClassController::class, 'subjectbystudent']);
     Route::get("/student/{session}/{class}", [StudentBySessionTermClassController::class, 'studentsessionclassterm'])

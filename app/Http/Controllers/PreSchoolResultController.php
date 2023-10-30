@@ -37,8 +37,15 @@ class PreSchoolResultController extends Controller
                     'period' => $request->period,
                     'term' => $request->term,
                     'session' => $request->session,
+                    'school_opened' => $request->school_opened,
+                    'times_present' => $request->times_present,
+                    'times_absent' => $request->times_absent,
                     'evaluation_report' => $request->evaluation_report,
                     'cognitive_development' => $request->cognitive_development,
+                    'teacher_comment' => $request->teacher_comment,
+                    'teacher_id' => $request->teacher_id,
+                    'hos_comment' => $request->hos_comment,
+                    'hos_id' => $request->hos_id,
                     'status' => 'active',
                 ]);
 
@@ -58,8 +65,15 @@ class PreSchoolResultController extends Controller
                     'period' => $request->period,
                     'term' => $request->term,
                     'session' => $request->session,
+                    'school_opened' => $request->school_opened,
+                    'times_present' => $request->times_present,
+                    'times_absent' => $request->times_absent,
                     'evaluation_report' => $request->evaluation_report,
                     'cognitive_development' => $request->cognitive_development,
+                    'teacher_comment' => $request->teacher_comment,
+                    'teacher_id' => $request->teacher_id,
+                    'hos_comment' => $request->hos_comment,
+                    'hos_id' => $request->hos_id,
                 ]);
 
                 return [
@@ -104,7 +118,7 @@ class PreSchoolResultController extends Controller
                     // 'teacher_fullname' => $teacher->surname . ' '. $teacher->firstname,
                     'hos_comment' => $request->hos_comment,
                     'hos_id' => $request->hos_id,
-                    // 'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
+                    'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
                     'status' => 'active',
                 ]);
 

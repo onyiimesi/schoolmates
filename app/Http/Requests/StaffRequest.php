@@ -31,7 +31,7 @@ class StaffRequest extends FormRequest
             'firstname' => ['required', 'string', 'max:255'],
             'middlename' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:staff'],
-            'phoneno' => ['required', 'string', 'max:255'],
+            'campus' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'max:255', 'unique:staff'],
             'password' => ['string', Rules\Password::defaults()],

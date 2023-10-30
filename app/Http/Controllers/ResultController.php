@@ -87,11 +87,9 @@ class ResultController extends Controller
                     'computed_midterm' => 'true'
                 ]);
 
+                $getresult->studentscore()->delete();
                 foreach ($request->results as $result) {
-                    $question = StudentScore::updateOrCreate(
-                        ['subject' => $result['subject']],
-                        ['score' => $result['score']]
-                    );
+                    $question = new StudentScore($result);
                     $getresult->studentscore()->save($question);
                 }
 

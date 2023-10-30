@@ -13,6 +13,7 @@ class Subject extends Model implements Auditable
 
     protected $fillable = [
         'sch_id',
+        'campus',
         'class_name',
         'subject',
     ];

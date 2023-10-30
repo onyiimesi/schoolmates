@@ -488,13 +488,14 @@ class EndTermResultController extends Controller
 
         $classAverage = $totalScore > 0 ? $totalScore / $count : 0;
 
-        $totalScore = 0;
         $totalSubject = 0;
 
         foreach ($results as $result) {
             foreach ($result->studentscore as $score) {
-                $totalScore += $score->score;
-                $totalSubject++;
+                if ($score->score != 0) {
+                    $totalScore += $score->score;
+                    $totalSubject++;
+                }
             }
         }
 

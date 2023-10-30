@@ -106,6 +106,7 @@ class PreSchoolSubjectController extends Controller
 
         $subject->update([
             'subject' => $request->subject,
+            'category' => $request->category,
             'topic' => $request->topic
         ]);
 
@@ -149,6 +150,7 @@ class PreSchoolSubjectController extends Controller
                 'session' => $request->session,
                 'class_id' => $request->class_id,
                 'class' => $request->class,
+                'category' => $request->category,
                 'subjects' => $request->subjects
             ]);
 
@@ -166,7 +168,7 @@ class PreSchoolSubjectController extends Controller
 
             return [
                 'status' => '',
-                'message' => 'Created Successfully',
+                'message' => 'Updated Successfully',
                 'data' => $pre
             ];
         }

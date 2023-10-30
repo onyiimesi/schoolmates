@@ -38,8 +38,11 @@ class LoginDetailsController extends Controller
 
     public function staffloginDetails(){
 
+        $user = Auth::user();
         $excludedDesignations = ['1', '2', '6'];
-        $staff = Staff::whereNotIn('designation_id', $excludedDesignations)->paginate(25);
+        $staff = Staff::whereNotIn('designation_id', $excludedDesignations)
+        ->where('campus', $user->campus)
+        ->paginate(25);
 
         $sdetails = StaffLoginDetailsResource::collection($staff);
 

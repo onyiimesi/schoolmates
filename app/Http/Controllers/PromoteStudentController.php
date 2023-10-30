@@ -11,7 +11,8 @@ class PromoteStudentController extends Controller
 {
     use HttpResponses;
 
-    public function promote(PromoteStudentRequest $request, Student $student){
+    public function promote(PromoteStudentRequest $request, Student $student)
+    {
 
         $student = Student::find($request->id);
 
@@ -30,6 +31,21 @@ class PromoteStudentController extends Controller
             "message" => 'Student Has Been Promoted',
         ];
 
+    }
 
+    public function promotestudents(Request $request)
+    {
+        $selectedClass = $request->class;
+        $checkedStudents = $request->students;
+
+        Student::whereIn('id', $checkedStudents)
+        ->update([
+            'present_class' => $selectedClass
+        ]);
+
+        return [
+            "status" => 'true',
+            "message" => 'Students Has Been Promoted',
+        ];
     }
 }

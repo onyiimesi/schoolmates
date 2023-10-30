@@ -33,6 +33,24 @@ class SubjectByClassController extends Controller
 
     }
 
+    public function subjectbyCampus(Request $request){
+
+        $user = Auth::user();
+
+        $Subject = SubjectResource::collection(
+            Subject::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
+
+        return [
+            'status' => 'true',
+            'message' => 'Subjects',
+            'data' => $Subject
+        ];
+
+    }
+
     public function studentExcelImport(){
 
         $Subject = StudentExcelImportResource::collection(StudentExcelImport::get());

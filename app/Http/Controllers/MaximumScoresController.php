@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\MaximumScoresResource;
 use App\Models\MaximunScores;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MaximumScoresController extends Controller
 {
@@ -15,7 +16,8 @@ class MaximumScoresController extends Controller
      */
     public function index()
     {
-        $maxi = MaximumScoresResource::collection(MaximunScores::get());
+        $user = Auth::user();
+        $maxi = MaximumScoresResource::collection(MaximunScores::where('campus', $user->campus)->first());
 
         return [
             'status' => 'true',

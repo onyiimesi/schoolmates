@@ -16,6 +16,8 @@ class ResultResource extends JsonResource
     public function toArray($request)
     {
         $teacher = Staff::where('id', $this->teacher_id)->first();
+        $signature = Staff::where('class_assigned', $this->class_name)->get();
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -50,8 +52,12 @@ class ResultResource extends JsonResource
                     ];
                 })->toArray(),
                 'teacher_comment' => $teacher->teacher_comment,
-                'teacher_fullname' => $teacher->teacher_fullname,
-                'teacher_signature' => $teacher->signature,
+                'teachers' => $signature->map(function($teacher) {
+                    return [
+                        "name" => $teacher->surname .' '. $teacher->firstname,
+                        "signature" => $teacher->signature
+                    ];
+                })->toArray(),
                 'hos_comment' => (string)$this->hos_comment,
                 'hos_fullname' => (string)$this->hos_fullname,
                 'computed_endterm' => (string)$this->computed_endterm

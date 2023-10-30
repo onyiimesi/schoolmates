@@ -17,7 +17,8 @@ class SubjectController extends Controller
      */
     public function index()
     {
-        $sub = SubjectResource::collection(Subject::get());
+        $user = Auth::user();
+        $sub = SubjectResource::collection(Subject::where('campus', $user->campus)->get());
 
         return [
             'status' => 'true',
@@ -41,7 +42,7 @@ class SubjectController extends Controller
 
         $sub = Subject::create([
             'sch_id' => $user->sch_id,
-            'class_name' => $request->class_name,
+            'campus' => $user->campus,
             'subject' => $request->subject,
         ]);
 

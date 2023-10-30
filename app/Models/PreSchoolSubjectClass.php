@@ -20,6 +20,7 @@ class PreSchoolSubjectClass extends Model
         'session',
         'class_id',
         'class',
+        'category',
         'subjects'
     ];
 

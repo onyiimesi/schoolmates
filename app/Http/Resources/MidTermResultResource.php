@@ -16,6 +16,7 @@ class MidTermResultResource extends JsonResource
     public function toArray($request)
     {
         $teacher = Staff::where('id', $this->teacher_id)->first();
+        $signature = Staff::where('class_assigned', $this->class_name)->get();
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -34,8 +35,12 @@ class MidTermResultResource extends JsonResource
                 })->toArray(),
                 'computed_midterm' => (string)$this->computed_midterm,
                 'teacher_comment' => (string)$this->teacher_comment,
-                'teacher_fullname' => $teacher->surname .' '. $teacher->firstname,
-                'teacher_signature' => $teacher->signature,
+                'teachers' => $signature->map(function($teacher) {
+                    return [
+                        "name" => $teacher->surname .' '. $teacher->firstname,
+                        "signature" => $teacher->signature
+                    ];
+                })->toArray()
             ]
         ];
     }
