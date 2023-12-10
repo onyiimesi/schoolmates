@@ -61,7 +61,7 @@ class ResultController extends Controller
                     'period' => $request->period,
                     'term' => $request->term,
                     'session' => $request->session,
-                    'computed_midterm' => 'true',
+                    'computed_midterm' => 'true'
                 ]);
 
                 foreach ($request->results as $result) {

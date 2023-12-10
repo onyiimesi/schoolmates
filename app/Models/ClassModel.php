@@ -20,4 +20,9 @@ class ClassModel extends Model implements Auditable
         'sub_class',
 
     ];
+
+    public function subjects()
+    {
+        return $this->hasMany(SubjectClass::class, 'class_id');
+    }
 }

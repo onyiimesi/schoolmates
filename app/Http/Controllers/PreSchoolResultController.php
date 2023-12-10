@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PreSchoolResultRequest;
+use App\Models\PreSchoolResultExtraCurricular;
 use App\Models\PreSchoolResult;
 use App\Models\Staff;
 use Illuminate\Http\Request;
@@ -25,6 +26,11 @@ class PreSchoolResultController extends Controller
             ->where("term", $request->term)
             ->where("session", $request->session)->first();
 
+            $hosId = Staff::where('campus', $teacher->campus)
+            ->where('designation_id', 3)
+            ->where('status', 'Active')
+            ->first();
+
             if(empty($getresult)){
 
                 $compute = PreSchoolResult::create([
@@ -45,7 +51,9 @@ class PreSchoolResultController extends Controller
                     'teacher_comment' => $request->teacher_comment,
                     'teacher_id' => $request->teacher_id,
                     'hos_comment' => $request->hos_comment,
-                    'hos_id' => $request->hos_id,
+                    'hos_id' => $hosId->id,
+                    'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
+                    'hos_signature' => $hosId->signature,
                     'status' => 'active',
                 ]);
 
@@ -93,8 +101,11 @@ class PreSchoolResultController extends Controller
             ->where("term", $request->term)
             ->where("session", $request->session)->first();
 
-
-            $hosId = Staff::find($request->hos_id);
+            $hosId = Staff::where('campus', $teacher->campus)
+            ->where('designation_id', 3)
+            ->where('status', 'Active')
+            ->first();
+            $teachId = Staff::find($request->teacher_id);
 
             if(empty($getsecondresult)){
 
@@ -115,12 +126,19 @@ class PreSchoolResultController extends Controller
                     'cognitive_development' => $request->cognitive_development,
                     'teacher_comment' => $request->teacher_comment,
                     'teacher_id' => $request->teacher_id,
-                    // 'teacher_fullname' => $teacher->surname . ' '. $teacher->firstname,
+                    'teacher_fullname' => $teachId->surname . ' '. $teachId->firstname,
+                    'teacher_signature' => $teachId->teacher_signature,
                     'hos_comment' => $request->hos_comment,
-                    'hos_id' => $request->hos_id,
+                    'hos_id' => $hosId->id,
                     'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
+                    'hos_signature' => $hosId->signature,
                     'status' => 'active',
                 ]);
+
+                foreach ($request->extra_curricular_activities as $extra) {
+                    $ext = new PreSchoolResultExtraCurricular($extra);
+                    $compute->preschoolresultextracurricular()->save($ext);
+                }
 
                 return [
                     "status" => 'true',
@@ -147,12 +165,20 @@ class PreSchoolResultController extends Controller
                     'times_absent' => $request->times_absent,
                     'teacher_comment' => $request->teacher_comment,
                     'teacher_id' => $request->teacher_id,
-                    // 'teacher_fullname' => $teacher->surname . ' '. $teacher->firstname,
+                    'teacher_fullname' => $teachId->surname . ' '. $teachId->firstname,
+                    'teacher_signature' => $teachId->teacher_signature,
                     'hos_comment' => $request->hos_comment,
-                    'hos_id' => $request->hos_id,
-                    // 'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
+                    'hos_id' => $hosId->id,
+                    'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
+                    'hos_signature' => $hosId->signature,
                     'status' => 'active',
                 ]);
+
+                $getsecondresult->preschoolresultextracurricular()->delete();
+                foreach ($request->extra_curricular_activities as $extra) {
+                    $ext = new PreSchoolResultExtraCurricular($extra);
+                    $getsecondresult->preschoolresultextracurricular()->save($ext);
+                }
 
                 return [
                     "status" => 'true',

@@ -75,7 +75,7 @@ class SkillsController extends Controller
             ];
         }
 
-        
+
     }
 
     /**
@@ -121,9 +121,9 @@ class SkillsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Skills $skills)
+    public function destroy(Skills $skill)
     {
-        $skills->delete();
+        $skill->delete();
 
         return response(null, 204);
     }

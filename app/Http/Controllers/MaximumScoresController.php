@@ -17,13 +17,23 @@ class MaximumScoresController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $maxi = MaximumScoresResource::collection(MaximunScores::where('campus', $user->campus)->first());
+        $maxi = MaximunScores::where('campus', $user->campus)->first();
 
-        return [
-            'status' => 'true',
-            'message' => 'Subjects',
-            'data' => $maxi
-        ];
+        if ($maxi) {
+            $maxiResource = new MaximumScoresResource($maxi);
+
+            return [
+                'status' => 'true',
+                'message' => 'Maximum Scores',
+                'data' => $maxiResource
+            ];
+        } else {
+            return [
+                'status' => 'false',
+                'message' => 'Maximum Scores not found',
+                'data' => []
+            ];
+        }
     }
 
 
@@ -35,16 +45,37 @@ class MaximumScoresController extends Controller
      */
     public function store(Request $request)
     {
-        $maxi = MaximunScores::create([
-            'midterm' => $request->midterm,
-            'exam' => $request->exam,
-            'total' => $request->total,
-        ]);
+        $user = Auth::user();
+
+        $scores = MaximunScores::where('campus', $user->campus)->first();
+
+        if(empty($scores)){
+
+            MaximunScores::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'midterm' => $request->midterm,
+                'first_assessment' => $request->first_assessment,
+                'second_assessment' => $request->second_assessment,
+                'has_two_assessment' => $request->has_two_assessment,
+                'exam' => $request->exam,
+                'total' => $request->total
+            ]);
+
+        }else {
+            $scores->update([
+                'midterm' => $request->midterm,
+                'first_assessment' => $request->first_assessment,
+                'second_assessment' => $request->second_assessment,
+                'has_two_assessment' => $request->has_two_assessment,
+                'exam' => $request->exam,
+                'total' => $request->total
+            ]);
+        }
 
         return [
             "status" => 'true',
-            "message" => 'Inserted Successfully',
-            "data" => $maxi
+            "message" => 'Saved Successfully',
         ];
     }
 

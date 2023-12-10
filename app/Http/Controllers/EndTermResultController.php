@@ -476,39 +476,52 @@ class EndTermResultController extends Controller
         ->with('studentscore')
         ->get();
 
+        $res = Result::where('class_name', $request->class_name)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->with('studentscore')
+        ->get();
         $count = Student::where('present_class', $request->class_name)->count();
 
-        $totalScore = 0;
-
-        foreach ($results as $result) {
+        $totalScores = 0;
+        $uniqueSubject = [];
+        foreach ($res as $result) {
             foreach ($result->studentscore as $score) {
-                $totalScore += $score->score;
+                if ($score->score != 0) {
+                    $totalScores += $score->score;
+                    $uniqueSubject[] = $score->subject;
+                }
             }
         }
+        $totalSubjects = count(array_unique($uniqueSubject));
+        $studentAverages = $totalSubjects > 0 ? $totalScores / $totalSubjects : 0;
+        $classAverage = $studentAverages / $count;
 
-        $classAverage = $totalScore > 0 ? $totalScore / $count : 0;
-
-        $totalSubject = 0;
-
+        $totalScore = 0;
+        $uniqueSubjects = [];
         foreach ($results as $result) {
             foreach ($result->studentscore as $score) {
                 if ($score->score != 0) {
                     $totalScore += $score->score;
-                    $totalSubject++;
+                    $uniqueSubjects[] = $score->subject;
                 }
             }
         }
 
+        $totalSubject = count(array_unique($uniqueSubjects));
         $studentAverage = $totalSubject > 0 ? $totalScore / $totalSubject : 0;
-
         $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
+        if($studentAverage > 90){
+            $grades = "EXCELLENT";
+        }else{
+            $grades = $grade->remark ?? "";
+        }
 
         return [
             "status" => "true",
             "Student Average" => $studentAverage,
-            "Class Average" => $classAverage,
-            "Grade" => $grade->remark ?? "",
+            "Class Average" => number_format($classAverage, 2),
+            "Grade" => $grades,
         ];
     }
-
 }

@@ -28,6 +28,8 @@ class AssignClassRequest extends FormRequest
             'teacher_surname' => ['string'],
             'teacher_firstname' => ['string'],
             'teacher_middlename' => ['string'],
+            'subjects' => ['required', 'array'],
+            'subjects.*.name' => ['required', 'string'],
         ];
     }
 }

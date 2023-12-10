@@ -30,9 +30,14 @@ class StaffsResource extends JsonResource
                 'address' => (string)$this->address,
                 'image' => (string)$this->image,
                 'class_assigned' => (string)$this->class_assigned,
-                'sub_class' => (string)$this->sub_class,
+                'campus_type' => (string)$this->campus_type,
+                'is_preschool' => (string)$this->is_preschool,
                 'signature' => (string)$this->signature,
+                'teacher_type' => (string)$this->teacher_type,
                 'status' => (string)$this->status,
+                'subjects' => $this->subjectteacher->flatMap(function($item){
+                    return $item->subject;
+                })
             ]
         ];
     }

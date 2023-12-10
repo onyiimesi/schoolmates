@@ -139,6 +139,7 @@ class PreSchoolSubjectController extends Controller
 
         $pre = PreSchoolSubjectClass::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
+        ->where('period', $request->period)
         ->where('class', $request->class)->first();
 
         if(empty($pre)){

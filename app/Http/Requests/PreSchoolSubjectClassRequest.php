@@ -24,7 +24,6 @@ class PreSchoolSubjectClassRequest extends FormRequest
     public function rules()
     {
         return [
-            'category' => ['required'],
             'class' => ['required'],
             'subjects' => ['required', 'array']
         ];

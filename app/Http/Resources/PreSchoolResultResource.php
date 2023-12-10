@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources;
 use App\Models\Staff;
-
+use App\Models\Student;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Auth;
 
 class PreSchoolResultResource extends JsonResource
 {
@@ -19,11 +20,18 @@ class PreSchoolResultResource extends JsonResource
         $jsonStrings = json_encode($this->evaluation_report);
         $jsonStringss = json_encode($this->cognitive_development);
         $signature = Staff::where('class_assigned', $this->class_name)->get();
+        $student_image = Student::where('id', $this->student_id)->first();
+        $teacher = Auth::user();
+        $hosId = Staff::where('campus', $teacher->campus)
+            ->where('designation_id', 3)
+            ->where('status', 'Active')
+            ->first();
         return [
             'id' => (string)$this->id,
             'attributes' => [
                 'student_id' => (string)$this->student_id,
                 'student_fullname' => (string)$this->student_fullname,
+                'student_image' => (string)$student_image->image,
                 'admission_number' => (string)$this->admission_number,
                 'class_name' => (string)$this->class_name,
                 'period' => (string)$this->period,
@@ -35,6 +43,12 @@ class PreSchoolResultResource extends JsonResource
                 'results' => json_decode($jsonString, JSON_UNESCAPED_SLASHES),
                 'evaluation_report' => json_decode($jsonStrings, JSON_UNESCAPED_SLASHES),
                 'cognitive_development' => json_decode($jsonStringss, JSON_UNESCAPED_SLASHES),
+                'extra_curricular_activities' => $this->preschoolresultextracurricular->map(function($value) {
+                    return [
+                        "name" => $value->name,
+                        "value" => $value->value
+                    ];
+                })->toArray(),
                 'teacher_comment' => (string)$this->teacher_comment,
                 'teacher_id' => (string)$this->teacher_id,
                 'teachers' => $signature->map(function($teacher) {
@@ -46,7 +60,7 @@ class PreSchoolResultResource extends JsonResource
                 'hos_comment' => (string)$this->hos_comment,
                 'hos_id' => (string)$this->hos_id,
                 'hos_fullname' => (string)$this->hos_fullname,
-                'hos_signature' => (string)$this->hos_signature,
+                'hos_signature' => $hosId->signature,
                 'status' => (string)$this->status,
             ]
         ];

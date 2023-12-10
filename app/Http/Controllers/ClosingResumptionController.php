@@ -17,7 +17,19 @@ class ClosingResumptionController extends Controller
      */
     public function index()
     {
-        $clos = ClosingResumptionResource::collection(ClosingResumption::get());
+        $user = Auth::user();
+        $academic = AcademicPeriod::first();
+        $closingResumption = ClosingResumption::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('term', $academic->term)
+            ->where('session', $academic->session)
+            ->first();
+
+        if($closingResumption){
+            $clos = new ClosingResumptionResource($closingResumption);
+        }else{
+            $clos = [];
+        }
 
         return [
             'status' => 'true',
@@ -37,14 +49,31 @@ class ClosingResumptionController extends Controller
 
         $user = Auth::user();
         $academic = AcademicPeriod::first();
+        $clos = ClosingResumption::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('term', $academic->term)
+            ->where('session', $academic->session)
+            ->first();
 
-        $clos = ClosingResumption::create([
-            'sch_id' => $user->sch_id,
-            'term' => $academic->term,
-            'session' => $academic->session,
-            'session_ends' => $request->session_ends,
-            'session_resumes' => $request->session_resumes
-        ]);
+        if(empty($clos)){
+            $clos = ClosingResumption::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'term' => $academic->term,
+                'session' => $academic->session,
+                'session_ends' => $request->session_ends,
+                'session_resumes' => $request->session_resumes
+            ]);
+        } else{
+            $clos->update([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'term' => $academic->term,
+                'session' => $academic->session,
+                'session_ends' => $request->session_ends,
+                'session_resumes' => $request->session_resumes
+            ]);
+        }
 
         return [
             "status" => 'true',

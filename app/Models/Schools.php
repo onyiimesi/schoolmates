@@ -28,5 +28,6 @@ class Schools extends Model implements Auditable
         'remark',
         'signed_up',
         'status',
+        'dos'
     ];
 }

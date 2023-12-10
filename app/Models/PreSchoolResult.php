@@ -31,12 +31,17 @@ class PreSchoolResult extends Model implements Auditable
         'hos_comment',
         'hos_id',
         'hos_fullname',
+        'hos_signature',
         'status'
-
     ];
 
     protected $casts = [
         'evaluation_report' => 'array',
         'cognitive_development' => 'array'
     ];
+
+    public function preschoolresultextracurricular()
+    {
+        return $this->hasMany(PreSchoolResultExtraCurricular::class);
+    }
 }

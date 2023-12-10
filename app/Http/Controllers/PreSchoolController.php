@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PreSchoolRequest;
 use App\Http\Resources\PreSchoolResource;
 use App\Models\PreSchool;
+use App\Models\PreSchoolSubjectClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -84,6 +85,9 @@ class PreSchoolController extends Controller
     public function update(Request $request, PreSchool $preschool)
     {
         $preschool->update($request->all());
+        PreSchoolSubjectClass::where('class_id', $preschool->id)->update([
+            'class' => $preschool->name
+        ]);
 
         $preschools = new PreSchoolResource($preschool);
 
@@ -92,6 +96,7 @@ class PreSchoolController extends Controller
             "message" => 'Updated Successfully',
             "data" => $preschools
         ];
+
     }
 
     /**

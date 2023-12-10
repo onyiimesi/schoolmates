@@ -46,7 +46,9 @@ class Result extends Model implements Auditable
         'computed_endterm',
         'status',
         'computed_midterm',
-        'computed_endterm'
+        'computed_endterm',
+        'result_type',
+        'performance_remark'
     ];
 
     protected $casts = [
@@ -54,6 +56,37 @@ class Result extends Model implements Auditable
         'affective_disposition' => 'array',
         'psychomotor_skills' => 'array',
     ];
+
+    public static function createOne($staff, $data, $hos)
+    {
+        $create = new self();
+
+        $create->sch_id = $staff->sch_id;
+        $create->campus = $staff->campus;
+        $create->campus_type = $staff->campus_type;
+        $create->student_id = $data->student_id;
+        $create->student_fullname = $data->student_fullname;
+        $create->admission_number = $data->admission_number;
+        $create->class_name = $data->class_name;
+        $create->period = $data->period;
+        $create->term = $data->term;
+        $create->session = $data->session;
+        $create->school_opened = $data->school_opened;
+        $create->times_present = $data->times_present;
+        $create->times_absent = $data->times_absent;
+        $create->performance_remark = $data->performance_remark;
+        $create->teacher_comment = $data->teacher_comment;
+        $create->teacher_id = $data->teacher_id;
+        $create->teacher_fullname = $staff->surname . ' '. $staff->firstname;
+        $create->hos_comment = $data->hos_comment;
+        $create->hos_id = $data->hos_id;
+        $create->hos_fullname = !empty($hos) ? $hos->surname . ' ' . $hos->firstname : '';
+        $create->computed_endterm = 'true';
+        $create->result_type = 'endterm';
+        $create->save();
+
+        return $create;
+    }
 
     public function results()
     {
@@ -78,5 +111,25 @@ class Result extends Model implements Auditable
     public function psychomotorskill()
     {
         return $this->hasMany(PsychomotorSkill::class);
+    }
+
+    public function resultextracurricular()
+    {
+        return $this->hasMany(ResultExtraCurricular::class);
+    }
+
+    public function abacus()
+    {
+        return $this->hasOne(Abacus::class);
+    }
+
+    public function psychomotorperformance()
+    {
+        return $this->hasMany(PsychomotorPerformance::class);
+    }
+
+    public function pupilreport()
+    {
+        return $this->hasMany(PupilReport::class);
     }
 }

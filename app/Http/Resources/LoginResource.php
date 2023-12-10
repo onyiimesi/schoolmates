@@ -29,9 +29,13 @@ class LoginResource extends JsonResource
             'address' => (string)$this->address,
             'image' => (string)$this->image,
             'class_assigned' => (string)$this->class_assigned,
-            'sub_class' => (string)$this->sub_class,
+            'teacher_type' => (string)$this->teacher_type,
             'signature' => (string)$this->signature,
+            'is_preschool' => (string)$this->is_preschool,
             'status' => (string)$this->status,
+            'subjects' => $this->subjectteacher->flatMap(function($item){
+                return $item->subject;
+            })
         ];
     }
 }

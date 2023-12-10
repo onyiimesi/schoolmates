@@ -42,8 +42,11 @@ class DepartmentController extends Controller
     public function store(DepartmentRequest $request)
     {
         $request->validated($request->all());
+        $user = Auth::user();
 
         $departm = Department::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'department_name' => $request->department_name,
             'department_id' => $request->department_id
         ]);

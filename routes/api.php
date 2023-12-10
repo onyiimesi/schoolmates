@@ -8,6 +8,7 @@ use App\Http\Controllers\AdmissionNumSearchController;
 use App\Http\Controllers\AssignClassController;
 use App\Http\Controllers\AssignedVehicleController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\AssignSubjectsController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankController;
@@ -44,6 +45,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LoginDetailsController;
 use App\Http\Controllers\MaximumScoresController;
 use App\Http\Controllers\MidTermResultController;
+use App\Http\Controllers\OtherController;
 use App\Http\Controllers\OutstandingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PreSchoolController;
@@ -55,7 +57,9 @@ use App\Http\Controllers\PromoteStudentController;
 use App\Http\Controllers\ReceivedIncomeController;
 use App\Http\Controllers\RegisterSubjectController;
 use App\Http\Controllers\ReleaseResultsController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\ResultTwoController;
 use App\Http\Controllers\SchoolsController;
 use App\Http\Controllers\SessionSearchController;
 use App\Http\Controllers\SkillsController;
@@ -148,7 +152,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::resource('/principalcomment', PrincipalCommentController::class);
     Route::resource('/skills', SkillsController::class);
     Route::resource('/preschool', PreSchoolController::class);
+    Route::resource('/reports', ReportsController::class);
 
+    //New result form
+    Route::post('midTermResult', [ResultTwoController::class, 'mid']);
+    Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
 
 
     //PreSchool Subject
@@ -206,6 +214,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
     Route::get("/school", [SchoolsController::class, 'schools']);
     Route::get("/subject/{class}", [SubjectByClassController::class, 'subjectbyclass']);
+    Route::get("/subjectby/{id}", [SubjectByClassController::class, 'subjectbyId']);
     Route::get("/subject", [SubjectByClassController::class, 'subjectbyCampus']);
     Route::get("/teacher-subject", [SubjectByClassController::class, 'subjectbyteacher']);
     Route::get("/student-subject", [SubjectByClassController::class, 'subjectbystudent']);
@@ -226,6 +235,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
     Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
     ->where('session', '.+');
+    Route::get("/result/firstassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'first'])
+    ->where('session', '.+');
+    Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
+    ->where('session', '.+');
+
 
     Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
     ->where('session', '.+');
@@ -235,7 +249,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
     ->where('session', '.+');
-
 
 
     Route::get('/classpopulation', [ClassPopulationController::class, 'getclasspopulation']);
@@ -301,6 +314,23 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
     Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassignstu'])
     ->where('session', '.+');
+
+    //Assign Subjects to class
+    Route::post('/subjects-to-class', [AssignSubjectsController::class, 'assign']);
+
+
+    Route::post("/add-dos", [SchoolsController::class, 'dos']);
+    Route::get("/dos", [SchoolsController::class, 'getdos']);
+
+    Route::post("/extra-curricular", [OtherController::class, 'extra']);
+    Route::get("/extra-curricular", [OtherController::class, 'getextra']);
+    Route::delete("/delete-extra-curricular/{id}", [OtherController::class, 'delextra']);
+
+    Route::post("/preschoolcurricular", [OtherController::class, 'preextra']);
+    Route::get("/preschoolcurricular", [OtherController::class, 'pregetextra']);
+    Route::delete("/delete-preschoolcurricular/{id}", [OtherController::class, 'predelextra']);
+
+    Route::get("/role", [OtherController::class, 'role']);
 
 
     Route::post('/changepassword', [AuthController::class, 'change']);

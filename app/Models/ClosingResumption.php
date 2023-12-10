@@ -14,8 +14,9 @@ class ClosingResumption extends Model implements Auditable
     protected $fillable = [
         'sch_id',
         'term',
+        'campus',
         'session',
         'session_ends',
-        'session_resumes',
+        'session_resumes'
     ];
 }

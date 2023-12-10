@@ -66,7 +66,7 @@ class StaffController extends Controller
 
         if($request->image){
             $file = $request->image;
-            $folderName = 'https://schoolmate.powershellerp.com/public/staffs';
+            $folderName = env('STAFF_FOLDER_NAME');
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
@@ -82,7 +82,7 @@ class StaffController extends Controller
 
         if($request->signature){
             $file = $request->signature;
-            $folderName = 'https://schoolmate.powershellerp.com/public/staffs/signature';
+            $folderName = env('SIGNATURE_FOLDER_NAME');
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $sig = str_replace($replace, '', $file);
@@ -94,6 +94,12 @@ class StaffController extends Controller
             $pathss = $folderName.'/'.$file_name;
         }else{
             $pathss = "";
+        }
+
+        if($request->teacher_type == ""){
+            $type = "";
+        }else{
+            $type = $request->teacher_type;
         }
 
         $staff = Staff::create([
@@ -109,8 +115,11 @@ class StaffController extends Controller
             'email' => $request->email,
             'phoneno' => $request->phoneno,
             'address' => $request->address,
+            'class_assigned' => $request->class_assigned,
             'image' => $paths,
             'signature' => $pathss,
+            'teacher_type' => $type,
+            'is_preschool' => $campus->is_preschool,
             'password' => Hash::make($request->password),
             'pass_word' => $request->password,
             'status' => 'active'
@@ -158,8 +167,6 @@ class StaffController extends Controller
             'message' => 'Staff Details',
             'data' => $staffs
         ];
-
-
     }
 
     /**
@@ -173,10 +180,8 @@ class StaffController extends Controller
     {
         if($request->image){
             $file = $request->image;
-            $folderName = 'https://schoolmate.powershellerp.com/public/staffs';
-
+            $folderName = env('STAFF_FOLDER_NAME');
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
 
@@ -191,7 +196,7 @@ class StaffController extends Controller
 
         if($request->signature){
             $file = $request->signature;
-            $folderName = 'https://schoolmate.powershellerp.com/public/staffs/signature';
+            $folderName = env('SIGNATURE_FOLDER_NAME');
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $sig = str_replace($replace, '', $file);
@@ -203,6 +208,12 @@ class StaffController extends Controller
             $pathss = $folderName.'/'.$file_name;
         }else{
             $pathss = "";
+        }
+
+        if($request->teacher_type == ""){
+            $type = $staff->teacher_type;
+        }else{
+            $type = $request->teacher_type;
         }
 
         $campus = Campus::where('name', $request->campus)->first();
@@ -219,8 +230,11 @@ class StaffController extends Controller
             'email' => $request->email,
             'phoneno' => $request->phoneno,
             'address' => $request->address,
+            'class_assigned' => $request->class_assigned,
+            'is_preschool' => $campus->is_preschool,
             'image' => $paths,
             'signature' => $pathss,
+            'teacher_type' => $type,
         ]);
 
         $staffs = new StaffsResource($staff);

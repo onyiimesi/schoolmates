@@ -24,6 +24,7 @@ class PreSchoolSubjectResource extends JsonResource
                 // 'session' => (string)$this->session,
                 'subject' => (string)$this->subject,
                 'topic' => (array)$this->topic,
+                'category' => (string)$this->category,
             ]
         ];
     }

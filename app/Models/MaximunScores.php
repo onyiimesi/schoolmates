@@ -15,5 +15,10 @@ class MaximunScores extends Model implements Auditable
         'midterm', 
         'exam', 
         'total',
+        'sch_id',
+        'campus',
+        'first_assessment',
+        'second_assessment',
+        'has_two_assessment'
     ];
 }

@@ -2,7 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ClassModel;
+use App\Models\Schools;
 use App\Models\Staff;
+use App\Models\Student;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ResultResource extends JsonResource
@@ -15,9 +18,16 @@ class ResultResource extends JsonResource
      */
     public function toArray($request)
     {
-        $teacher = Staff::where('id', $this->teacher_id)->first();
         $signature = Staff::where('class_assigned', $this->class_name)->get();
-
+        $dos = Schools::first('dos');
+        $student_image = Student::where('id', $this->student_id)->first();
+        $class = ClassModel::where('class_name', $this->class_name)->first();
+        $hod = null;
+        if($class->class_type === "upper"){
+            $hod = Staff::where('class_type', 'upper')->get();
+        }else if($class->class_type === "lower"){
+            $hod = Staff::where('class_type', 'lower')->get();
+        }
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -25,6 +35,7 @@ class ResultResource extends JsonResource
                 'campus_type' => (string)$this->campus_type,
                 'student_id' => (string)$this->student_id,
                 'student_fullname' => (string)$this->student_fullname,
+                'student_image' => (string)$student_image->image,
                 'admission_number' => (string)$this->admission_number,
                 'class_name' => (string)$this->class_name,
                 'period' => (string)$this->period,
@@ -33,7 +44,9 @@ class ResultResource extends JsonResource
                 'school_opened' => (string)$this->school_opened,
                 'times_present' => (string)$this->times_present,
                 'times_absent' => (string)$this->times_absent,
-                'results' => $this->studentscore->map(function($score) {
+                'results' => $this->studentscore->filter(function($score) {
+                    return $score->score != 0;
+                })->map(function($score) {
                     return [
                         "subject" => $score->subject,
                         "score" => $score->score
@@ -51,16 +64,45 @@ class ResultResource extends JsonResource
                         "score" => $score->score
                     ];
                 })->toArray(),
-                'teacher_comment' => $teacher->teacher_comment,
+                'extra_curricular_activities' => $this->resultextracurricular->map(function($value) {
+                    return [
+                        "name" => $value->name,
+                        "value" => $value->value
+                    ];
+                })->toArray(),
+                'abacus' => (object)[
+                    "name" => $this->abacus?->name
+                ],
+                'psychomotor_performance' => $this->psychomotorperformance->map(function($score) {
+                    return [
+                        "name" => $score->name,
+                        "score" => $score->score
+                    ];
+                })->toArray(),
+                'pupil_report' => $this->pupilreport->map(function($score) {
+                    return [
+                        "name" => $score->name,
+                        "score" => $score->score
+                    ];
+                })->toArray(),
+                'teacher_comment' => $this->teacher_comment,
                 'teachers' => $signature->map(function($teacher) {
                     return [
                         "name" => $teacher->surname .' '. $teacher->firstname,
                         "signature" => $teacher->signature
                     ];
                 })->toArray(),
+                'hos' => $hod ? $hod->map(function($hods) {
+                    return [
+                        "name" => $hods->surname .' '. $hods->firstname,
+                        "signature" => $hods->signature
+                    ];
+                })->toArray() : [],
+                'performance_remark' => (string)$this->performance_remark,
                 'hos_comment' => (string)$this->hos_comment,
                 'hos_fullname' => (string)$this->hos_fullname,
-                'computed_endterm' => (string)$this->computed_endterm
+                'computed_endterm' => (string)$this->computed_endterm,
+                'dos' => $dos->dos
             ]
         ];
     }

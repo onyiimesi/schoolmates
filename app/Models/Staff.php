@@ -31,7 +31,10 @@ class Staff extends Authenticatable implements Auditable
         'class_assigned',
         'sub_class',
         'signature',
-        'status'
+        'status',
+        'teacher_type',
+        'campus_type',
+        'is_preschool'
     ];
 
     public function staff(){
@@ -40,5 +43,9 @@ class Staff extends Authenticatable implements Auditable
 
     public function result(){
         return $this->hasMany(Result::class, 'teacher_id');
+    }
+
+    public function subjectteacher(){
+        return $this->hasMany(SubjectTeacher::class, 'staff_id');
     }
 }

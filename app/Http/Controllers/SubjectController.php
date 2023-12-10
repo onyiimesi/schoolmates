@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SubjectRequest;
 use App\Http\Resources\SubjectResource;
+use App\Models\StudentScore;
 use App\Models\Subject;
+use App\Models\SubjectClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -80,6 +82,17 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject)
     {
+
+        $subj = Subject::findorFail($subject->id);
+
+        SubjectClass::where('subject', $subj->subject)->update([
+            'subject' => $request->subject
+        ]);
+
+        StudentScore::where('subject', $subj->subject)->update([
+            'subject' => $request->subject
+        ]);
+
         $subject->update($request->all());
 
         $sub = new SubjectResource($subject);

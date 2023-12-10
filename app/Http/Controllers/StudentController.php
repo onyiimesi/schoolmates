@@ -66,7 +66,7 @@ class StudentController extends Controller
 
         if($request->image){
             $file = $request->image;
-            $folderName = 'https://schoolmate.powershellerp.com/public/students';
+            $folderName = env('STUDENT_FOLDER_NAME');
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
@@ -149,10 +149,8 @@ class StudentController extends Controller
 
         if($request->image){
             $file = $request->image;
-            $folderName = 'https://schoolmate.powershellerp.com/public/students';
-
+            $folderName = env('STUDENT_FOLDER_NAME');
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
 

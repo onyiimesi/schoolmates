@@ -13,8 +13,10 @@ class Department extends Model implements Auditable
 
     protected $fillable = [
         'id',
+        'sch_id',
+        'campus',
         'department_id',
         'department_name',
-        
+
     ];
 }

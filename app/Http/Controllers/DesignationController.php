@@ -15,13 +15,6 @@ class DesignationController extends Controller
      */
     public function index()
     {
-        // $desig = Designation::get(['id', 'designation_name']);
-        // return [
-        //     "status" => '200',
-        //     "message" => 'Designation list',
-        //     "data" => $desig
-        // ];
-
         return DesignationResource::collection(Designation::get());
     }
 

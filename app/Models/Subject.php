@@ -22,4 +22,9 @@ class Subject extends Model implements Auditable
     {
         return $this->hasMany(Question::class);
     }
+
+    public function subjectclass()
+    {
+        return $this->belongsTo(SubjectClass::class);
+    }
 }
