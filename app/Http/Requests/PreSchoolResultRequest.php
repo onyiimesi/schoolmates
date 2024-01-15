@@ -31,16 +31,9 @@ class PreSchoolResultRequest extends FormRequest
             'period' => ['required', 'string', 'max:255'],
             'term' => ['required', 'string', 'max:255'],
             'session' => ['required', 'string', 'max:255'],
-            'school_opened' => ['string', 'max:255'],
-            'times_present' => ['string', 'max:255'],
-            'times_absent' => ['string', 'max:255'],
-            'evaluation_report' => ['required', 'array'],
-            'evaluation_report.*.subject' => ['required', 'string'],
-            'evaluation_report.*.topic' => ['required', 'array'],
+            'evaluation_report' => ['array'],
             'cognitive_development' => ['array'],
-            'teacher_comment' => ['string', 'max:255'],
-            'hos_comment' => ['string', 'max:255'],
-
+            'teacher_comment' => ['string']
         ];
     }
 }

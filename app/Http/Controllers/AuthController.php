@@ -20,6 +20,11 @@ class AuthController extends Controller
 {
     use HttpResponses;
 
+    public function __construct()
+    {
+        // $this->middleware('throttle:3,5')->only(['token', 'verify', 'loginVerify']);
+    }
+
     public function login(LoginUserRequest $request) {
 
         $request->validated($request->all());
@@ -28,6 +33,11 @@ class AuthController extends Controller
         $studGuard = Auth::guard('studs');
 
         if ($staffGuard->attempt($request->only(['username', 'password']))) {
+            $auth = Auth::guard('staffs')->user();
+
+            if($auth->status === "inactive"){
+                return $this->error('', 'Account is inactive, contact support', 400);
+            }
             $user = Staff::where('username', $request->username)->first();
             $users = new LoginResource($user);
             $token = $user->createToken('API Token of '. $user->username);
@@ -38,6 +48,11 @@ class AuthController extends Controller
                 'expires_at' => $token->accessToken->expires_at
             ]);
         } elseif ($studGuard->attempt($request->only(['username', 'password']))) {
+            $auth = Auth::guard('studs')->user();
+
+            if($auth->status === "inactive"){
+                return $this->error('', 'Account is inactive, contact support', 400);
+            }
             $stud = Student::where('username', $request->username)->first();
             $studs = new StudentLoginResource($stud);
             $token = $stud->createToken('API Token of '. $stud->username);

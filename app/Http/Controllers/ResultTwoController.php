@@ -98,9 +98,7 @@ class ResultTwoController extends Controller
                     "status" => 'true',
                     "message" => 'Result Updated Successfully'
                 ];
-
             }
-
         }
 
         if($request->period === "First Half" && $request->result_type === "second_assesment"){

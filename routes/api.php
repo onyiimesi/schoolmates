@@ -12,6 +12,7 @@ use App\Http\Controllers\AssignSubjectsController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\BroadSheetController;
 use App\Http\Controllers\BusRoutingController;
 use App\Http\Controllers\CampusController;
 use App\Http\Controllers\ChartAccountController;
@@ -317,8 +318,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     //Assign Subjects to class
     Route::post('/subjects-to-class', [AssignSubjectsController::class, 'assign']);
-
-
     Route::post("/add-dos", [SchoolsController::class, 'dos']);
     Route::get("/dos", [SchoolsController::class, 'getdos']);
 
@@ -329,9 +328,9 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post("/preschoolcurricular", [OtherController::class, 'preextra']);
     Route::get("/preschoolcurricular", [OtherController::class, 'pregetextra']);
     Route::delete("/delete-preschoolcurricular/{id}", [OtherController::class, 'predelextra']);
-
     Route::get("/role", [OtherController::class, 'role']);
-
+    Route::get("/broadsheet/{class_name}/{term}/{session}", [BroadSheetController::class, 'broadsheet'])
+    ->where('session', '.+');
 
     Route::post('/changepassword', [AuthController::class, 'change']);
     Route::post('/logout', [AuthController::class, 'logout']);
