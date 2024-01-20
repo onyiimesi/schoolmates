@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\SubjectTeacher;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AssignClassController extends Controller
 {
@@ -19,9 +20,12 @@ class AssignClassController extends Controller
     use HttpResponses;
 
     public function assign(AssignClassRequest $request, Staff $staff){
+        $user = Auth::user();
 
         $staff = Staff::where('id', $request->id)->first();
-        $period = AcademicPeriod::first();
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
         $class = ClassModel::findorFail($request->class_id);
 
         if(!$staff){
@@ -44,7 +48,9 @@ class AssignClassController extends Controller
                 'class_assigned' => $request->class_assigned,
             ]);
 
-            Student::where('present_class', $request->class_assigned)
+            Student::where('sch_id', $staff->sch_id)
+            ->where('campus', $staff->campus)
+            ->where('present_class', $request->class_assigned)
             ->update([
                 'teacher_surname' => $teacher_firstname,
                 'teacher_firstname' => $teacher_surname,
@@ -76,14 +82,15 @@ class AssignClassController extends Controller
                 "status" => 'true',
                 "message" => 'Assigned Successfully'
             ];
-
         }
 
         $staff->update([
             'class_assigned' => $request->class_assigned,
         ]);
 
-        Student::where('present_class', $request->class_assigned)
+        Student::where('sch_id', $staff->sch_id)
+        ->where('campus', $staff->campus)
+        ->where('present_class', $request->class_assigned)
         ->update([
             'teacher_surname' => $teacher_firstname,
             'teacher_firstname' => $teacher_surname,
@@ -115,6 +122,5 @@ class AssignClassController extends Controller
             "status" => 'true',
             "message" => 'Assigned Successfully'
         ];
-
     }
 }

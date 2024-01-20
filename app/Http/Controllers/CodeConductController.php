@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CodeConductRequest;
 use App\Models\CodeCoduct;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CodeConductController extends Controller
 {
@@ -27,8 +28,11 @@ class CodeConductController extends Controller
     public function store(CodeConductRequest $request)
     {
         $request->validated($request->all());
+        $user = Auth::user();
 
         $code = CodeCoduct::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,  
             'rule' => $request->rule,
             'description' => $request->description,
             'apply_to' => $request->apply_to,

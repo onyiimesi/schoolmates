@@ -19,6 +19,8 @@ class VehicleLog extends Model implements Auditable
         'mechanic_condition', 
         'add_info', 
         'date_out', 
-        'time_out'
+        'time_out',
+        'sch_id',
+        'campus', 
     ];
 }

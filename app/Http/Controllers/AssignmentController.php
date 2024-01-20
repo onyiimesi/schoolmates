@@ -50,14 +50,12 @@ class AssignmentController extends Controller
                 'total_mark' => $item['total_mark'],
                 'week' => $item['week']
             ]);
-
         }
 
         return [
             "status" => 'true',
             "message" => 'Created Successfully'
         ];
-
     }
 
     public function theory(Request $request)
@@ -69,15 +67,30 @@ class AssignmentController extends Controller
         foreach ($data as $item) {
 
             if($item['image']){
+                $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+
                 $file = $item['image'];
-                $folderName = 'https://schoolmate.powershellerp.com/public/assignment';
+                $baseFolder = 'assignment';
+                $userFolder = $cleanSchId;
+                $folderPath = public_path($baseFolder . '/' . $userFolder);
+
+                $folderName = env('ASSIGNMENT_FOLDER') . '/' . $cleanSchId;
                 $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
                 $replace = substr($file, 0, strpos($file, ',')+1);
                 $image = str_replace($replace, '', $file);
 
                 $image = str_replace(' ', '+', $image);
                 $file_name = time().'.'.$extension;
-                file_put_contents(public_path().'/assignment/'.$file_name, base64_decode($image));
+
+                if (!file_exists(public_path($baseFolder))) {
+                    mkdir(public_path($baseFolder), 0777, true);
+                }
+    
+                if (!file_exists($folderPath)) {
+                    mkdir($folderPath, 0777, true);
+                }
+
+                file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
 
                 $paths = $folderName.'/'.$file_name;
             }else{
@@ -102,7 +115,6 @@ class AssignmentController extends Controller
                 'total_mark' => $item['total_mark'],
                 'week' => $item['week']
             ]);
-
         }
 
         return [
@@ -114,7 +126,11 @@ class AssignmentController extends Controller
 
     public function assign(Request $request)
     {
-        $assign = Assignment::where('period', $request->period)
+        $user = Auth::user();
+
+        $assign = Assignment::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('period', $request->period)
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
@@ -219,7 +235,11 @@ class AssignmentController extends Controller
 
     public function getanswer(Request $request)
     {
-        $assign = AssignmentAnswer::where('period', $request->period)
+        $user = Auth::user();
+
+        $assign = AssignmentAnswer::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('period', $request->period)
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
@@ -242,9 +262,7 @@ class AssignmentController extends Controller
     {
 
         $user = Auth::user();
-
         $data = $request->json()->all();
-
 
         foreach ($data as $item) {
 
@@ -281,9 +299,7 @@ class AssignmentController extends Controller
     {
 
         $user = Auth::user();
-
         $data = $request->json()->all();
-
 
         foreach ($data as $item) {
 
@@ -318,7 +334,11 @@ class AssignmentController extends Controller
 
     public function marked(Request $request)
     {
-        $assign = AssignmentMark::where('period', $request->period)
+        $user = Auth::user();
+
+        $assign = AssignmentMark::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('period', $request->period)
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
@@ -339,7 +359,11 @@ class AssignmentController extends Controller
 
     public function markedbystudent(Request $request)
     {
-        $assign = AssignmentMark::where('student_id', $request->student_id)
+        $user = Auth::user();
+
+        $assign = AssignmentMark::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('student_id', $request->student_id)
         ->where('period', $request->period)
         ->where('term', $request->term)
         ->where('session', $request->session)
@@ -442,7 +466,11 @@ class AssignmentController extends Controller
 
     public function resultassign(Request $request)
     {
-        $assign = AssignmentResult::where('period', $request->period)
+        $user = Auth::user();
+
+        $assign = AssignmentResult::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('period', $request->period)
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
@@ -459,7 +487,11 @@ class AssignmentController extends Controller
 
     public function resultassignstu(Request $request)
     {
-        $assign = AssignmentResult::where('student_id', $request->student_id)
+        $user = Auth::user();
+        
+        $assign = AssignmentResult::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('student_id', $request->student_id)
         ->where('period', $request->period)
         ->where('term', $request->term)
         ->where('session', $request->session)

@@ -20,7 +20,13 @@ class PrincipalCommentController extends Controller
      */
     public function index()
     {
-        $principal = PrincipalCommentResource::collection(PrincipalComment::get());
+        $user = Auth::user();
+
+        $principal = PrincipalCommentResource::collection(
+            PrincipalComment::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -38,12 +44,12 @@ class PrincipalCommentController extends Controller
     public function store(PrincipalCommentRequest $request)
     {
         $request->validated($request->all());
-
-        $school = Schools::first();
         $user = Auth::user();
 
-        if($user->designation_id == '3'){
+        $school = Schools::where('sch_id', $user->sch_id)
+        ->first();
 
+        if($user->designation_id == '3'){
             $user_id = $user->id;
             $user_fullname = $user->surname . ' '. $user->firstname;
 

@@ -17,7 +17,13 @@ class GradingSystemController extends Controller
      */
     public function index()
     {
-        $grading = GradingSystemResource::collection(GradingSystem::get());
+        $user = Auth::user();
+
+        $grading = GradingSystemResource::collection(
+            GradingSystem::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -39,6 +45,8 @@ class GradingSystemController extends Controller
         $user = Auth::user();
 
         $grading = GradingSystem::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'score_from' => $request->score_from,
             'score_to' => $request->score_to,
             'grade' => $request->grade,

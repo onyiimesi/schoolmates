@@ -60,20 +60,39 @@ class StaffController extends Controller
     public function store(StaffRequest $request)
     {
         $request->validated($request->all());
+        $user = Auth::user();
 
-        $campus = Campus::where('name', $request->campus)->first();
-        $sch = Schools::first();
+        $campus = Campus::where('sch_id', $user->sch_id)
+        ->where('name', $request->campus)
+        ->first();
+
+        $sch = Schools::where('sch_id', $user->sch_id)
+        ->first();
+
+        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
         if($request->image){
             $file = $request->image;
-            $folderName = env('STAFF_FOLDER_NAME');
+            $baseFolder = 'staffs';
+            $userFolder = $cleanSchId;
+            $folderPath = public_path($baseFolder . '/' . $userFolder);
+            $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
 
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/staffs/'.$file_name, base64_decode($image));
+
+            if (!file_exists(public_path($baseFolder))) {
+                mkdir(public_path($baseFolder), 0777, true);
+            }
+
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath, 0777, true);
+            }
+
+            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
 
             $paths = $folderName.'/'.$file_name;
         }else{
@@ -82,14 +101,26 @@ class StaffController extends Controller
 
         if($request->signature){
             $file = $request->signature;
-            $folderName = env('SIGNATURE_FOLDER_NAME');
+            $baseFolder = 'staffs/signature';
+            $userFolder = $cleanSchId;
+            $folderPath = public_path($baseFolder . '/' . $userFolder);
+            $folderName = env('SIGNATURE_FOLDER_NAME') . '/' . $cleanSchId;
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $sig = str_replace($replace, '', $file);
 
             $sig = str_replace(' ', '+', $sig);
             $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/staffs/signature/'.$file_name, base64_decode($sig));
+
+            if (!file_exists(public_path($baseFolder))) {
+                mkdir(public_path($baseFolder), 0777, true);
+            }
+
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath, 0777, true);
+            }
+
+            file_put_contents($folderPath.'/'.$file_name, base64_decode($sig));
 
             $pathss = $folderName.'/'.$file_name;
         }else{
@@ -178,16 +209,32 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
+        $user = Auth::user();
+
+        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+
         if($request->image){
             $file = $request->image;
-            $folderName = env('STAFF_FOLDER_NAME');
+            $baseFolder = 'staffs';
+            $userFolder = $cleanSchId;
+            $folderPath = public_path($baseFolder . '/' . $userFolder);
+            $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
 
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/staffs/'.$file_name, base64_decode($image));
+
+            if (!file_exists(public_path($baseFolder))) {
+                mkdir(public_path($baseFolder), 0777, true);
+            }
+
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath, 0777, true);
+            }
+
+            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
 
             $paths = $folderName.'/'.$file_name;
         }else{
@@ -196,14 +243,26 @@ class StaffController extends Controller
 
         if($request->signature){
             $file = $request->signature;
-            $folderName = env('SIGNATURE_FOLDER_NAME');
+            $baseFolder = 'staffs/signature';
+            $userFolder = $cleanSchId;
+            $folderPath = public_path($baseFolder . '/' . $userFolder);
+            $folderName = env('SIGNATURE_FOLDER_NAME') . '/' . $cleanSchId;
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $sig = str_replace($replace, '', $file);
 
             $sig = str_replace(' ', '+', $sig);
             $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/staffs/signature/'.$file_name, base64_decode($sig));
+
+            if (!file_exists(public_path($baseFolder))) {
+                mkdir(public_path($baseFolder), 0777, true);
+            }
+
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath, 0777, true);
+            }
+
+            file_put_contents($folderPath.'/'.$file_name, base64_decode($sig));
 
             $pathss = $folderName.'/'.$file_name;
         }else{

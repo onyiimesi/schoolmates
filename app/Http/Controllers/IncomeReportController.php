@@ -8,12 +8,16 @@ use App\Models\Bank;
 use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class IncomeReportController extends Controller
 {
     public function incomesearch(Request $request){
+        $user = Auth::user();
 
-        $search = Payment::where("term", $request->term)
+        $search = Payment::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where("term", $request->term)
         ->where("session", $request->session)
         ->get();
 
@@ -28,8 +32,11 @@ class IncomeReportController extends Controller
     }
 
     public function invoicesearch(Request $request){
+        $user = Auth::user();
 
-        $searchs = Invoice::where("term", $request->term)
+        $searchs = Invoice::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where("term", $request->term)
         ->where("session", $request->session)
         ->get();
 
@@ -40,7 +47,6 @@ class IncomeReportController extends Controller
             'message' => '',
             'data' => $ss
         ];
-
     }
 
 }

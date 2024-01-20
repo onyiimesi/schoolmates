@@ -16,17 +16,21 @@ class StudentFeeHistoryController extends Controller
         // $fullname = $stud->surname . ' '. $stud->firstname . ' '. $stud->middlename;
         $fullname = "{$stud->surname} {$stud->firstname} {$stud->middlename}";
 
-        $period = AcademicPeriod::first();
+        $period = AcademicPeriod::where('sch_id', $stud->sch_id)
+        ->first();
 
-        $payment = PaymentResource::collection(Payment::where('student_fullname', $fullname)
-        ->where('term', $period->term)
-        ->where('session', $period->session)->get());
+        $payment = PaymentResource::collection(
+            Payment::where('sch_id', $stud->sch_id)
+            ->where('campus', $stud->campus)
+            ->where('student_fullname', $fullname)
+            ->where('term', $period->term)
+            ->where('session', $period->session)->get()
+        );
 
         return [
             'status' => 'true',
             'message' => 'Fee History',
             'data' => $payment
         ];
-
     }
 }

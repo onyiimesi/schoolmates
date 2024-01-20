@@ -22,7 +22,9 @@ class CommunicationBookController extends Controller
 
         $user = Auth::user();
         $dsg = Designation::find($user->designation_id);
-        $period = AcademicPeriod::first();
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
         $stat = 'Pending';
 
         $comm = CommunicationBook::create([
@@ -55,9 +57,13 @@ class CommunicationBookController extends Controller
         if($stud->designation_id == '5'){
 
             $student = Student::find($stud->id);
-            $period = AcademicPeriod::first();
+            $period = AcademicPeriod::where('sch_id', $stud->sch_id)
+            ->where('campus', $stud->campus)
+            ->first();
 
-            $msg = CommunicationBook::where('student_id', $student->id)
+            $msg = CommunicationBook::where('sch_id', $stud->sch_id)
+            ->where('campus', $stud->campus)
+            ->where('student_id', $student->id)
             ->where('period', $period->period)
             ->where('term', $period->term)
             ->where('session', $period->session)
@@ -74,8 +80,5 @@ class CommunicationBookController extends Controller
         }else {
             return $this->error('', "Can't perform this action", 401);
         }
-
-
-
     }
 }

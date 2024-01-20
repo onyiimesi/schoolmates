@@ -29,6 +29,5 @@ class TransferStudentController extends Controller
             "status" => "true",
             "message" => "Student Transferred Successfully",
         ];
-
     }
 }

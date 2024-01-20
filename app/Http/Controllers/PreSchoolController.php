@@ -84,8 +84,12 @@ class PreSchoolController extends Controller
      */
     public function update(Request $request, PreSchool $preschool)
     {
+        $user = Auth::user();
+
         $preschool->update($request->all());
-        PreSchoolSubjectClass::where('class_id', $preschool->id)->update([
+        PreSchoolSubjectClass::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('class_id', $preschool->id)->update([
             'class' => $preschool->name
         ]);
 

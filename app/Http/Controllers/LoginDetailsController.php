@@ -40,13 +40,13 @@ class LoginDetailsController extends Controller
 
         $user = Auth::user();
         $excludedDesignations = ['1', '2', '6'];
-        $staff = Staff::whereNotIn('designation_id', $excludedDesignations)
+
+        $staff = Staff::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
+        ->whereNotIn('designation_id', $excludedDesignations)
         ->paginate(25);
 
         $sdetails = StaffLoginDetailsResource::collection($staff);
-
-
 
         return [
             'status' => 'true',
@@ -60,6 +60,5 @@ class LoginDetailsController extends Controller
                 'next_page_url' => $staff->nextPageUrl()
             ],
         ];
-
     }
 }

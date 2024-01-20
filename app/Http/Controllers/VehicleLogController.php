@@ -6,6 +6,7 @@ use App\Http\Requests\VehicleLogRequest;
 use App\Http\Resources\VehicleLogResource;
 use App\Models\VehicleLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VehicleLogController extends Controller
 {
@@ -16,7 +17,13 @@ class VehicleLogController extends Controller
      */
     public function index()
     {
-        $vehiclelog = VehicleLogResource::collection(VehicleLog::get());
+        $user = Auth::user();
+
+        $vehiclelog = VehicleLogResource::collection(
+            VehicleLog::where('sch_id', $user->sch_id)
+            ->where('sch_id', $user->sch_id)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -34,8 +41,11 @@ class VehicleLogController extends Controller
     public function store(VehicleLogRequest $request)
     {
         $request->validated($request->all());
+        $user = Auth::user();
 
         $vehiclelog = VehicleLog::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'vehicle_number' => $request->vehicle_number,
             'driver_name' => $request->driver_name,
             'route' => $request->route,

@@ -19,5 +19,6 @@ class Timetable extends Model implements Auditable
         'period', 
         'term',
         'session',
+        'campus', 
     ];
 }

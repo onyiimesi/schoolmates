@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AcademicCalenderRequest;
 use App\Http\Resources\AcademicCalenderResource;
 use App\Models\AcademicCalender;
+use App\Models\AcademicPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,7 +18,11 @@ class AcademicCalenderController extends Controller
      */
     public function index()
     {
-        $aca = AcademicCalenderResource::collection(AcademicCalender::get());
+        $user = Auth::user();
+        $aca = AcademicCalenderResource::collection(
+            AcademicCalender::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)->get()
+        );
 
         return [
             'status' => 'true',
@@ -38,17 +43,33 @@ class AcademicCalenderController extends Controller
         $request->validated($request->all());
 
         $user = Auth::user();
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)->first();
 
         if($request->file){
+            $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+
             $file = $request->file;
-            $folderName = 'https://schoolmate.powershellerp.com/public/calender';
+            $baseFolder = 'calender';
+            $userFolder = $cleanSchId;
+            $folderPath = public_path($baseFolder . '/' . $userFolder);
+            $folderName = env('CALENDAR_FOLDER') . '/' . $cleanSchId;
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
 
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/calender/'.$file_name, base64_decode($image));
+
+            if (!file_exists(public_path($baseFolder))) {
+                mkdir(public_path($baseFolder), 0777, true);
+            }
+
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath, 0777, true);
+            }
+
+            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
 
             $paths = $folderName.'/'.$file_name;
         }else{
@@ -56,10 +77,11 @@ class AcademicCalenderController extends Controller
         }
 
         $aca = AcademicCalender::create([
-            'sch_id' => '1234',
-            'period' => $user->period,
-            'term' => $user->term,
-            'session' => $user->session,
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'period' => $period->period,
+            'term' => $period->term,
+            'session' => $period->session,
             'title' => $request->title,
             'description' => $request->description,
             'file' => $paths

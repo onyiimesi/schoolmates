@@ -13,6 +13,7 @@ class PrincipalComment extends Model implements Auditable
 
     protected $fillable = [
         'sch_id',
+        'campus',
         'hos_id',
         'hos_fullname',
         'hos_comment',

@@ -84,12 +84,15 @@ class ProfileController extends Controller
         
         if($stud->designation_id != '7'){
             // $stud->update($request->all());
+            $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $stud->sch_id);
             
             if($request->image){
                 // unlink($prev);
                 $file = $request->image;
-                $folderName = 'https://schoolmate.powershellerp.com/public/staffs';
-                
+                $baseFolder = 'staffs';
+                $userFolder = $cleanSchId;
+                $folderPath = public_path($baseFolder . '/' . $userFolder);
+                $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
                 $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
                 
                 $replace = substr($file, 0, strpos($file, ',')+1); 
@@ -97,7 +100,16 @@ class ProfileController extends Controller
     
                 $image = str_replace(' ', '+', $image);
                 $file_name = time().'.'.$extension;
-                file_put_contents(public_path().'/staffs/'.$file_name, base64_decode($image));
+
+                if (!file_exists(public_path($baseFolder))) {
+                    mkdir(public_path($baseFolder), 0777, true);
+                }
+    
+                if (!file_exists($folderPath)) {
+                    mkdir($folderPath, 0777, true);
+                }
+
+                file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
                 
                 $paths = $folderName.'/'.$file_name;
                 
@@ -105,14 +117,26 @@ class ProfileController extends Controller
             
             if($request->signature){
                 $file = $request->signature;
-                $folderName = 'https://schoolmate.powershellerp.com/public/staffs/signature';
+                $baseFolder = 'staffs/signature';
+                $userFolder = $cleanSchId;
+                $folderPath = public_path($baseFolder . '/' . $userFolder);
+                $folderName = env('SIGNATURE_FOLDER_NAME') . '/' . $cleanSchId;
                 $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
                 $replace = substr($file, 0, strpos($file, ',')+1); 
                 $sig = str_replace($replace, '', $file); 
     
                 $sig = str_replace(' ', '+', $sig);
                 $file_name = time().'.'.$extension;
-                file_put_contents(public_path().'/staffs/signature/'.$file_name, base64_decode($sig));
+
+                if (!file_exists(public_path($baseFolder))) {
+                    mkdir(public_path($baseFolder), 0777, true);
+                }
+    
+                if (!file_exists($folderPath)) {
+                    mkdir($folderPath, 0777, true);
+                }
+
+                file_put_contents($folderPath.'/'.$file_name, base64_decode($sig));
                 
                 $pathss = $folderName.'/'.$file_name;
             }else{
@@ -139,22 +163,33 @@ class ProfileController extends Controller
             ];
             
         }else if($stud->designation_id == '7'){
+            $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $stud->sch_id);
             
             if($request->image){
                 $file = $request->image;
-                $folderName = 'https://schoolmate.powershellerp.com/public/students';
+                $baseFolder = 'students';
+                $userFolder = $cleanSchId;
+                $folderPath = public_path($baseFolder . '/' . $userFolder);
+                $folderName = env('STUDENT_FOLDER_NAME') . '/' . $cleanSchId;
                 $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
                 $replace = substr($file, 0, strpos($file, ',')+1); 
                 $image = str_replace($replace, '', $file); 
     
                 $image = str_replace(' ', '+', $image);
                 $file_name = time().'.'.$extension;
-                file_put_contents(public_path().'/students/'.$file_name, base64_decode($image));
+
+                if (!file_exists(public_path($baseFolder))) {
+                    mkdir(public_path($baseFolder), 0777, true);
+                }
+    
+                if (!file_exists($folderPath)) {
+                    mkdir($folderPath, 0777, true);
+                }
+                
+                file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
                 
                 $paths = $folderName.'/'.$file_name;
             }
-            
-            
             
             $stud->update([
                 'department' => $request->department,
@@ -167,7 +202,6 @@ class ProfileController extends Controller
                 'address' => $request->address,
                 'image' => $paths,
             ]);
-    
     
             return [
                 "status" => 'true',

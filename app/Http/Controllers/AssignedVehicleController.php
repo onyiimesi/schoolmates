@@ -19,25 +19,32 @@ class AssignedVehicleController extends Controller
 
         $stud = Student::findOrFail($user->id);
 
-        $bus = BusRoutingResource::collection(BusRouting::where('student_id', $stud->id)->get());
+        $bus = BusRoutingResource::collection(
+            BusRouting::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('student_id', $stud->id)->get()
+        );
 
         return [
             'status' => 'true',
             'message' => 'Your Assigned Bus',
             'data' => $bus
         ];
-
     }
 
     public function getvehicles(){
+        $user = Auth::user();
 
-        $bus = BusRoutingResource::collection(BusRouting::get());
+        $bus = BusRoutingResource::collection(
+            BusRouting::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',
             'message' => 'Assigned Bus',
             'data' => $bus
         ];
-
     }
 }

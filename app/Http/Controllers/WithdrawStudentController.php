@@ -24,7 +24,5 @@ class WithdrawStudentController extends Controller
             "status" => 'true',
             "message" => 'Student Withdrawn Successfully',
         ];
-
-
     }
 }

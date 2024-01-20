@@ -15,6 +15,8 @@ class Vehicle extends Model implements Auditable
         'type', 
         'make', 
         'number', 
-        'drivername'
+        'drivername',
+        'sch_id',
+        'campus', 
     ];
 }

@@ -16,8 +16,14 @@ class ExpensesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        $exp = ExpensesResource::collection(Expenses::get());
+    {   
+        $user = Auth::user();
+        
+        $exp = ExpensesResource::collection(
+            Expenses::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',

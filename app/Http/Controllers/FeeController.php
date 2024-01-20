@@ -17,7 +17,12 @@ class FeeController extends Controller
      */
     public function index()
     {
-        $fee = FeeResource::collection(Fee::get());
+        $user = Auth::user();
+        $fee = FeeResource::collection(
+            Fee::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',

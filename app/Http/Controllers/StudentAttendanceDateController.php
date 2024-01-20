@@ -14,8 +14,13 @@ class StudentAttendanceDateController extends Controller
 {
     public function attendancedate(Request $request){
 
+        $user = Auth::user();
+
         if($request->date){
-            $search = StudentAttendance::where("attendance_date", $request->date)->get();
+            $search = StudentAttendance::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where("attendance_date", $request->date)
+            ->get();
 
             $s = StudentAttendanceResource::collection($search);
 

@@ -14,8 +14,12 @@ class SchoolsController extends Controller
     use HttpResponses;
 
     public function schools(){
+        $user = Auth::user();
 
-        $school = SchoolsResource::collection(Schools::get());
+        $school = SchoolsResource::collection(
+            Schools::where('sch_id', $user->sch_id)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -33,7 +37,8 @@ class SchoolsController extends Controller
             return $this->error('', 'Unauthenticated', 401);
         }
 
-        $school = Schools::first();
+        $school = Schools::where('sch_id', $user->sch_id)
+        ->first();
 
         $school->update([
             'dos' => $request->dos
@@ -53,7 +58,8 @@ class SchoolsController extends Controller
             return $this->error('', 'Unauthenticated', 401);
         }
 
-        $school = Schools::first();
+        $school = Schools::where('sch_id', $user->sch_id)
+        ->first();
 
         return [
             'status' => 'true',
@@ -63,6 +69,4 @@ class SchoolsController extends Controller
             ]
         ];
     }
-
-
 }

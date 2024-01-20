@@ -17,7 +17,10 @@ class MaximumScoresController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $maxi = MaximunScores::where('campus', $user->campus)->first();
+
+        $maxi = MaximunScores::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
 
         if ($maxi) {
             $maxiResource = new MaximumScoresResource($maxi);
@@ -47,7 +50,8 @@ class MaximumScoresController extends Controller
     {
         $user = Auth::user();
 
-        $scores = MaximunScores::where('campus', $user->campus)->first();
+        $scores = MaximunScores::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)->first();
 
         if(empty($scores)){
 

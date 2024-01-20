@@ -90,7 +90,7 @@ class OtherController extends Controller
 
         } else if($user->designation_id === 1){
 
-            $roleNot = ['1','6', '7'];
+            $roleNot = ['1', '6', '7'];
             return DesignationResource::collection(Designation::whereNotIn('id', $roleNot)->get());
 
         }

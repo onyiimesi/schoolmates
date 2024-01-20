@@ -17,7 +17,13 @@ class BankController extends Controller
      */
     public function index()
     {
-        $banks = BankResource::collection(Bank::get());
+        $user = Auth::user();
+
+        $banks = BankResource::collection(
+            Bank::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',

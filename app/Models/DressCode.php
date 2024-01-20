@@ -15,5 +15,7 @@ class DressCode extends Model implements Auditable
         'day', 
         'wear', 
         'description', 
+        'sch_id',
+        'campus'
     ];
 }

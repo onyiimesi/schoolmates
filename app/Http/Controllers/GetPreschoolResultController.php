@@ -33,12 +33,14 @@ class GetPreschoolResultController extends Controller
     {
         $user = Auth::user();
 
-        $computed = PreSchoolResultResource::collection(PreSchoolResult::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where("period", $request->period)
-        ->where("term", $request->term)
-        ->where("session", $request->session)
-        ->get());
+        $computed = PreSchoolResultResource::collection(
+            PreSchoolResult::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where("period", $request->period)
+            ->where("term", $request->term)
+            ->where("session", $request->session)
+            ->get()
+        );
 
         return [
             'status' => 'success',

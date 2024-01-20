@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DisciplinaryRequest;
 use App\Models\DisciplinaryAction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DisciplinaryController extends Controller
 {
@@ -27,8 +28,11 @@ class DisciplinaryController extends Controller
     public function store(DisciplinaryRequest $request)
     {
         $request->validated($request->all());
+        $user = Auth::user();
 
         $dis = DisciplinaryAction::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'offence_type' => $request->offence_type,
             'offence_action' => $request->offence_action,
             'fine' => $request->fine,

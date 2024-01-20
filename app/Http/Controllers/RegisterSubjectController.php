@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RegisterSubjectRequest;
 use App\Models\RegisterSubject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RegisterSubjectController extends Controller
 {
@@ -27,9 +28,11 @@ class RegisterSubjectController extends Controller
     public function store(RegisterSubjectRequest $request)
     {
         $request->validated($request->all());
+        $user = Auth::user();
 
         $regsub = RegisterSubject::create([
-            'sch_id' => '1234',
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'admission_number' => $request->admission_number,
             'student_fullname' => $request->student_fullname,
             'class' => $request->class,

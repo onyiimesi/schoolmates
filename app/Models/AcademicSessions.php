@@ -12,6 +12,8 @@ class AcademicSessions extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
+        'sch_id', 
+        'campus', 
         'academic_session'
     ];
 }

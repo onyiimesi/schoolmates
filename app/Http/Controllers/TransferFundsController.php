@@ -35,8 +35,13 @@ class TransferFundsController extends Controller
     }
 
     public function getFunds(){
+        $user = Auth::user();
 
-        $funds = TransferFundsResource::collection(TransferFunds::get());
+        $funds = TransferFundsResource::collection(
+            TransferFunds::where('sch_id', $user->sch_id)
+            ->where('sch_id', $user->sch_id)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -47,8 +52,14 @@ class TransferFundsController extends Controller
     }
 
     public function getSingleFunds(Request $request){
+        $user = Auth::user();
 
-        $funds = TransferFundsResource::collection(TransferFunds::where('id', $request->id)->get());
+        $funds = TransferFundsResource::collection(
+            TransferFunds::where('id', $request->id)
+            ->where('sch_id', $user->sch_id)
+            ->where('sch_id', $user->sch_id)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -59,8 +70,12 @@ class TransferFundsController extends Controller
     }
 
     public function EditFunds(Request $request){
+        $user = Auth::user();
 
-        $funds = TransferFunds::where('id', $request->id)->first();
+        $funds = TransferFunds::where('id', $request->id)
+        ->where('sch_id', $user->sch_id)
+        ->where('sch_id', $user->sch_id)
+        ->first();
 
         if(!$funds){
             return $this->error('', 'Fund does not exist', 400);

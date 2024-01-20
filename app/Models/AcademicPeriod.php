@@ -13,6 +13,7 @@ class AcademicPeriod extends Model implements Auditable
 
     protected $fillable = [
         'sch_id', 
+        'campus', 
         'period', 
         'term',
         'session',

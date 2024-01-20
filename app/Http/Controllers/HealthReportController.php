@@ -35,6 +35,5 @@ class HealthReportController extends Controller
             'message' => 'Report Sent Successfully',
             'data' => $health
         ];
-
     }
 }

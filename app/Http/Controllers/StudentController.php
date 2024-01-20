@@ -39,12 +39,8 @@ class StudentController extends Controller
                 'current_page' => $students->currentPage(),
                 'last_page' => $students->lastPage(),
                 'per_page' => $students->perPage(),
-                // 'total' => $students->total(),
-                // 'first_page_url' => $students->url(1),
-                // 'last_page_url' => $students->url($students->lastPage()),
                 'prev_page_url' => $students->previousPageUrl(),
-                'next_page_url' => $students->nextPageUrl(),
-                // 'links' => $students->toArray()['links'],
+                'next_page_url' => $students->nextPageUrl()
             ],
         ];
 
@@ -61,19 +57,37 @@ class StudentController extends Controller
         $request->validated($request->all());
 
         $user = Auth::user();
-        $campus = Campus::where('name', $request->campus)->first();
-        $sch = Schools::first();
+
+        $campus = Campus::where('sch_id', $user->sch_id)
+        ->where('name', $request->campus)
+        ->first();
+
+        $sch = Schools::where('sch_id', $user->sch_id)
+        ->first();
 
         if($request->image){
+            $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
             $file = $request->image;
-            $folderName = env('STUDENT_FOLDER_NAME');
+            $baseFolder = 'students';
+            $userFolder = $cleanSchId;
+            $folderPath = public_path($baseFolder . '/' . $userFolder);
+            $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
 
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/students/'.$file_name, base64_decode($image));
+
+            if (!file_exists(public_path($baseFolder))) {
+                mkdir(public_path($baseFolder), 0777, true);
+            }
+
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath, 0777, true);
+            }
+
+            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
 
             $paths = $folderName.'/'.$file_name;
         }else{
@@ -136,7 +150,6 @@ class StudentController extends Controller
         ];
     }
 
-
     /**
      * Update the specified resource in storage.
      *
@@ -146,24 +159,40 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student)
     {
+        $user = Auth::user();
+
+        $campus = Campus::where('sch_id', $user->sch_id)
+        ->where('name', $request->campus)
+        ->first();
 
         if($request->image){
+            $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
             $file = $request->image;
-            $folderName = env('STUDENT_FOLDER_NAME');
+            $baseFolder = 'students';
+            $userFolder = $cleanSchId;
+            $folderPath = public_path($baseFolder . '/' . $userFolder);
+            $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
 
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/students/'.$file_name, base64_decode($image));
+
+            if (!file_exists(public_path($baseFolder))) {
+                mkdir(public_path($baseFolder), 0777, true);
+            }
+
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath, 0777, true);
+            }
+
+            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
 
             $paths = $folderName.'/'.$file_name;
         }else{
-            $paths = $student->image;
+            $paths = "";
         }
-
-        $campus = Campus::where('name', $request->campus)->first();
 
         $student->update([
             'campus' => $request->campus,

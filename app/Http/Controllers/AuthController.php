@@ -65,44 +65,6 @@ class AuthController extends Controller
         }
 
         return $this->error('', 'Credentials do not match', 401);
-
-
-        // if(Auth::guard('staffs')->attempt($request->only(['username', 'password']))){
-        //     $user = Staff::where('username', $request->username)->first();
-
-        //     $users = new LoginResource($user);
-
-        //     $token = $user->createToken('API Token of '. $user->username);
-
-        //     return $this->success([
-        //         'user' => $users,
-        //         'token' => $token->plainTextToken,
-        //         'expires_at' => $token->accessToken->expires_at
-        //     ]);
-        // }
-
-        // if(Auth::guard('studs')->attempt($request->only(['username', 'password']))){
-        //     $stud = Student::where('username', $request->username)->first();
-
-        //     $studs = new StudentLoginResource($stud);
-
-        //     $token = $stud->createToken('API Token of '. $stud->username);
-
-        //     return $this->success([
-        //         'user' => $studs,
-        //         'token' => $token->plainTextToken,
-        //         'expires_at' => $token->accessToken->expires_at
-        //     ]);
-        // }
-
-        // if(!Auth::guard('staffs')->attempt($request->only(['username', 'password']))){
-        //     return $this->error('', 'Credentials do not match', 401);
-        // }
-
-        // if(!Auth::guard('studs')->attempt($request->only(['username', 'password']))){
-        //     return $this->error('', 'Credentials do not match', 401);
-        // }
-
     }
 
     public function register(StoreUserRequest $request) {
@@ -148,7 +110,6 @@ class AuthController extends Controller
 
             ]);
 
-
              return [
                 "status" => 'true',
                 "message" => 'Password Successfully Updated',
@@ -158,7 +119,5 @@ class AuthController extends Controller
         {
             return $this->error('', 'Old Password did not match', 422);
         }
-
     }
-
 }

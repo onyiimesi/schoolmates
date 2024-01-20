@@ -17,7 +17,8 @@ class ChartAccountController extends Controller
      */
     public function index()
     {
-        $chart = ChartAccountResource::collection(ChartAccount::get());
+        $user = Auth::user();
+        $chart = ChartAccountResource::collection(ChartAccount::where('sch_id', $user->sch_id)->get());
 
         return [
             'status' => 'true',

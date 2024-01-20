@@ -26,7 +26,8 @@ class PreSchoolResultController extends Controller
             ->where("term", $request->term)
             ->where("session", $request->session)->first();
 
-            $hosId = Staff::where('campus', $teacher->campus)
+            $hosId = Staff::where('sch_id', $teacher->sch_id)
+            ->where('campus', $teacher->campus)
             ->where('designation_id', 3)
             ->where('status', 'Active')
             ->first();

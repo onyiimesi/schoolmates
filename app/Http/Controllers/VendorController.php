@@ -18,7 +18,13 @@ class VendorController extends Controller
      */
     public function index()
     {
-        $ven = VendorResource::collection(Vendor::get());
+        $user = Auth::user();
+
+        $ven = VendorResource::collection(
+            Vendor::where('sch_id', $user->sch_id)
+            ->where('sch_id', $user->sch_id)
+            ->get()
+        );
 
         return [
             'status' => 'true',

@@ -6,12 +6,19 @@ use App\Http\Requests\StudentCreditorsRequest;
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StudentCreditorsController extends Controller
 {
     public function creditors(){
-        
-        $cred = PaymentResource::collection(Payment::where('status', 'creditor')->get());
+        $user = Auth::user();
+
+        $cred = PaymentResource::collection(
+            Payment::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('status', 'creditor')
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -22,17 +29,21 @@ class StudentCreditorsController extends Controller
     }
 
     public function creditorsByTermSession(Request $request){
-        
-        $credi = PaymentResource::collection(Payment::where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('status', 'creditor')
-        ->get());
+        $user = Auth::user();
+
+        $credi = PaymentResource::collection(
+            Payment::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->where('status', 'creditor')
+            ->get()
+        );
 
         return [
             'status' => 'true',
             'message' => 'Creditors List',
             'data' => $credi
         ];
- 
     }
 }

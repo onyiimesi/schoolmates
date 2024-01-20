@@ -17,7 +17,12 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        $pay = PaymentResource::collection(Payment::get());
+        $user = Auth::user();
+
+        $pay = PaymentResource::collection(
+            Payment::where('sch_id', $user->sch_id)
+            ->get()
+        );
 
         return [
             'status' => 'true',

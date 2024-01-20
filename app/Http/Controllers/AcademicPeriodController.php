@@ -8,6 +8,7 @@ use App\Models\AcademicPeriod;
 use App\Models\AcademicSessions;
 use App\Models\Schools;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AcademicPeriodController extends Controller
 {
@@ -15,19 +16,28 @@ class AcademicPeriodController extends Controller
 
         $request->validated($request->all());
 
-        $aced = AcademicPeriod::first();
-        $sch = Schools::first();
+        $user = Auth::user();
+
+        $aced = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
+
+        $sch = Schools::where('sch_id', $user->sch_id)
+        ->first();
 
         if(empty($aced)){
 
             $aced = AcademicPeriod::create([
                 'sch_id' => $sch->sch_id,
+                'campus' => $user->campus,
                 'period' => $request->period,
                 'term' => $request->term,
                 'session' => $request->session,
             ]);
 
             AcademicSessions::create([
+                'sch_id' => $sch->sch_id,
+                'campus' => $user->campus,
                 'academic_session' => $request->session,
             ]);
 
@@ -41,6 +51,7 @@ class AcademicPeriodController extends Controller
 
             $aced->update([
                 'sch_id' => $sch->sch_id,
+                'campus' => $user->campus,
                 'period' => $request->period,
                 'term' => $request->term,
                 'session' => $request->session,
@@ -51,6 +62,8 @@ class AcademicPeriodController extends Controller
             if(!$sess){
 
                 AcademicSessions::create([
+                    'sch_id' => $sch->sch_id,
+                    'campus' => $user->campus,
                     'academic_session' => $request->session,
                 ]);
 
@@ -63,9 +76,7 @@ class AcademicPeriodController extends Controller
                 "message" => 'Academic Period Updated Successfully',
                 "data" => $aaa
             ];
-
         }
-
     }
 
     public function getperiod(){
@@ -77,7 +88,6 @@ class AcademicPeriodController extends Controller
             "message" => 'Academic Period',
             "data" => $getaca
         ];
-
     }
 
     public function getsessions(){
@@ -89,6 +99,5 @@ class AcademicPeriodController extends Controller
             "message" => 'Academic Sessions',
             "data" => $getsess
         ];
-
     }
 }

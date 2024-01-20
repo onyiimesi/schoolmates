@@ -10,15 +10,16 @@ use Illuminate\Support\Facades\Auth;
 class DiscountController extends Controller
 {
     public function discount(){
-        
-        $discount_amount = Invoice::sum('discount_amount');
+        $user = Auth::user();
+
+        $discount_amount = Invoice::where('sch_id', $user->sch_id)
+        ->sum('discount_amount');
 
         return [
             'status' => 'true',
             'message' => 'Discount',
             'data' => $discount_amount
         ];
-
     }
 
     public function setupDiscount(Request $request){

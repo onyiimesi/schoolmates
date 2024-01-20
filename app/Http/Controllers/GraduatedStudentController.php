@@ -6,6 +6,7 @@ use App\Http\Requests\StudentRequest;
 use App\Http\Resources\StudentResource;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GraduatedStudentController extends Controller
 {
@@ -30,14 +31,19 @@ class GraduatedStudentController extends Controller
     }
 
     public function graduate(){
+        $user = Auth::user();
 
-        $gra = StudentResource::collection(Student::where('status', 'graduated')->get());
+        $gra = StudentResource::collection(
+            Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('status', 'graduated')
+            ->get()
+        );
 
         return [
             'status' => 'true',
             'message' => 'Graduated Students List',
             'data' => $gra
         ];
-
     }
 }

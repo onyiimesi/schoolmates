@@ -6,6 +6,7 @@ use App\Http\Requests\VehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VehicleController extends Controller
 {
@@ -16,7 +17,13 @@ class VehicleController extends Controller
      */
     public function index()
     {
-        $vehicle = VehicleResource::collection(Vehicle::get());
+        $user = Auth::user();
+
+        $vehicle = VehicleResource::collection(
+            Vehicle::where('sch_id', $user->sch_id)
+            ->where('sch_id', $user->sch_id)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -34,8 +41,11 @@ class VehicleController extends Controller
     public function store(VehicleRequest $request)
     {
         $request->validated($request->all());
+        $user = Auth::user();
 
         $vehicle = Vehicle::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'type' => $request->type,
             'make' => $request->make,
             'number' => $request->number,

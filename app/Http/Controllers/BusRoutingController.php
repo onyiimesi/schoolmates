@@ -12,12 +12,15 @@ use Illuminate\Support\Facades\Auth;
 class BusRoutingController extends Controller
 {
     public function route(BusRoutingRequest $request){
+        $user = Auth::user();
 
         $request->validated($request->all());
 
-        $sch = Schools::first();
-        $user = Auth::user();
-        $period = AcademicPeriod::first();
+        $sch = Schools::where('sch_id', $user->sch_id)
+        ->first();
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
 
         $paths = "";
         if($request->driver_image){
@@ -75,6 +78,5 @@ class BusRoutingController extends Controller
             "message" => 'Bus assigned to student',
             "data" => $bus
         ];
-
     }
 }

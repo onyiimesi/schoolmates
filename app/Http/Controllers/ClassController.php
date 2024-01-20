@@ -19,7 +19,11 @@ class ClassController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $class = ClassResource::collection(ClassModel::where('campus', $user->campus)->get());
+        $class = ClassResource::collection(
+            ClassModel::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',

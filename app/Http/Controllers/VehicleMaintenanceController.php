@@ -40,14 +40,18 @@ class VehicleMaintenanceController extends Controller
     }
 
     public function getmaintenance(){
-
-        $main = VehicleMaintenanceResource::collection(VehicleMaintenance::get());
+        $user = Auth::user();
+        
+        $main = VehicleMaintenanceResource::collection(
+            VehicleMaintenance::where('sch_id', $user->sch_id)
+            ->where('sch_id', $user->sch_id)
+            ->get()
+        );
 
         return [
             'status' => 'true',
             'message' => '',
             'data' => $main
         ];
-
     }
 }

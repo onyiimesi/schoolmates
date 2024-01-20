@@ -18,7 +18,13 @@ class StudentAttendanceController extends Controller
      */
     public function index()
     {
-        $studentatt = StudentAttendanceResource::collection(StudentAttendance::get());
+        $user = Auth::user();
+
+        $studentatt = StudentAttendanceResource::collection(
+            StudentAttendance::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -39,7 +45,8 @@ class StudentAttendanceController extends Controller
 
         $teacher = Auth::user();
 
-        $period = AcademicPeriod::first();
+        $period = AcademicPeriod::where('sch_id', $teacher->sch_id)
+        ->first();
 
         $search = StudentAttendance::where("attendance_date", $request->attendance_date)->first();
 

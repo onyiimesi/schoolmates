@@ -15,6 +15,7 @@ class CodeCoduct extends Model implements Auditable
         'rule', 
         'description', 
         'apply_to', 
-
+        'sch_id',
+        'campus'
     ];
 }

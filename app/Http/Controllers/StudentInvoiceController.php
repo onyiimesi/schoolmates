@@ -13,11 +13,17 @@ class StudentInvoiceController extends Controller
     public function studentinvoices(){
 
         $stud = Auth::user();
-        $period = AcademicPeriod::first();
+        $period = AcademicPeriod::where('sch_id', $stud->sch_id)
+        ->where('campus', $stud->campus)
+        ->first();
 
-        $invoice = InvoiceResource::collection(Invoice::where('student_id', $stud->id)
-        ->where('term', $period->term)
-        ->where('session', $period->session)->get());
+        $invoice = InvoiceResource::collection(
+            Invoice::where('sch_id', $stud->sch_id)
+            ->where('campus', $stud->campus)
+            ->where('student_id', $stud->id)
+            ->where('term', $period->term)
+            ->where('session', $period->session)->get()
+        );
 
         return [
             'status' => 'true',
@@ -32,13 +38,17 @@ class StudentInvoiceController extends Controller
 
         $stud = Auth::user();
 
-        $invoice = InvoiceResource::collection(Invoice::where('student_id', $stud->id)->get());
+        $invoice = InvoiceResource::collection(
+            Invoice::where('sch_id', $stud->sch_id)
+            ->where('campus', $stud->campus)
+            ->where('student_id', $stud->id)
+            ->get()
+        );
 
         return [
             'status' => 'true',
             'message' => 'Previous Invoice',
             'data' => $invoice
         ];
-
     }
 }

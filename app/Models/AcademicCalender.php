@@ -16,6 +16,7 @@ class AcademicCalender extends Model implements Auditable
         'description', 
         'file', 
         'sch_id', 
+        'campus', 
         'period', 
         'term',
         'session',

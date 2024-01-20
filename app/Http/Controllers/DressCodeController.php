@@ -6,6 +6,7 @@ use App\Http\Requests\DressCodeRequest;
 use App\Http\Resources\DressCodeResource;
 use App\Models\DressCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DressCodeController extends Controller
 {
@@ -16,7 +17,13 @@ class DressCodeController extends Controller
      */
     public function index()
     {
-        $dress = DressCodeResource::collection(DressCode::get());
+        $user = Auth::user();
+
+        $dress = DressCodeResource::collection(
+            DressCode::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',
@@ -34,8 +41,11 @@ class DressCodeController extends Controller
     public function store(DressCodeRequest $request)
     {
         $request->validated($request->all());
+        $user = Auth::user();
 
         $dress = DressCode::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
             'day' => $request->day,
             'wear' => $request->wear,
             'description' => $request->description

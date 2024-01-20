@@ -18,7 +18,10 @@ class ClosingResumptionController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $academic = AcademicPeriod::first();
+        $academic = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
+
         $closingResumption = ClosingResumption::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('term', $academic->term)
@@ -48,7 +51,10 @@ class ClosingResumptionController extends Controller
     {
 
         $user = Auth::user();
-        $academic = AcademicPeriod::first();
+        $academic = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
+        
         $clos = ClosingResumption::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('term', $academic->term)

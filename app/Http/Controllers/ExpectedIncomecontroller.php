@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExpectedIncomecontroller extends Controller
 {
     public function expected(){
-        
-        $amount = Invoice::sum('amount');
-        $discount = Invoice::sum('discount');
+        $user = Auth::user();
+
+        $amount = Invoice::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->sum('amount');
+
+        $discount = Invoice::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->sum('discount');
 
         $total = $amount - $discount;
 
@@ -19,7 +26,5 @@ class ExpectedIncomecontroller extends Controller
             'message' => 'Expected Income',
             'data' => $total
         ];
-
-        
     }
 }

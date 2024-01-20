@@ -24,7 +24,5 @@ class AcceptStudentController extends Controller
             "status" => 'true',
             "message" => 'Student Accepted Successfully',
         ];
-
-
     }
 }

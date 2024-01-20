@@ -13,6 +13,7 @@ class RegisterSubject extends Model implements Auditable
 
     protected $fillable = [
         'sch_id', 
+        'campus',
         'admission_number', 
         'student_fullname', 
         'class', 

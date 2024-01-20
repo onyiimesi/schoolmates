@@ -17,7 +17,13 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoice = InvoiceResource::collection(Invoice::get());
+        $user = Auth::user();
+
+        $invoice = InvoiceResource::collection(
+            Invoice::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get()
+        );
 
         return [
             'status' => 'true',

@@ -12,10 +12,10 @@ class DisciplinaryAction extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
-
         'offence_type', 
         'offence_action',
-        'fine'
-        
+        'fine',
+        'sch_id',
+        'campus'
     ];
 }

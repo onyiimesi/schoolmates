@@ -12,7 +12,8 @@ class StudentAttendance extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
-        'sch_id', 
+        'sch_id',
+        'campus', 
         'student_id',
         'admission_number', 
         'student_fullname', 

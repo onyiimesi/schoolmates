@@ -16,13 +16,18 @@ class AssignSubjectsController extends Controller
     public function assign(Request $request)
     {
         $user = Auth::user();
-        $period = AcademicPeriod::first();
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
 
         if(!$user){
             return $this->error('', 'Unauthenticated', 401);
         }
 
-        $subjects = SubjectClass::where('class_id', $request->class_id)->get();
+        $subjects = SubjectClass::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('class_id', $request->class_id)->get();
+
         $class = ClassModel::find($request->class_id);
 
         if(!$class){
@@ -51,6 +56,5 @@ class AssignSubjectsController extends Controller
             "status" => 'true',
             "message" => $subjects->isEmpty() ? 'Assigned Successfully' : 'Updated Successfully',
         ];
-
     }
 }

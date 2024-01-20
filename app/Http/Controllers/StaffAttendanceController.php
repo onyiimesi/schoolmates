@@ -16,8 +16,12 @@ class StaffAttendanceController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        $attend = StaffAttendance::paginate(25);
+    {   
+        $user = Auth::user();
+
+        $attend = StaffAttendance::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->paginate(25);
 
         $staffatten = StaffAttendanceResource::collection($attend);
 

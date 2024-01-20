@@ -27,7 +27,5 @@ class DisableStudentController extends Controller
             "status" => 'true',
             "message" => 'Account Disabled Successfully',
         ];
-
-
     }
 }

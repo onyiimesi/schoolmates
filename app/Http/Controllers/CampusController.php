@@ -17,14 +17,16 @@ class CampusController extends Controller
      */
     public function index()
     {
-        $campus = CampusResource::collection(Campus::get());
+        $user = Auth::user();
+        $campus = CampusResource::collection(
+            Campus::where('sch_id', $user->sch_id)->get()
+        );
 
         return [
             'status' => 'true',
             'message' => 'Campus List',
             'data' => $campus
         ];
-
     }
 
     /**
@@ -55,6 +57,7 @@ class CampusController extends Controller
         }
 
         $campus = Campus::create([
+            'sch_id' => $user->sch_id,
             'name' => $request->name,
             'email' => $request->email,
             'image' => $paths,

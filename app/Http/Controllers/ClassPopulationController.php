@@ -15,7 +15,9 @@ class ClassPopulationController extends Controller
     {
 
         $staff = Auth::user();
-        $period = AcademicPeriod::first();
+        $period = AcademicPeriod::where('sch_id', $staff->sch_id)
+        ->where('campus', $staff->campus)
+        ->first();
 
         $class = Student::where('present_class', $staff->class_assigned)
         ->where('sch_id', $staff->sch_id)
@@ -23,7 +25,6 @@ class ClassPopulationController extends Controller
         ->where("session_admitted", $period->session)->get();
 
         $popu = $class->count();
-
 
         return [
             'status' => 'true',
@@ -34,8 +35,10 @@ class ClassPopulationController extends Controller
 
     public function getallpopulation()
     {
+        $staff = Auth::user();
 
-        $all = Student::get();
+        $all = Student::where('sch_id', $staff->sch_id)
+        ->get();
 
         $popul = $all->count();
 
@@ -48,8 +51,11 @@ class ClassPopulationController extends Controller
 
     public function getstaffpopulation()
     {
+        $staff = Auth::user();
 
-        $all = Staff::get();
+        $all = Staff::where('sch_id', $staff->sch_id)
+        ->where('sch_id', $staff->sch_id)
+        ->get();
 
         $popul = $all->count();
 
@@ -62,8 +68,11 @@ class ClassPopulationController extends Controller
 
     public function getteacherpopulation()
     {
-
-        $all = Staff::where('designation_id', '4');
+        $staff = Auth::user();
+        
+        $all = Staff::where('designation_id', '4')
+        ->where('sch_id', $staff->sch_id)
+        ->get();
 
         $popul = $all->count();
 
@@ -76,10 +85,13 @@ class ClassPopulationController extends Controller
 
     public function getschoolpopulation()
     {
+        $user = Auth::user();
 
-        $staff = Staff::get();
+        $staff = Staff::where('sch_id', $user->sch_id)
+        ->get();
 
-        $student = Student::get();
+        $student = Student::where('sch_id', $user->sch_id)
+        ->get();
 
         $total = $staff->count() + $student->count();
 

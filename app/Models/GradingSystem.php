@@ -17,6 +17,8 @@ class GradingSystem extends Model implements Auditable
         'score_to', 
         'grade', 
         'remark',
-        'created_by'
+        'created_by',
+        'sch_id',
+        'campus'
     ];
 }
