@@ -27,7 +27,6 @@ class RegisterSubjectRequest extends FormRequest
             'admission_number' => ['required', 'string',],
             'student_fullname' => ['required', 'string', 'max:255'],
             'class' => ['required', 'string', 'max:255'],
-            'sub_class' => ['required', 'string', 'max:255'],
             'subject' => ['required', 'string', 'max:255'],
             'period' => ['required', 'string', 'max:255'],
             'term' => ['required', 'string', 'max:255'],

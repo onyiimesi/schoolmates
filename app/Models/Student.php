@@ -41,7 +41,8 @@ class Student extends Authenticatable implements Auditable
         'phone_number',
         'email_address',
         'status',
-        'created_by'
+        'created_by',
+        'file_id'
     ];
 
     public function assignmentanswer()

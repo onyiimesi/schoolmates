@@ -25,8 +25,7 @@ class ClassRequest extends FormRequest
     {
         return [
             'campus' => ['required'],
-            'class_name' => ['required', 'string'],
-            'sub_class' => ['string'],
+            'class_name' => ['required', 'string']
         ];
     }
 }

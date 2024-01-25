@@ -24,8 +24,7 @@ class PromoteStudentRequest extends FormRequest
     public function rules()
     {
         return [
-            'present_class' => ['required', 'string',],
-            'sub_class' => ['required', 'string',],
+            'present_class' => ['required', 'string']
         ];
     }
 }

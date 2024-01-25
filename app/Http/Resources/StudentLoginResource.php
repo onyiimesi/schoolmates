@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Pricing;
+use App\Models\SchoolPayment;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentLoginResource extends JsonResource
@@ -14,6 +16,12 @@ class StudentLoginResource extends JsonResource
      */
     public function toArray($request)
     {
+        $plan = SchoolPayment::where('sch_id', $this->sch_id)->first();
+        if(!$plan){
+            return "An error occured";
+        }
+        $getplan = Pricing::where('id', $plan->pricing_id)->first();
+
         return [
             'id' => (string)$this->id,
             'sch_id' => (string)$this->sch_id,
@@ -38,6 +46,7 @@ class StudentLoginResource extends JsonResource
             'present_class' => (string)$this->present_class,
             'home_address' => (string)$this->home_address,
             'status' => (string)$this->status,
+            'plan' => (string)$getplan->plan
         ];
     }
 }

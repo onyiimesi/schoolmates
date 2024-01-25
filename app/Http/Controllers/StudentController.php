@@ -6,15 +6,20 @@ use App\Http\Requests\StudentRequest;
 use App\Http\Resources\StudentResource;
 use App\Mail\StudentWelcomeMail;
 use App\Models\Campus;
+use App\Models\SchoolPayment;
 use App\Models\Schools;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Traits\HttpResponses;
+use ImageKit\ImageKit;
 
 class StudentController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -57,6 +62,31 @@ class StudentController extends Controller
         $request->validated($request->all());
 
         $user = Auth::user();
+        $imageKit = new ImageKit(
+            env('IMAGEKIT_PUBLIC_KEY'),
+            env('IMAGEKIT_PRIVATE_KEY'),
+            env('IMAGEKIT_URL_ENDPOINT')
+        );
+
+        $getstudents = Student::where('sch_id', $user->sch_id)->get();
+        $count = $getstudents->count();
+
+        $plan = SchoolPayment::where('sch_id', $user->sch_id)->first();
+        if(!$plan){
+            return "An error occured";
+        }
+
+        if($count >= 50 && $plan->pricing_id == 1){
+            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+        }
+
+        if($count >= 250 && $plan->pricing_id == 2){
+            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+        }
+
+        if($count >= 500 && $plan->pricing_id == 3){
+            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+        }
 
         $campus = Campus::where('sch_id', $user->sch_id)
         ->where('name', $request->campus)
@@ -67,29 +97,28 @@ class StudentController extends Controller
 
         if($request->image){
             $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+
             $file = $request->image;
-            $baseFolder = 'students';
-            $userFolder = $cleanSchId;
-            $folderPath = public_path($baseFolder . '/' . $userFolder);
-            $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
+            $baseFolder = 'student';
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
-
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
+            $folderPath = $file_name;
 
-            if (!file_exists(public_path($baseFolder))) {
-                mkdir(public_path($baseFolder), 0777, true);
-            }
+            $folderName = $baseFolder . '/' . $cleanSchId;
 
-            if (!file_exists($folderPath)) {
-                mkdir($folderPath, 0777, true);
-            }
+            $uploadFile = $imageKit->uploadFile([
+                'file' => $file,
+                'fileName' => $folderPath,
+                'folder' => $folderName
+            ]);
 
-            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
+            $url = $uploadFile->result->url;
+            $fileId = $uploadFile->result->fileId;
 
-            $paths = $folderName.'/'.$file_name;
+            $paths = $url;
         }else{
             $paths = "";
         }
@@ -120,6 +149,7 @@ class StudentController extends Controller
             'home_address' => $request->home_address,
             'phone_number' => $request->phone_number,
             'email_address' => $request->email_address,
+            'file_id' => $fileId,
             'status' => 'active',
             'created_by' => $user->surname .' '. $user->firstname .' '. $user->middlename,
         ]);
@@ -160,38 +190,44 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $user = Auth::user();
+        $imageKit = new ImageKit(
+            env('IMAGEKIT_PUBLIC_KEY'),
+            env('IMAGEKIT_PRIVATE_KEY'),
+            env('IMAGEKIT_URL_ENDPOINT')
+        );
 
         $campus = Campus::where('sch_id', $user->sch_id)
         ->where('name', $request->campus)
         ->first();
 
+        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+
         if($request->image){
-            $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
             $file = $request->image;
-            $baseFolder = 'students';
-            $userFolder = $cleanSchId;
-            $folderPath = public_path($baseFolder . '/' . $userFolder);
-            $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
+            $baseFolder = 'student';
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
-
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
+            $folderPath = $file_name;
+            $folderName = $baseFolder . '/' . $cleanSchId;
 
-            if (!file_exists(public_path($baseFolder))) {
-                mkdir(public_path($baseFolder), 0777, true);
-            }
+            $fileId = $user->file_id;
+            $imageKit->deleteFile($fileId);
 
-            if (!file_exists($folderPath)) {
-                mkdir($folderPath, 0777, true);
-            }
+            $uploadFile = $imageKit->uploadFile([
+                'file' => $file,
+                'fileName' => $folderPath,
+                'folder' => $folderName
+            ]);
 
-            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
-
-            $paths = $folderName.'/'.$file_name;
+            $url = $uploadFile->result->url;
+            $fileId = $uploadFile->result->fileId;
+            $paths = $url;
         }else{
             $paths = "";
+            $fileId = "";
         }
 
         $student->update([
@@ -215,6 +251,7 @@ class StudentController extends Controller
             'home_address' => $request->home_address,
             'phone_number' => $request->phone_number,
             'email_address' => $request->email_address,
+            'file_id' => $fileId,
         ]);
 
         $students = new StudentResource($student);

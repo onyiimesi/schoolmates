@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use ImageKit\ImageKit;
 
 class StaffController extends Controller
 {
@@ -28,6 +29,27 @@ class StaffController extends Controller
     {
 
         $user = Auth::user();
+
+        if($user->designation_id == 6){
+            $staff = Staff::where('sch_id', $user->sch_id)
+            ->where('status', 'active')
+            ->paginate(25);
+
+            $staffcollection = StaffsResource::collection($staff);
+
+            return [
+                'status' => 'true',
+                'message' => 'Staff List',
+                'data' => $staffcollection,
+                'pagination' => [
+                    'current_page' => $staff->currentPage(),
+                    'last_page' => $staff->lastPage(),
+                    'per_page' => $staff->perPage(),
+                    'prev_page_url' => $staff->previousPageUrl(),
+                    'next_page_url' => $staff->nextPageUrl(),
+                ],
+            ];
+        }
 
         $staff = Staff::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
@@ -62,6 +84,12 @@ class StaffController extends Controller
         $request->validated($request->all());
         $user = Auth::user();
 
+        $imageKit = new ImageKit(
+            env('IMAGEKIT_PUBLIC_KEY'),
+            env('IMAGEKIT_PRIVATE_KEY'),
+            env('IMAGEKIT_URL_ENDPOINT')
+        );
+
         $campus = Campus::where('sch_id', $user->sch_id)
         ->where('name', $request->campus)
         ->first();
@@ -72,59 +100,92 @@ class StaffController extends Controller
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
         if($request->image){
+
             $file = $request->image;
-            $baseFolder = 'staffs';
-            $userFolder = $cleanSchId;
-            $folderPath = public_path($baseFolder . '/' . $userFolder);
-            $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
+            $baseFolder = 'staff';
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
-
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
+            $folderPath = $file_name;
 
-            if (!file_exists(public_path($baseFolder))) {
-                mkdir(public_path($baseFolder), 0777, true);
-            }
+            $folderName = $baseFolder . '/' . $cleanSchId;
 
-            if (!file_exists($folderPath)) {
-                mkdir($folderPath, 0777, true);
-            }
+            $uploadFile = $imageKit->uploadFile([
+                'file' => $file,
+                'fileName' => $folderPath,
+                'folder' => $folderName
+            ]);
 
-            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
+            $url = $uploadFile->result->url;
+            $fileId = $uploadFile->result->fileId;
 
-            $paths = $folderName.'/'.$file_name;
+            // $userFolder = $cleanSchId;
+            // $folderPath = public_path($baseFolder . '/' . $userFolder);
+            // $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
+            // if (!file_exists(public_path($baseFolder))) {
+            //     mkdir(public_path($baseFolder), 0777, true);
+            // }
+            // if (!file_exists($folderPath)) {
+            //     mkdir($folderPath, 0777, true);
+            // }
+            // file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
+
+            $paths = $url;
         }else{
             $paths = "";
+            $fileId = "";
         }
 
         if($request->signature){
+
             $file = $request->signature;
-            $baseFolder = 'staffs/signature';
-            $userFolder = $cleanSchId;
-            $folderPath = public_path($baseFolder . '/' . $userFolder);
-            $folderName = env('SIGNATURE_FOLDER_NAME') . '/' . $cleanSchId;
+            $baseFolder = 'signature';
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $sig = str_replace($replace, '', $file);
-
             $sig = str_replace(' ', '+', $sig);
-            $file_name = time().'.'.$extension;
+            $file_name = uniqid().'.'.$extension;
+            $folderPath = $file_name;
 
-            if (!file_exists(public_path($baseFolder))) {
-                mkdir(public_path($baseFolder), 0777, true);
-            }
+            $folderName = $baseFolder . '/' . $cleanSchId;
 
-            if (!file_exists($folderPath)) {
-                mkdir($folderPath, 0777, true);
-            }
+            $uploadFile = $imageKit->uploadFile([
+                'file' => $file,
+                'fileName' => $folderPath,
+                'folder' => $folderName
+            ]);
 
-            file_put_contents($folderPath.'/'.$file_name, base64_decode($sig));
+            $url = $uploadFile->result->url;
+            $sigId = $uploadFile->result->fileId;
 
-            $pathss = $folderName.'/'.$file_name;
+            // $file = $request->signature;
+            // $baseFolder = 'staffs/signature';
+            // $userFolder = $cleanSchId;
+            // $folderPath = public_path($baseFolder . '/' . $userFolder);
+            // $folderName = env('SIGNATURE_FOLDER_NAME') . '/' . $cleanSchId;
+            // $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
+            // $replace = substr($file, 0, strpos($file, ',')+1);
+            // $sig = str_replace($replace, '', $file);
+
+            // $sig = str_replace(' ', '+', $sig);
+            // $file_name = time().'.'.$extension;
+
+            // if (!file_exists(public_path($baseFolder))) {
+            //     mkdir(public_path($baseFolder), 0777, true);
+            // }
+
+            // if (!file_exists($folderPath)) {
+            //     mkdir($folderPath, 0777, true);
+            // }
+
+            // file_put_contents($folderPath.'/'.$file_name, base64_decode($sig));
+
+            $pathss = $url;
         }else{
             $pathss = "";
+            $sigId = "";
         }
 
         if($request->teacher_type == ""){
@@ -151,6 +212,8 @@ class StaffController extends Controller
             'signature' => $pathss,
             'teacher_type' => $type,
             'is_preschool' => $campus->is_preschool,
+            'file_id' => $fileId,
+            'sig_id' => $sigId,
             'password' => Hash::make($request->password),
             'pass_word' => $request->password,
             'status' => 'active'
@@ -210,63 +273,68 @@ class StaffController extends Controller
     public function update(Request $request, Staff $staff)
     {
         $user = Auth::user();
+        $imageKit = new ImageKit(
+            env('IMAGEKIT_PUBLIC_KEY'),
+            env('IMAGEKIT_PRIVATE_KEY'),
+            env('IMAGEKIT_URL_ENDPOINT')
+        );
 
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
         if($request->image){
             $file = $request->image;
-            $baseFolder = 'staffs';
-            $userFolder = $cleanSchId;
-            $folderPath = public_path($baseFolder . '/' . $userFolder);
-            $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
+            $baseFolder = 'staff';
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
-
             $image = str_replace(' ', '+', $image);
             $file_name = time().'.'.$extension;
+            $folderPath = $file_name;
+            $folderName = $baseFolder . '/' . $cleanSchId;
 
-            if (!file_exists(public_path($baseFolder))) {
-                mkdir(public_path($baseFolder), 0777, true);
-            }
+            $fileId = $staff->file_id;
+            $imageKit->deleteFile($fileId);
 
-            if (!file_exists($folderPath)) {
-                mkdir($folderPath, 0777, true);
-            }
+            $uploadFile = $imageKit->uploadFile([
+                'file' => $file,
+                'fileName' => $folderPath,
+                'folder' => $folderName
+            ]);
 
-            file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
-
-            $paths = $folderName.'/'.$file_name;
+            $url = $uploadFile->result->url;
+            $fileId = $uploadFile->result->fileId;
+            $paths = $url;
         }else{
             $paths = $staff->image;
+            $fileId = "";
         }
 
         if($request->signature){
             $file = $request->signature;
-            $baseFolder = 'staffs/signature';
-            $userFolder = $cleanSchId;
-            $folderPath = public_path($baseFolder . '/' . $userFolder);
-            $folderName = env('SIGNATURE_FOLDER_NAME') . '/' . $cleanSchId;
+            $baseFolder = 'signature';
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $sig = str_replace($replace, '', $file);
-
             $sig = str_replace(' ', '+', $sig);
-            $file_name = time().'.'.$extension;
+            $file_name = uniqid().'.'.$extension;
+            $folderPath = $file_name;
+            $folderName = $baseFolder . '/' . $cleanSchId;
 
-            if (!file_exists(public_path($baseFolder))) {
-                mkdir(public_path($baseFolder), 0777, true);
-            }
+            $sigId = $staff->sig_id;
+            $imageKit->deleteFile($sigId);
 
-            if (!file_exists($folderPath)) {
-                mkdir($folderPath, 0777, true);
-            }
+            $uploadFile = $imageKit->uploadFile([
+                'file' => $file,
+                'fileName' => $folderPath,
+                'folder' => $folderName
+            ]);
 
-            file_put_contents($folderPath.'/'.$file_name, base64_decode($sig));
-
-            $pathss = $folderName.'/'.$file_name;
+            $url = $uploadFile->result->url;
+            $sigId = $uploadFile->result->fileId;
+            $pathss = $url;
         }else{
-            $pathss = "";
+            $pathss = $staff->signature;
+            $sigId = "";
         }
 
         if($request->teacher_type == ""){
@@ -294,6 +362,8 @@ class StaffController extends Controller
             'image' => $paths,
             'signature' => $pathss,
             'teacher_type' => $type,
+            'file_id' => $fileId,
+            'sig_id' => $sigId
         ]);
 
         $staffs = new StaffsResource($staff);

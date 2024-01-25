@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Pricing;
+use App\Models\SchoolPayment;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StaffsResource extends JsonResource
@@ -14,6 +16,12 @@ class StaffsResource extends JsonResource
      */
     public function toArray($request)
     {
+        $plan = SchoolPayment::where('sch_id', $this->sch_id)->first();
+        if(!$plan){
+            return "An error occured";
+        }
+        $getplan = Pricing::where('id', $plan->pricing_id)->first();
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -37,7 +45,8 @@ class StaffsResource extends JsonResource
                 'status' => (string)$this->status,
                 'subjects' => $this->subjectteacher->flatMap(function($item){
                     return $item->subject;
-                })
+                }),
+                'plan' => (string)$getplan->plan
             ]
         ];
     }

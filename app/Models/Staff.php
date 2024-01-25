@@ -34,7 +34,9 @@ class Staff extends Authenticatable implements Auditable
         'status',
         'teacher_type',
         'campus_type',
-        'is_preschool'
+        'is_preschool',
+        'file_id',
+        'sig_id'
     ];
 
     public function staff(){

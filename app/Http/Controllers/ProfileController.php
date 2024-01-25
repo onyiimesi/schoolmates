@@ -10,6 +10,7 @@ use App\Models\Student;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use ImageKit\ImageKit;
 
 class ProfileController extends Controller
 {
@@ -20,7 +21,7 @@ class ProfileController extends Controller
      */
     public function index()
     {
-            
+
         $stud = Auth::user();
 
         if($stud->designation_id){
@@ -43,7 +44,7 @@ class ProfileController extends Controller
                 'data' => $studs
             ];
         }
-        
+
     }
 
     /**
@@ -78,71 +79,81 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $stud = $request->user();
-        
+        $imageKit = new ImageKit(
+            env('IMAGEKIT_PUBLIC_KEY'),
+            env('IMAGEKIT_PRIVATE_KEY'),
+            env('IMAGEKIT_URL_ENDPOINT')
+        );
+
         $paths = $stud->image;
         $pathss = $stud->signature;
-        
+
         if($stud->designation_id != '7'){
             // $stud->update($request->all());
             $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $stud->sch_id);
-            
+
             if($request->image){
-                // unlink($prev);
+                $fileId = "";
                 $file = $request->image;
-                $baseFolder = 'staffs';
-                $userFolder = $cleanSchId;
-                $folderPath = public_path($baseFolder . '/' . $userFolder);
-                $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
+                $baseFolder = 'staff';
                 $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-                
-                $replace = substr($file, 0, strpos($file, ',')+1); 
-                $image = str_replace($replace, '', $file); 
-    
+                $replace = substr($file, 0, strpos($file, ',')+1);
+                $image = str_replace($replace, '', $file);
                 $image = str_replace(' ', '+', $image);
                 $file_name = time().'.'.$extension;
+                $folderPath = $file_name;
+                $folderName = $baseFolder . '/' . $cleanSchId;
 
-                if (!file_exists(public_path($baseFolder))) {
-                    mkdir(public_path($baseFolder), 0777, true);
-                }
-    
-                if (!file_exists($folderPath)) {
-                    mkdir($folderPath, 0777, true);
+                $fileId = $stud->file_id;
+                $del = $imageKit->deleteFile($fileId);
+
+                if($del){
+                    $uploadFile = $imageKit->uploadFile([
+                        'file' => $file,
+                        'fileName' => $folderPath,
+                        'folder' => $folderName
+                    ]);
                 }
 
-                file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
-                
-                $paths = $folderName.'/'.$file_name;
-                
+                $url = $uploadFile->result->url;
+                $paths = $url;
+                $fileId = $uploadFile->result->fileId;
+
+            }else{
+                $paths = $stud->image;
+                $fileId = "";
             }
-            
+
             if($request->signature){
+                $sigId = "";
                 $file = $request->signature;
-                $baseFolder = 'staffs/signature';
-                $userFolder = $cleanSchId;
-                $folderPath = public_path($baseFolder . '/' . $userFolder);
-                $folderName = env('SIGNATURE_FOLDER_NAME') . '/' . $cleanSchId;
+                $baseFolder = 'signature';
                 $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-                $replace = substr($file, 0, strpos($file, ',')+1); 
-                $sig = str_replace($replace, '', $file); 
-    
+                $replace = substr($file, 0, strpos($file, ',')+1);
+                $sig = str_replace($replace, '', $file);
                 $sig = str_replace(' ', '+', $sig);
-                $file_name = time().'.'.$extension;
+                $file_name = uniqid().'.'.$extension;
+                $folderPath = $file_name;
+                $folderName = $baseFolder . '/' . $cleanSchId;
 
-                if (!file_exists(public_path($baseFolder))) {
-                    mkdir(public_path($baseFolder), 0777, true);
-                }
-    
-                if (!file_exists($folderPath)) {
-                    mkdir($folderPath, 0777, true);
-                }
+                $sigId = $stud->sig_id;
+                $imageKit->deleteFile($sigId);
 
-                file_put_contents($folderPath.'/'.$file_name, base64_decode($sig));
-                
-                $pathss = $folderName.'/'.$file_name;
+                $uploadFile = $imageKit->uploadFile([
+                    'file' => $file,
+                    'fileName' => $folderPath,
+                    'folder' => $folderName
+                ]);
+
+                $url = $uploadFile->result->url;
+                $pathss = $url;
+                $sigId = $uploadFile->result->fileId;
+
             }else{
                 $pathss = "";
+                $sigId = "";
             }
-            
+
             $stud->update([
                 'department' => $request->department,
                 'surname' => $request->surname,
@@ -153,44 +164,47 @@ class ProfileController extends Controller
                 'phoneno' => $request->phoneno,
                 'address' => $request->address,
                 'image' => $paths,
-                'signature' => $pathss
+                'signature' => $pathss,
+                'file_id' => $fileId,
+                'sig_id' => $sigId
             ]);
-            
+
             return [
                 "status" => 'true',
                 "message" => 'Updated Successfully',
                 "data" => $stud
             ];
-            
+
         }else if($stud->designation_id == '7'){
             $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $stud->sch_id);
-            
+
             if($request->image){
                 $file = $request->image;
-                $baseFolder = 'students';
-                $userFolder = $cleanSchId;
-                $folderPath = public_path($baseFolder . '/' . $userFolder);
-                $folderName = env('STUDENT_FOLDER_NAME') . '/' . $cleanSchId;
+                $baseFolder = 'student';
                 $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-                $replace = substr($file, 0, strpos($file, ',')+1); 
-                $image = str_replace($replace, '', $file); 
-    
+                $replace = substr($file, 0, strpos($file, ',')+1);
+                $image = str_replace($replace, '', $file);
                 $image = str_replace(' ', '+', $image);
                 $file_name = time().'.'.$extension;
+                $folderPath = $file_name;
+                $folderName = $baseFolder . '/' . $cleanSchId;
 
-                if (!file_exists(public_path($baseFolder))) {
-                    mkdir(public_path($baseFolder), 0777, true);
-                }
-    
-                if (!file_exists($folderPath)) {
-                    mkdir($folderPath, 0777, true);
-                }
-                
-                file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
-                
-                $paths = $folderName.'/'.$file_name;
+                $fileId = $stud->file_id;
+                $imageKit->deleteFile($fileId);
+
+                $uploadFile = $imageKit->uploadFile([
+                    'file' => $file,
+                    'fileName' => $folderPath,
+                    'folder' => $folderName
+                ]);
+
+                $url = $uploadFile->result->url;
+                $paths = $url;
+                $fileId = $uploadFile->result->fileId;
+            }else{
+                $fileId = "";
             }
-            
+
             $stud->update([
                 'department' => $request->department,
                 'surname' => $request->surname,
@@ -201,16 +215,17 @@ class ProfileController extends Controller
                 'phoneno' => $request->phoneno,
                 'address' => $request->address,
                 'image' => $paths,
+                'file_id' => $fileId,
             ]);
-    
+
             return [
                 "status" => 'true',
                 "message" => 'Updated Successfully',
                 "data" => $stud
             ];
-            
+
         }
-        
+
     }
 
     /**
