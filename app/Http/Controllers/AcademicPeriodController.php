@@ -66,7 +66,6 @@ class AcademicPeriodController extends Controller
                     'campus' => $user->campus,
                     'academic_session' => $request->session,
                 ]);
-
             }
 
             $aaa = new AcademicPeriodResource($aced);
@@ -81,7 +80,10 @@ class AcademicPeriodController extends Controller
 
     public function getperiod(){
 
-        $getaca = AcademicPeriod::get();
+        $user = Auth::user();
+        $getaca = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
 
         return [
             "status" => 'true',
@@ -92,7 +94,10 @@ class AcademicPeriodController extends Controller
 
     public function getsessions(){
 
-        $getsess = AcademicSessions::get();
+        $user = Auth::user();
+        $getsess = AcademicSessions::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
 
         return [
             "status" => 'true',

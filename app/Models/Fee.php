@@ -12,12 +12,13 @@ class Fee extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
-        'sch_id', 
-        'pid', 
-        'campus', 
-        'feetype', 
+        'sch_id',
+        'pid',
+        'campus',
+        'feetype',
         'amount',
         'term',
+        'session',
         'fee_status',
         'category',
     ];

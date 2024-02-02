@@ -12,13 +12,13 @@ class Invoice extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
-        'sch_id', 
-        'campus', 
+        'sch_id',
+        'campus',
         'admission_number',
         'student_id',
-        'fullname', 
+        'fullname',
         'class',
-        'feetype', 
+        'feetype',
         'amount',
         'notation',
         'discount',
@@ -26,5 +26,9 @@ class Invoice extends Model implements Auditable
         'term',
         'session',
         'invoice_no',
+    ];
+
+    protected $casts = [
+        'feetype' => 'array'
     ];
 }

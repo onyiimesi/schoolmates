@@ -23,14 +23,11 @@ class InvoiceResource extends JsonResource
                 'student_id' => (string)$this->student_id,
                 'fullname' => (string)$this->fullname,
                 'class' => (string)$this->class,
-                'feetype' => (string)$this->feetype,
-                'amount' => (string)$this->amount,
                 'notation' => (string)$this->notation,
-                'discount' => (string)$this->discount,
-                'discount_amount' => (string)$this->discount_amount,
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
                 'invoice_no' => (string)$this->invoice_no,
+                'fee' => (array)$this->feetype
             ]
         ];
     }

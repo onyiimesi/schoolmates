@@ -17,12 +17,12 @@ class StudentInvoiceController extends Controller
         ->where('campus', $stud->campus)
         ->first();
 
-        $invoice = InvoiceResource::collection(
+        $invoice = new InvoiceResource(
             Invoice::where('sch_id', $stud->sch_id)
             ->where('campus', $stud->campus)
             ->where('student_id', $stud->id)
             ->where('term', $period->term)
-            ->where('session', $period->session)->get()
+            ->where('session', $period->session)->first()
         );
 
         return [
@@ -30,8 +30,6 @@ class StudentInvoiceController extends Controller
             'message' => 'My Invoice',
             'data' => $invoice
         ];
-
-
     }
 
     public function studentprevinvoices(){

@@ -30,13 +30,12 @@ class InvoiceRequest extends FormRequest
             'student_id' => ['required'],
             'fullname' => ['required', 'string', 'max:255'],
             'class' => ['required', 'string', 'max:255'],
-            'feetype' => ['required', 'string', 'max:255'],
-            'amount' => ['required', 'string', 'max:255'],
+            'fee.*' => ['required', 'array'],
+            'fee.*.feetype' => ['required'],
+            'fee.*.amount' => ['required'],
+            'fee.*.discount' => ['required'],
+            'fee.*.discount_amount' => ['required'],
             'notation' => ['string', 'max:255'],
-            'discount' => ['string', 'max:255'],
-            'discount_amount' => ['string', 'max:255'],
-            'term' => ['required', 'string', 'max:255'],
-            'session' => ['required', 'string', 'max:255'],
             'invoice_no' => ['string', 'max:100']
         ];
     }

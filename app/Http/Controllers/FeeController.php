@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FeeRequest;
 use App\Http\Resources\FeeResource;
+use App\Models\AcademicPeriod;
 use App\Models\Fee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,6 +44,9 @@ class FeeController extends Controller
         $request->validated($request->all());
 
         $user = Auth::user();
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
 
         $fees = Fee::create([
             'sch_id' => $user->sch_id,
@@ -50,6 +54,7 @@ class FeeController extends Controller
             'feetype' => $request->feetype,
             'amount' => $request->amount,
             'term' => $request->term,
+            'session' => $period->session,
             'fee_status' => $request->fee_status,
             'category' => $request->category
         ]);

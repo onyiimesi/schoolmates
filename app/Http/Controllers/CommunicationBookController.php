@@ -54,7 +54,7 @@ class CommunicationBookController extends Controller
 
         $stud = Auth::user();
 
-        if($stud->designation_id == '5'){
+        if($stud->designation_id == '7'){
 
             $student = Student::find($stud->id);
             $period = AcademicPeriod::where('sch_id', $stud->sch_id)

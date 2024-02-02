@@ -6,6 +6,7 @@ use App\Http\Resources\DesignationResource;
 use App\Models\Designation;
 use App\Models\ExtraCurricular;
 use App\Models\PreSchoolExtraCurricular;
+use App\Models\Schools;
 use App\Traits\HttpResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -85,12 +86,28 @@ class OtherController extends Controller
 
         if($user->designation_id === 6){
 
-            $roleNot = ['6', '7'];
-            return DesignationResource::collection(Designation::whereNotIn('id', $roleNot)->get());
+            $school = Schools::where('sch_id', $user->sch_id)->first();
+
+            if($school->pricing_id == 1 || $school->pricing_id == 3){
+                $roleNot = ['2' ,'6', '7'];
+            }else{
+                $roleNot = ['6', '7'];
+            }
+
+            return DesignationResource::collection(
+                Designation::whereNotIn('id', $roleNot)->get()
+            );
 
         } else if($user->designation_id === 1){
 
-            $roleNot = ['1', '6', '7'];
+            $school = Schools::where('sch_id', $user->sch_id)->first();
+
+            if($school->pricing_id == 1 || $school->pricing_id == 2){
+                $roleNot = ['1', '2' ,'6', '7'];
+            }else{
+                $roleNot = ['1', '6', '7'];
+            }
+
             return DesignationResource::collection(Designation::whereNotIn('id', $roleNot)->get());
 
         }

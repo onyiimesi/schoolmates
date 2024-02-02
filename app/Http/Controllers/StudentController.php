@@ -68,7 +68,9 @@ class StudentController extends Controller
             env('IMAGEKIT_URL_ENDPOINT')
         );
 
-        $getstudents = Student::where('sch_id', $user->sch_id)->get();
+        $getstudents = Student::where('sch_id', $user->sch_id)
+        ->where('status', 'active')
+        ->get();
         $count = $getstudents->count();
 
         $plan = SchoolPayment::where('sch_id', $user->sch_id)->first();
@@ -121,6 +123,7 @@ class StudentController extends Controller
             $paths = $url;
         }else{
             $paths = "";
+            $fileId = "";
         }
 
         $student = Student::create([
