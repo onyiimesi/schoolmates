@@ -45,18 +45,19 @@ class BankController extends Controller
 
         $user = Auth::user();
 
-        $bnk = Bank::create([
+        Bank::create([
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
             'bank_name' => $request->bank_name,
             'account_name' => $request->account_name,
             'opening_balance' => $request->opening_balance,
+            'account_number' => $request->account_number,
+            'account_purpose' => $request->account_purpose
         ]);
 
         return [
             "status" => 'true',
-            "message" => 'Bank Added Successfully',
-            "data" => $bnk
+            "message" => 'Bank Added Successfully'
         ];
     }
 

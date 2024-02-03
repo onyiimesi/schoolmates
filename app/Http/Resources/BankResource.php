@@ -20,6 +20,8 @@ class BankResource extends JsonResource
                 'bank_name' => (string)$this->bank_name,
                 'account_name' => (string)$this->account_name,
                 'opening_balance' => (string)$this->opening_balance,
+                'account_number' => (string)$this->account_number,
+                'account_purpose' => (string)$this->account_purpose
             ]
         ];
     }

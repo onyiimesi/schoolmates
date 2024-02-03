@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
     {
         
         $schedule->command('sanctum:prune-expired --hours24')->daily();
+        $schedule->command('queue:work --stop-when-empty')->everyMinute();
         
     }
 

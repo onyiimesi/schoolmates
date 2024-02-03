@@ -17,6 +17,7 @@ class Bank extends Model implements Auditable
         'bank_name',
         'account_name',
         'opening_balance',
-
+        'account_number',
+        'account_purpose'
     ];
 }

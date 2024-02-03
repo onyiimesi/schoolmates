@@ -115,9 +115,16 @@ class InvoiceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Invoice $invoice)
     {
-        //
+        $invoice->update([
+            'feetype' => $request->fee
+        ]);
+
+        return [
+            "status" => 'true',
+            "message" => 'Updated Successfully'
+        ];
     }
 
     /**
