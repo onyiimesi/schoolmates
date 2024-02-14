@@ -27,7 +27,8 @@ class InvoiceResource extends JsonResource
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
                 'invoice_no' => (string)$this->invoice_no,
-                'fee' => (array)$this->feetype
+                'fee' => (array)$this->feetype,
+                'due_date' => (string)$this->due_date
             ]
         ];
     }

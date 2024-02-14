@@ -26,9 +26,15 @@ class Invoice extends Model implements Auditable
         'term',
         'session',
         'invoice_no',
+        'due_date'
     ];
 
     protected $casts = [
         'feetype' => 'array'
     ];
+
+    public function payment()
+    {
+        return $this->hasMany(Payment::class, 'invoice_id');
+    }
 }

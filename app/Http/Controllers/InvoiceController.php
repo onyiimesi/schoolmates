@@ -78,6 +78,7 @@ class InvoiceController extends Controller
             'term' => $period->term,
             'session' => $period->session,
             'invoice_no' => $invoice_number,
+            'due_date' => $request->due_date
         ]);
 
         return [
@@ -118,7 +119,8 @@ class InvoiceController extends Controller
     public function update(Request $request, Invoice $invoice)
     {
         $invoice->update([
-            'feetype' => $request->fee
+            'feetype' => $request->fee,
+            'due_date' => $request->due_date
         ]);
 
         return [

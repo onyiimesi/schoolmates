@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PaymentRequest;
 use App\Http\Resources\PaymentResource;
+use App\Models\AcademicPeriod;
 use App\Models\Payment;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -18,17 +23,54 @@ class PaymentController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
 
-        $pay = PaymentResource::collection(
-            Payment::where('sch_id', $user->sch_id)
-            ->get()
-        );
+        $pay = Payment::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('term', $period->term)
+        ->where('session', $period->session)
+        ->with('invoice')
+        ->get();
 
-        return [
-            'status' => 'true',
-            'message' => 'Payment List',
-            'data' => $pay
-        ];
+        $group = $pay->groupBy(['student_id']);
+        $data = $group->map(function ($students, $studentId) {
+            $name = $students->first();
+            return [
+                'sch_id' => $name->sch_id,
+                'campus' => $name->campus,
+                'term' => $name->term,
+                'session' => $name->session,
+                'student_id' => $studentId,
+                'class_name' => $name->invoice->class,
+                'student_fullname' => $name->student_fullname,
+                'payment' => $students->map(function ($payment) {
+                    return [
+                        'invoice_id' => $payment->invoice_id,
+                        'bank_name' => $payment->bank_name,
+                        'account_name' => $payment->account_name,
+                        'payment_method' => $payment->payment_method,
+                        'amount_paid' => $payment->amount_paid,
+                        'total_amount' => $payment->total_amount,
+                        'amount_due' => $payment->amount_due,
+                        'type' => $payment->type,
+                        'status' => $payment->status,
+                        'paid_at' => Carbon::parse($payment->created_at)->format('j M Y')
+                    ];
+                })->toArray()
+            ];
+        })->values()->toArray();
+
+        if($data){
+            return response()->json([
+                'status' => "true",
+                'message' => "Payment List",
+                'data' => $data,
+            ], 200);
+        }
+
+        return $this->success([], "Payment List", 200);
     }
 
     /**
@@ -41,41 +83,60 @@ class PaymentController extends Controller
     {
         $request->validated($request->all());
 
+        $user = Auth::user();
+
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->first();
+
         $amountPaid = (float) $request->amount_paid;
         $totalAmount = (float) $request->total_amount;
 
-        if ($amountPaid == $totalAmount) {
-            $due = 0;
-            $status = "creditor";
+        $pays = Payment::where('invoice_id', $request->invoice_id)->get();
+
+        $amount = 0;
+        if (!$pays->isEmpty()) {
+            foreach ($pays as $pay) {
+                if ($pay->type == "part-payment") {
+                    $amount = $pay->amount_due;
+                    $due = $amount - $amountPaid;
+                    $status = "debtor";
+                }
+                if($request->type == "complete-payment"){
+                    $amount = $pay->amount_due;
+                    $due = $amount - $amountPaid;
+                    $status = "creditor";
+                }
+            }
         } else {
-            $due = $totalAmount - $amountPaid;
-            $status = "debtor";
+            $amount = (float) $request->amount_paid;
+            $due = $totalAmount - $amount;
+            if($due == 0){
+                $status = "creditor";
+            }else{
+                $status = "debtor";
+            }
         }
 
-        $user = Auth::user();
-
-        $pays = Payment::create([
+        Payment::create([
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
-            'term' => $request->term,
-            'session' => $request->session,
+            'student_id' => $request->student_id,
+            'invoice_id' => $request->invoice_id,
+            'term' => $period->term,
+            'session' => $period->session,
             'bank_name' => $request->bank_name,
             'account_name' => $request->account_name,
-            'student_id' => $request->student_id,
             'student_fullname' => $request->student_fullname,
             'payment_method' => $request->payment_method,
             'amount_paid' => $request->amount_paid,
             'total_amount' => $request->total_amount,
             'amount_due' => $due,
-            'remark' => $request->remark,
-            'status' => $status,
+            'type' => $request->type,
+            'status' => $status
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Payment Added Successfully',
-            "data" => $pays
-        ];
+        return $this->success(null, "Payment Added Successfully", 200);
     }
 
     /**
@@ -84,20 +145,11 @@ class PaymentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Payment $payment)
     {
-        //
-    }
+        $viewPayment = new PaymentResource($payment);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return $this->success($viewPayment, "", 200);
     }
 
     /**
@@ -107,9 +159,11 @@ class PaymentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Payment $payment)
     {
-        //
+        $payment->update($request->all());
+
+        return $this->success(null, "Updated Successfully", 200);
     }
 
     /**

@@ -67,20 +67,15 @@ class BankController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Bank $bank)
     {
-        //
-    }
+        $bank_det = new BankResource($bank);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return [
+            'status' => 'true',
+            'message' => 'Bank Detail',
+            'data' => $bank_det
+        ];
     }
 
     /**
@@ -90,9 +85,17 @@ class BankController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Bank $bank)
     {
-        //
+        $bank->update($request->all());
+
+        $banks = new BankResource($bank);
+
+        return [
+            "status" => 'true',
+            "message" => 'Updated Successfully',
+            "data" => $banks
+        ];
     }
 
     /**
@@ -101,8 +104,10 @@ class BankController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Bank $bank)
     {
-        //
+        $bank->delete();
+
+        return response(null, 204);
     }
 }

@@ -14,18 +14,23 @@ class Payment extends Model implements Auditable
     protected $fillable = [
         'sch_id',
         'campus',
-        'term', 
-        'session', 
-        'bank_name', 
-        'account_name', 
+        'term',
+        'session',
+        'bank_name',
+        'account_name',
         'student_id',
+        'invoice_id',
         'student_fullname',
         'payment_method',
         'amount_paid',
         'total_amount',
         'amount_due',
-        'remark',
+        'type',
         'status'
-
     ];
+
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class, 'invoice_id');
+    }
 }

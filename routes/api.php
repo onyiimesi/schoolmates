@@ -102,7 +102,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::resource('/staff', StaffController::class);
     Route::resource('/campus', CampusController::class);
 
-
     Route::patch('/enablecampus/{id}', [EnableCampusController::class, 'enable']);
     Route::patch('/disablecampus/{id}', [DisableCampusController::class, 'disable']);
 
@@ -123,6 +122,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/communicationbook', [CommunicationBookController::class, 'communicate']);
     Route::get('/communicationbook', [CommunicationBookController::class, 'getmessage']);
 
+    Route::get('/payment/{invoice_id}/get', [OtherController::class, 'paymentinvoice']);
 
     Route::resource('/vehicle', VehicleController::class);
     Route::resource('/vehiclelog', VehicleLogController::class);

@@ -24,8 +24,7 @@ class PaymentRequest extends FormRequest
     public function rules()
     {
         return [
-            'term' => ['required', 'string',],
-            'session' => ['required', 'string', 'max:255'],
+            'invoice_id' => ['required'],
             'bank_name' => ['required', 'string', 'max:255'],
             'account_name' => ['required', 'string', 'max:255'],
             'student_id' => ['required'],
@@ -33,7 +32,7 @@ class PaymentRequest extends FormRequest
             'payment_method' => ['required', 'string', 'max:255'],
             'amount_paid' => ['required', 'string', 'max:255'],
             'total_amount' => ['required', 'string', 'max:255'],
-            'remark' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'string'],
         ];
     }
 }

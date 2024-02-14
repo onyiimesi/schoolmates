@@ -12,6 +12,7 @@ class ReceivedIncomeController extends Controller
         $user = Auth::user();
 
         $amount = Payment::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
         ->sum('amount_paid');
 
         return [
