@@ -46,25 +46,22 @@ class StudentAttendanceController extends Controller
         $teacher = Auth::user();
 
         $period = AcademicPeriod::where('sch_id', $teacher->sch_id)
+        ->where('campus', $teacher->campus)
         ->first();
 
         $search = StudentAttendance::where("attendance_date", $request->attendance_date)->first();
 
-
         if(empty($search)){
 
             $studentatt = StudentAttendance::create([
-                'sch_id' => '1234',
-                // 'student_id' => $request->student_id,
-                // 'admission_number' => $request->admission_number,
-                // 'student_fullname' => $request->student_fullname,
+                'sch_id' => $teacher->sch_id,
+                'campus' => $teacher->campus,
                 'attendance_date' => $request->attendance_date,
                 'data' => $request->data,
                 'class' => $teacher->class_assigned .' '. $teacher->sub_class,
                 'period' => $period->period,
                 'term' => $period->term,
                 'session' => $period->session,
-
                 // 'status' => $status,
             ]);
 
@@ -78,17 +75,12 @@ class StudentAttendanceController extends Controller
         }else if(!empty($search)){
 
             $search->update([
-                'sch_id' => '1234',
-                // 'student_id' => $request->student_id,
-                // 'admission_number' => $request->admission_number,
-                // 'student_fullname' => $request->student_fullname,
                 'attendance_date' => $request->attendance_date,
                 'data' => $request->data,
                 'class' => $teacher->class_assigned .' '. $teacher->sub_class,
                 'period' => $period->period,
                 'term' => $period->term,
                 'session' => $period->session,
-
                 // 'status' => $status,
             ]);
 
@@ -98,11 +90,7 @@ class StudentAttendanceController extends Controller
                 "message" => 'Attendance Updated Successfully',
                 "data" => $search
             ];
-
         }
-
-
-
     }
 
     /**

@@ -255,6 +255,9 @@ class ResultTwoController extends Controller
             ->where("session", $request->session)->first();
 
             $hosId = Staff::find($request->hos_id);
+            if(!$hosId){
+                return $this->error(null, "Hod needs to add comments", 400);
+            }
 
             if(empty($getsecondresult)){
 
@@ -346,7 +349,7 @@ class ResultTwoController extends Controller
                         'session' => $request->session,
                         'school_opened' => $request->school_opened,
                         'times_present' => $request->times_present,
-                        'times_absent' => $request->times_absent,
+                        'times_absent' => $request->school_opened - $request->times_present,
                         'teacher_comment' => $request->teacher_comment,
                         'performance_remark' => $request->performance_remark,
                         'teacher_id' => $request->teacher_id,

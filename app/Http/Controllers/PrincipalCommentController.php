@@ -60,6 +60,7 @@ class PrincipalCommentController extends Controller
 
         $principal = PrincipalComment::create([
             'sch_id' => $school->sch_id,
+            'campus' => $user->campus,
             'hos_id' => $user_id,
             'hos_fullname' => $user_fullname,
             'hos_comment' => $request->hos_comment,

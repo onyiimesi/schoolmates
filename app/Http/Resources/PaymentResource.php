@@ -25,10 +25,13 @@ class PaymentResource extends JsonResource
                 'account_name' => (string)$this->account_name,
                 'student_id' => (string)$this->student_id,
                 'student_fullname' => (string)$this->student_fullname,
+                'admission_number' => $this->invoice->admission_number,
+                'class' => $this->invoice->class,
                 'payment_method' => (string)$this->payment_method,
                 'amount_paid' => (string)$this->amount_paid,
                 'total_amount' => (string)$this->total_amount,
                 'amount_due' => (string)$this->amount_due,
+                'invoice_number' => $this->invoice->invoice_no,
                 'type' => (string)$this->type,
                 'status' => (string)$this->status
             ]

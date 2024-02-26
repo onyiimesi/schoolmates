@@ -47,6 +47,7 @@ class PaymentController extends Controller
                 'student_fullname' => $name->student_fullname,
                 'payment' => $students->map(function ($payment) {
                     return [
+                        'id' => $payment->id,
                         'invoice_id' => $payment->invoice_id,
                         'bank_name' => $payment->bank_name,
                         'account_name' => $payment->account_name,
