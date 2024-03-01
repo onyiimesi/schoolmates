@@ -44,7 +44,7 @@ class CampusController extends Controller
         $paths = "";
         if($request->image){
             $file = $request->image;
-            $folderName = 'http://127.0.0.1:8000/public/campus';
+            $folderName = env('CAMPUS_URL');
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);

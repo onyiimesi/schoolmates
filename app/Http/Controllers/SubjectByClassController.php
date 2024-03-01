@@ -22,7 +22,7 @@ class SubjectByClassController extends Controller
 
         $user = Auth::user();
 
-        $Subject = SubjectClassResource::collection(
+        $subject = SubjectClassResource::collection(
             ClassModel::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class)
@@ -32,7 +32,7 @@ class SubjectByClassController extends Controller
         return [
             'status' => 'true',
             'message' => 'Subjects',
-            'data' => $Subject
+            'data' => $subject
         ];
 
     }
@@ -40,8 +40,7 @@ class SubjectByClassController extends Controller
     public function subjectbyId(Request $request){
 
         $user = Auth::user();
-
-        $Subject = SubjectClassResource::collection(
+        $subject = SubjectClassResource::collection(
             ClassModel::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('id', $request->id)
@@ -51,7 +50,7 @@ class SubjectByClassController extends Controller
         return [
             'status' => 'true',
             'message' => 'Subjects',
-            'data' => $Subject
+            'data' => $subject
         ];
     }
 
@@ -69,8 +68,9 @@ class SubjectByClassController extends Controller
                 'message' => 'Subjects',
                 'data' => $subs
             ];
-        } else if($user->teacher_type == "class teacher"){
-            $Subject = SubjectClassResultResource::collection(
+
+        } elseif($user->teacher_type == "class teacher"){
+            $subject = SubjectClassResultResource::collection(
                 ClassModel::where('sch_id', $user->sch_id)
                 ->where('campus', $user->campus)
                 ->where('class_name', $user->class_assigned)
@@ -79,19 +79,19 @@ class SubjectByClassController extends Controller
             return [
                 'status' => 'true',
                 'message' => 'Subjects',
-                'data' => $Subject
+                'data' => $subject
             ];
         }
     }
 
     public function studentExcelImport(){
 
-        $Subject = StudentExcelImportResource::collection(StudentExcelImport::get());
+        $subject = StudentExcelImportResource::collection(StudentExcelImport::get());
 
         return [
             'status' => 'true',
             'message' => '',
-            'data' => $Subject
+            'data' => $subject
         ];
 
     }
@@ -100,8 +100,9 @@ class SubjectByClassController extends Controller
 
         $user = Auth::user();
 
-        $Subject = SubjectResource::collection(
-            Subject::where('sch_id', $user->sch_id)
+        $subject = SubjectResource::collection(
+            SubjectTeacher::where('sch_id', $user->sch_id)
+            ->where('staff_id', $user->id)
             ->where('campus', $user->campus)
             ->where('class_name', $user->class_assigned)
             ->get()
@@ -110,9 +111,8 @@ class SubjectByClassController extends Controller
         return [
             'status' => 'true',
             'message' => 'Subjects',
-            'data' => $Subject
+            'data' => $subject
         ];
-
     }
 
     public function subjectbystudent(){
@@ -123,7 +123,7 @@ class SubjectByClassController extends Controller
             return $this->error('', 'Unauthenticated', 401);
         }
 
-        $Subject = SubjectResource::collection(
+        $subject = SubjectResource::collection(
             Subject::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $user->present_class)
@@ -133,7 +133,7 @@ class SubjectByClassController extends Controller
         return [
             'status' => 'true',
             'message' => 'Student Subjects',
-            'data' => $Subject
+            'data' => $subject
         ];
 
     }
