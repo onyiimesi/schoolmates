@@ -20,6 +20,9 @@ class AssignmentController extends Controller
 {
     use HttpResponses;
 
+    const SUCCESS = 'Submitted Successfully';
+    const ASSIGNMENT_ERROR = 'Assignment does not exist';
+
     public function objective(Request $request)
     {
 
@@ -85,7 +88,7 @@ class AssignmentController extends Controller
                 if (!file_exists(public_path($baseFolder))) {
                     mkdir(public_path($baseFolder), 0777, true);
                 }
-    
+
                 if (!file_exists($folderPath)) {
                     mkdir($folderPath, 0777, true);
                 }
@@ -153,7 +156,6 @@ class AssignmentController extends Controller
     {
 
         $user = Auth::user();
-        // $session = AcademicPeriod::first();
 
         if($user->designation_id === 3){
             return $this->error('', 'Unauthenticated', 401);
@@ -186,7 +188,7 @@ class AssignmentController extends Controller
 
         return [
             "status" => 'true',
-            "message" => 'Submitted Successfully'
+            "message" => SELF::SUCCESS
         ];
 
     }
@@ -195,7 +197,6 @@ class AssignmentController extends Controller
     {
 
         $user = Auth::user();
-        // $session = AcademicPeriod::first();
 
         if($user->designation_id === 3){
             return $this->error('', 'Unauthenticated', 401);
@@ -226,10 +227,7 @@ class AssignmentController extends Controller
 
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Submitted Successfully'
-        ];
+        return $this->success(null, SELF::SUCCESS, 200);
 
     }
 
@@ -247,8 +245,10 @@ class AssignmentController extends Controller
 
         if($request->type === "objective"){
             $assigns = AssignmentAnswerResource::collection($assign);
-        }else{
+        }elseif($request->type === "theory"){
             $assigns = AssignmentAnswerResource::collection($assign);
+        }else{
+            $assigns = [];
         }
 
         return [
@@ -290,7 +290,7 @@ class AssignmentController extends Controller
 
         return [
             "status" => 'true',
-            "message" => 'Submitted Successfully'
+            "message" => SELF::SUCCESS
         ];
 
     }
@@ -325,10 +325,7 @@ class AssignmentController extends Controller
 
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Submitted Successfully'
-        ];
+        return $this->success(null, SELF::SUCCESS, 200);
 
     }
 
@@ -346,8 +343,10 @@ class AssignmentController extends Controller
 
         if($request->type === "objective"){
             $assigns = AssignmentMarkResource::collection($assign);
-        }else{
+        }elseif($request->type === "theory"){
             $assigns = AssignmentMarkResource::collection($assign);
+        }else{
+            $assigns = [];
         }
 
         return [
@@ -372,8 +371,10 @@ class AssignmentController extends Controller
 
         if($request->type === "objective"){
             $assigns = AssignmentMarkResource::collection($assign);
-        }else{
+        }elseif($request->type === "theory"){
             $assigns = AssignmentMarkResource::collection($assign);
+        }else{
+            $assigns = [];
         }
 
         return [
@@ -388,7 +389,7 @@ class AssignmentController extends Controller
         $assign = Assignment::where('id', $request->id)->first();
 
         if(!$assign){
-            return $this->error('', 'Assignment does not exist', 400);
+            return $this->error('', SELF::ASSIGNMENT_ERROR, 400);
         }
 
         $assign->update([
@@ -411,7 +412,7 @@ class AssignmentController extends Controller
         $assign = Assignment::where('id', $request->id)->first();
 
         if(!$assign){
-            return $this->error('', 'Assignment does not exist', 400);
+            return $this->error('', SELF::ASSIGNMENT_ERROR, 400);
         }
 
         $assign->update([
@@ -430,7 +431,7 @@ class AssignmentController extends Controller
         $ass = Assignment::where('id', $request->id)->first();
 
         if(!$ass){
-            return $this->error('', 'Assignment does not exist', 400);
+            return $this->error('', SELF::ASSIGNMENT_ERROR, 400);
         }
 
         $ass->delete();
@@ -460,7 +461,7 @@ class AssignmentController extends Controller
 
         return [
             "status" => 'true',
-            "message" => 'Submitted Successfully'
+            "message" => SELF::SUCCESS
         ];
     }
 
@@ -488,7 +489,7 @@ class AssignmentController extends Controller
     public function resultassignstu(Request $request)
     {
         $user = Auth::user();
-        
+
         $assign = AssignmentResult::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->where('student_id', $request->student_id)
