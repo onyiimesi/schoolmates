@@ -23,6 +23,7 @@ class AssignmentResource extends JsonResource
                 'staff' => (string)$this->staff->surname .' '. $this->staff->firstname,
                 'question_type' => (string)$this->question_type,
                 'question' => (string)$this->question,
+                'question_number' => (string)$this->question_number,
                 'answer' => (string)$this->answer,
                 'subject_id' => (string)$this->subject_id,
                 'subject' => (string)$this->subject->subject,

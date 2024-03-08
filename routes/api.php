@@ -159,7 +159,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('midTermResult', [ResultTwoController::class, 'mid']);
     Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
 
-
     //PreSchool Subject
     Route::post('/preschoolsubject', [PreSchoolSubjectController::class, 'addSubject']);
     Route::get('/preschoolsubject/{period}/{term}/{session}', [PreSchoolSubjectController::class, 'getSubject'])->where('session', '.+');
@@ -171,7 +170,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/preschoolsubjectclass/{period}/{term}/{session}', [PreSchoolSubjectController::class, 'getSubjectClass'])->where('session', '.+');
 
     Route::get('/preschoolsubjects/{period}/{term}/{session}/{class}', [PreSchoolSubjectController::class, 'getSubjectByClass'])->where('session', '.+');
-
 
     //Search Routes
     Route::get("/studentsessionsearch/{session}", [SessionSearchController::class, 'sessionsearch'])
@@ -186,9 +184,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::get("/graduatedstudent", [GraduatedStudentController::class, 'graduate']);
     Route::patch("/graduatestudent/{id}", [GraduatedStudentController::class, 'graduatestudent']);
-
-
-    // Route::post("/studentsessionsearch", [SessionSearchController::class, 'sessionsearch']);
 
     Route::get("/studentcreditors", [StudentCreditorsController::class, 'creditors']);
     Route::get("/studentdebtors", [StudentDebtorController::class, 'debtors']);
@@ -288,18 +283,13 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     // Assignment
     Route::post('/objective-assignment', [AssignmentController::class, 'objective']);
     Route::post('/theory-assignment', [AssignmentController::class, 'theory']);
-
     Route::patch("/edit-obj-assignment/{id}", [AssignmentController::class, 'editObjAssign']);
     Route::patch("/edit-thoery-assignment/{id}", [AssignmentController::class, 'editTheoAssign']);
-
     Route::delete("/assignment/{id}", [AssignmentController::class, 'delAssign']);
-
     Route::get('/assignment/{period}/{term}/{session}/{type}', [AssignmentController::class, 'assign'])
     ->where('session', '.+');
-
     Route::post('/objective-assignment-answer', [AssignmentController::class, 'objectiveanswer']);
     Route::post('/theory-assignment-answer', [AssignmentController::class, 'theoryanswer']);
-
     Route::get('/assignment-answer/{period}/{term}/{session}/{type}', [AssignmentController::class, 'getanswer'])
     ->where('session', '.+');
 
@@ -309,7 +299,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
     Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'markedbystudent'])
     ->where('session', '.+');
-
     Route::post('/assignment-result', [AssignmentController::class, 'result']);
     Route::get('/get-assignment-result/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassign'])
     ->where('session', '.+');

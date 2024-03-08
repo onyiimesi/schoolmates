@@ -394,6 +394,8 @@ class AssignmentController extends Controller
 
         $assign->update([
             'question' => $request->question,
+            'question_number' => $request->question_number,
+            'question_mark' => $request->question_mark,
             'answer' =>  $request->answer,
             'option1' => $request->option1,
             'option2' => $request->option2,
@@ -417,6 +419,8 @@ class AssignmentController extends Controller
 
         $assign->update([
             'question' => $request->question,
+            'question_number' => $request->question_number,
+            'question_mark' => $request->question_mark,
             'answer' => $request->answer
         ]);
 
