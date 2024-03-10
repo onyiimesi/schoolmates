@@ -386,22 +386,27 @@ class AssignmentController extends Controller
 
     public function editObjAssign(Request $request)
     {
-        $assign = Assignment::where('id', $request->id)->first();
+        $data = $request->json()->all();
 
-        if(!$assign){
-            return $this->error('', SELF::ASSIGNMENT_ERROR, 400);
+        foreach ($data as $item) {
+
+            $assign = Assignment::where('id', $item['id'])->first();
+
+            if(!$assign){
+                return $this->error('', SELF::ASSIGNMENT_ERROR, 400);
+            }
+
+            $assign->update([
+                'question' => $item['question'],
+                'question_number' => $item['question_number'],
+                'question_mark' => $item['question_mark'],
+                'answer' =>  $item['answer'],
+                'option1' => $item['option1'],
+                'option2' => $item['option2'],
+                'option3' => $item['option3'],
+                'option4' => $item['option4']
+            ]);
         }
-
-        $assign->update([
-            'question' => $request->question,
-            'question_number' => $request->question_number,
-            'question_mark' => $request->question_mark,
-            'answer' =>  $request->answer,
-            'option1' => $request->option1,
-            'option2' => $request->option2,
-            'option3' => $request->option3,
-            'option4' => $request->option4
-        ]);
 
         return [
             "status" => 'true',
@@ -510,5 +515,43 @@ class AssignmentController extends Controller
             "message" => 'List',
             "data" => $assigns
         ];
+    }
+
+    public function publish(Request $request)
+    {
+        $request->validate([
+            'period' => ['required', 'string'],
+            'term' => ['required', 'string'],
+            'session' => ['required', 'string'],
+            'question_type' => ['required', 'string'],
+            'week' => ['required', 'string'],
+            'is_publish' => ['required', 'numeric', 'in:0,1']
+        ]);
+
+        $user = Auth::user();
+        $assign = Assignment::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('question_type', $request->question_type)
+        ->where('week', $request->week)
+        ->get();
+
+        if ($request->is_publish == 1) {
+            $assign->each(function ($assignment) {
+                $assignment->update([
+                    'status' => 'published'
+                ]);
+            });
+        } else {
+            $assign->each(function ($assignment) {
+                $assignment->update([
+                    'status' => 'unpublished'
+                ]);
+            });
+        }
+
+        return $this->success(null, "Updated successfully!", 200);
     }
 }

@@ -29,7 +29,8 @@ class Assignment extends Model
         'question_mark',
         'total_mark',
         'question_number',
-        'week'
+        'week',
+        'status'
     ];
 
     public function subject()
