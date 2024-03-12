@@ -43,9 +43,6 @@ jobs:
     - name: 🛑 Put site into maintenance mode
       run: php artisan down --refresh=15 --secret="1630542a-246b-4b66-afa1-dd72a4c43515"
 
-    - name: 🔄 Run Laravel migrations
-      run: php artisan migrate --force
-
     - name: 🗑 Clear Laravel cache
       run: php artisan cache:clear
 
