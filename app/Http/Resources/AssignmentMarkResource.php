@@ -27,6 +27,7 @@ class AssignmentMarkResource extends JsonResource
                 'assignment_id' => (string)$this->assignment_id,
                 'question_type' => (string)$this->question_type,
                 'question' => (string)$this->question,
+                'question_number' => (string)$this->question_number,
                 'answer' => (string)$this->answer,
                 'correct_answer' => (string)$this->correct_answer,
                 'submitted' => (string)$this->submitted,
