@@ -17,7 +17,7 @@ jobs:
         server: ftp.sapsms.com
         username: ${{ secrets.ftp_username }}
         password: ${{ secrets.ftp_password }}
-        server-dir: /dashboard.com
+        server-dir: /dashboard.com/
         exclude: |
           **/.git*
           **/.git*/**
