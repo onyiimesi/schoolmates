@@ -12,13 +12,21 @@ jobs:
       uses: actions/checkout@v4
 
     - name: 📂 Sync files
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ftp.sapsms.com
-        username: ${{ secrets.staging_ftp_username }}
-        password: ${{ secrets.staging_ftp_password }}
-        server-dir: ./staging.com/
-        exclude: |
-          **/.git*
-          **/.git*/**
-          fileToExclude.txt
+        run: |
+          if [ ${{ github.ref }} == 'refs/heads/staging' ]; then
+            subdomain="staging.com"
+          elif [ ${{ github.ref }} == 'refs/heads/main' ]; then
+            subdomain="dashboard.com"
+          # Add other branches as needed
+          else
+            echo "Branch not configured for deployment"
+            exit 1
+          fi
+
+          # Use the correct subdomain variable in the FTP deployment action
+          echo "Deploying to $subdomain"
+        env:
+          FTP_SERVER: ftp.sapsms.com
+          FTP_USERNAME: ${{ secrets.ftp_username }}
+          FTP_PASSWORD: ${{ secrets.ftp_password }}
+          SERVER_DIR: "/"
