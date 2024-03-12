@@ -1,8 +1,8 @@
 on:
   push:
     branches:
-      - main
-name: 🚀 Deploy to Live
+      - staging
+name: 🚀 Deploy to Staging
 jobs:
   web-deploy:
     name: 🎉 Deploy
@@ -15,8 +15,8 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ftp.sapsms.com
-        username: ${{ secrets.ftp_username }}
-        password: ${{ secrets.ftp_password }}
+        username: ${{ secrets.staging_ftp_username }}
+        password: ${{ secrets.staging_ftp_password }}
         exclude: |
           **/.git*
           **/.git*/**
