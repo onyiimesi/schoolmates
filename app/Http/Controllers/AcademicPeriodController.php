@@ -47,7 +47,7 @@ class AcademicPeriodController extends Controller
                 "data" => $aced
             ];
 
-        }else if(!empty($aced)){
+        }elseif(!empty($aced)){
 
             $aced->update([
                 'sch_id' => $sch->sch_id,
@@ -83,7 +83,7 @@ class AcademicPeriodController extends Controller
         $user = Auth::user();
         $getaca = AcademicPeriod::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
-        ->first();
+        ->get();
 
         return [
             "status" => 'true',
@@ -97,7 +97,7 @@ class AcademicPeriodController extends Controller
         $user = Auth::user();
         $getsess = AcademicSessions::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
-        ->first();
+        ->get();
 
         return [
             "status" => 'true',
