@@ -153,7 +153,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::resource('/skills', SkillsController::class);
     Route::resource('/preschool', PreSchoolController::class);
     Route::resource('/reports', ReportsController::class);
-
     //New result form
     Route::post('midTermResult', [ResultTwoController::class, 'mid']);
     Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
@@ -225,7 +224,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
     ->where('date', '.+');
 
-
     Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
     ->where('session', '.+');
     Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
@@ -244,8 +242,9 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
     ->where('session', '.+');
+});
 
-
+Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/classpopulation', [ClassPopulationController::class, 'getclasspopulation']);
     Route::get('/studentpopulation', [ClassPopulationController::class, 'getallpopulation']);
     Route::get('/staffpopulation', [ClassPopulationController::class, 'getstaffpopulation']);
