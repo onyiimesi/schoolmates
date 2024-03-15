@@ -481,7 +481,7 @@ class AssignmentController extends Controller
         $data = $request->json()->all();
 
         foreach($data as $item){
-            
+
             $item->validate([
                 'period' => 'required',
                 'term' => 'required',
@@ -510,6 +510,7 @@ class AssignmentController extends Controller
                 'score' => $item['score'],
                 'week' => $item['week']
             ]);
+            
         }
 
         return [
