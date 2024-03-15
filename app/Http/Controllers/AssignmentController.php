@@ -137,6 +137,33 @@ class AssignmentController extends Controller
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
+        ->where('status', 'published')
+        ->get();
+
+        if($request->type === "objective"){
+            $assigns = AssignmentResource::collection($assign);
+        }else{
+            $assigns = TheoryResource::collection($assign);
+        }
+
+        return [
+            "status" => 'true',
+            "message" => 'List',
+            "data" => $assigns
+        ];
+    }
+
+    public function assignUnpublished(Request $request)
+    {
+        $user = Auth::user();
+
+        $assign = Assignment::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->where('question_type', $request->type)
+        ->where('status', 'unpublished')
         ->get();
 
         if($request->type === "objective"){
@@ -451,22 +478,40 @@ class AssignmentController extends Controller
     public function result (Request $request)
     {
         $user = Auth::user();
+        $data = $request->json()->all();
 
-        AssignmentResult::create([
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'period' => $request->period,
-            'term' => $request->term,
-            'session' => $request->session,
-            'assignment_id' => $request->assignment_id,
-            'student_id' => $request->student_id,
-            'subject_id' => $request->subject_id,
-            'question_type' => $request->question_type,
-            'student_mark' => $request->student_mark,
-            'total_mark' => $request->total_mark,
-            'score' => $request->score,
-            'week' => $request->week
-        ]);
+        foreach($data as $item){
+
+            $item->validate([
+                'period' => 'required',
+                'term' => 'required',
+                'assignment_id' => 'required',
+                'student_id' => 'required',
+                'subject_id' => 'required',
+                'question_type' => 'required',
+                'student_mark' => 'required',
+                'total_mark' => 'required',
+                'score' => 'required',
+                'week' => 'required'
+            ]);
+
+            AssignmentResult::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question_type' => $item['question_type'],
+                'student_mark' => $item['student_mark'],
+                'total_mark' => $item['total_mark'],
+                'score' => $item['score'],
+                'week' => $item['week']
+            ]);
+            
+        }
 
         return [
             "status" => 'true',
