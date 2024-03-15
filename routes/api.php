@@ -191,7 +191,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get("/debtors/{term}/{session}", [StudentDebtorController::class, 'debtorsByTermSession'])
     ->where('session', '.+');
 
-
     Route::patch('/withdrawstudent/{id}', [WithdrawStudentController::class, 'withdraw']);
     Route::patch('/acceptstudent/{id}', [AcceptStudentController::class, 'accept']);
     Route::patch('/promotestudent/{id}', [PromoteStudentController::class, 'promote']);
@@ -232,7 +231,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
     Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
     ->where('session', '.+');
-
 
     Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
     ->where('session', '.+');
@@ -308,7 +306,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/get-assignment-result/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassign'])
     ->where('session', '.+');
     Route::patch("/publish/assignment", [AssignmentController::class, 'publish']);
-
 
     Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassignstu'])
     ->where('session', '.+');
