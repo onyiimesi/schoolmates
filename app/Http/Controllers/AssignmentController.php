@@ -137,6 +137,7 @@ class AssignmentController extends Controller
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
+        ->where('week', $request->week)
         ->where('status', 'published')
         ->get();
 
@@ -268,6 +269,7 @@ class AssignmentController extends Controller
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
+        ->where('week', $request->week)
         ->get();
 
         if($request->type === "objective"){
@@ -366,6 +368,7 @@ class AssignmentController extends Controller
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
+        ->where('week', $request->week)
         ->get();
 
         if($request->type === "objective"){
@@ -394,6 +397,7 @@ class AssignmentController extends Controller
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
+        ->where('week', $request->week)
         ->get();
 
         if($request->type === "objective"){
@@ -510,7 +514,7 @@ class AssignmentController extends Controller
                 'score' => $item['score'],
                 'week' => $item['week']
             ]);
-            
+
         }
 
         return [
@@ -529,6 +533,7 @@ class AssignmentController extends Controller
         ->where('term', $request->term)
         ->where('session', $request->session)
         ->where('question_type', $request->type)
+        ->where('week', $request->week)
         ->get();
 
         $assigns = AssignmentResultResource::collection($assign);
