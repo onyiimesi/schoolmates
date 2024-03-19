@@ -32,12 +32,18 @@ jobs:
           echo "composer.json does not exist"
           exit 1
         fi
-
+    
     - name: Install or update Composer dependencies
       if: steps.check_files.outcome == 'success'
       run: |
         composer validate --no-check-publish
-        composer install --prefer-dist --no-progress
+        if [ -f composer.lock ]; then
+          echo "composer.lock exists, running composer update"
+          composer update --no-progress
+        else
+          echo "composer.lock does not exist, running composer install"
+          composer install --prefer-dist --no-progress
+        fi
         exit $?
 
     - name: 🛑 Put site into maintenance mode
