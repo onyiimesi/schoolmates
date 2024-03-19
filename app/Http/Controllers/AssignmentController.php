@@ -408,7 +408,8 @@ class AssignmentController extends Controller
                 'option1' => $item['option1'],
                 'option2' => $item['option2'],
                 'option3' => $item['option3'],
-                'option4' => $item['option4']
+                'option4' => $item['option4'],
+                'status' => $item['status'],
             ]);
         }
 
@@ -430,7 +431,8 @@ class AssignmentController extends Controller
             'question' => $request->question,
             'question_number' => $request->question_number,
             'question_mark' => $request->question_mark,
-            'answer' => $request->answer
+            'answer' => $request->answer,
+            'status' => $request->status
         ]);
 
         return [
@@ -458,19 +460,6 @@ class AssignmentController extends Controller
         $data = $request->json()->all();
 
         foreach($data as $item){
-
-            $item->validate([
-                'period' => 'required',
-                'term' => 'required',
-                'assignment_id' => 'required',
-                'student_id' => 'required',
-                'subject_id' => 'required',
-                'question_type' => 'required',
-                'student_mark' => 'required',
-                'total_mark' => 'required',
-                'score' => 'required',
-                'week' => 'required'
-            ]);
 
             AssignmentResult::create([
                 'sch_id' => $user->sch_id,
