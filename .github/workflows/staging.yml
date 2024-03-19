@@ -28,9 +28,11 @@ jobs:
       with:
         files: 'composer.json'
 
-    - name: Run composer install if composer.json exists
+    - name: Run composer update if composer.json and composer.lock are not in sync
       if: steps.check_files.outputs.files_exists == 'true'
-      run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+      run: |
+        composer validate --no-check-publish
+        composer update
 
     - name: 🛑 Put site into maintenance mode
       run: php artisan down --refresh=15 --secret="1630542a-246b-4b66-afa1-dd72a4c43515"
