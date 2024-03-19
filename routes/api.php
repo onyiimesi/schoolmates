@@ -283,12 +283,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::patch("/edit-thoery-assignment/{id}", [AssignmentController::class, 'editTheoAssign']);
     Route::delete("/assignment/{id}", [AssignmentController::class, 'delAssign']);
 
-    // Published Assignment
+    // Assignment
     Route::get('/assignment/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'assign'])
-    ->where('session', '.+');
-
-    // Unpublished Assignment
-    Route::get('/assignment/unpublished/{period}/{term}/{session}/{type}', [AssignmentController::class, 'assignUnpublished'])
     ->where('session', '.+');
 
     Route::post('/objective-assignment-answer', [AssignmentController::class, 'objectiveanswer']);
