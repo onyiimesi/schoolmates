@@ -293,7 +293,9 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
 
     Route::post('/objective-assignment-mark', [AssignmentController::class, 'objectivemark']);
+    Route::patch('/update/objective/assignment/mark', [AssignmentController::class, 'updateobjectivemark']);
     Route::post('/theory-assignment-mark', [AssignmentController::class, 'theorymark']);
+    Route::patch('/update/theory/assignment/mark', [AssignmentController::class, 'updatetheorymark']);
     Route::get('/marked-assignment/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'marked'])
     ->where('session', '.+');
     Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'markedbystudent'])
