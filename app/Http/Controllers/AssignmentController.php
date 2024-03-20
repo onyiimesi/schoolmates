@@ -468,8 +468,10 @@ class AssignmentController extends Controller
             '*.total_mark' => 'required',
             '*.score' => 'required',
             '*.week' => 'required',
+        ], [
+            '*.student_mark' => 'student mark is required'
         ]);
-        
+
         $user = Auth::user();
         $data = $request->json()->all();
 
