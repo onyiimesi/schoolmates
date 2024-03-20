@@ -459,7 +459,7 @@ class AssignmentController extends Controller
         $user = Auth::user();
         $data = $request->json()->all();
 
-        try {
+
             foreach($data as $item){
 
                 AssignmentResult::create([
@@ -472,16 +472,13 @@ class AssignmentController extends Controller
                     'student_id' => $item['student_id'],
                     'subject_id' => $item['subject_id'],
                     'question_type' => $item['question_type'],
-                    'student_mark' => $item['student_mark'],
+                    // 'student_mark' => $item['student_mark'],
                     'total_mark' => $item['total_mark'],
                     'score' => $item['score'],
                     'week' => $item['week']
                 ]);
 
             }
-        } catch (\Throwable $th) {
-            return $this->error(null, 400, 'Error occured');
-        }
 
         return [
             "status" => 'true',
