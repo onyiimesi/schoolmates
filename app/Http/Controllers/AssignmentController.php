@@ -456,28 +456,41 @@ class AssignmentController extends Controller
 
     public function result (Request $request)
     {
+        $request->validate([
+            '*.period' => 'required',
+            '*.term' => 'required',
+            '*.session' => 'required',
+            '*.assignment_id' => 'required',
+            '*.student_id' => 'required',
+            '*.subject_id' => 'required',
+            '*.question_type' => 'required',
+            '*.student_mark' => 'required',
+            '*.total_mark' => 'required',
+            '*.score' => 'required',
+            '*.week' => 'required',
+        ]);
+        
         $user = Auth::user();
         $data = $request->json()->all();
 
 
-            foreach($data as $item){
-
-                AssignmentResult::create([
-                    'sch_id' => $user->sch_id,
-                    'campus' => $user->campus,
-                    'period' => $item['period'],
-                    'term' => $item['term'],
-                    'session' => $item['session'],
-                    'assignment_id' => $item['assignment_id'],
-                    'student_id' => $item['student_id'],
-                    'subject_id' => $item['subject_id'],
-                    'question_type' => $item['question_type'],
-                    'student_mark' => $item['student_mark'],
-                    'total_mark' => $item['total_mark'],
-                    'score' => $item['score'],
-                    'week' => $item['week']
-                ]);
-            }
+        foreach($data as $item){
+            AssignmentResult::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question_type' => $item['question_type'],
+                'student_mark' => $item['student_mark'],
+                'total_mark' => $item['total_mark'],
+                'score' => $item['score'],
+                'week' => $item['week']
+            ]);
+        }
 
         return [
             "status" => 'true',
