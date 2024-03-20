@@ -480,7 +480,7 @@ class AssignmentController extends Controller
 
             }
         } catch (\Throwable $th) {
-            return $this->error(null, 400, $th->getMessage());
+            return $this->error(null, 400, 'Error occured');
         }
 
         return [
