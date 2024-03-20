@@ -472,12 +472,11 @@ class AssignmentController extends Controller
                     'student_id' => $item['student_id'],
                     'subject_id' => $item['subject_id'],
                     'question_type' => $item['question_type'],
-                    // 'student_mark' => $item['student_mark'],
+                    'student_mark' => $item['student_mark'],
                     'total_mark' => $item['total_mark'],
                     'score' => $item['score'],
                     'week' => $item['week']
                 ]);
-
             }
 
         return [
