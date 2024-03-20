@@ -22,6 +22,7 @@ class AssignmentController extends Controller
 
     const SUCCESS = 'Submitted Successfully';
     const ASSIGNMENT_ERROR = 'Assignment does not exist';
+    const ASSIGNMENT_MARK_ERROR = 'Does not exist';
 
     public function objective(Request $request)
     {
@@ -155,7 +156,6 @@ class AssignmentController extends Controller
 
     public function objectiveanswer(Request $request)
     {
-
         $user = Auth::user();
 
         if($user->designation_id === 3){
@@ -184,14 +184,12 @@ class AssignmentController extends Controller
                 'submitted' =>  $item['submitted'],
                 'week' => $item['week']
             ]);
-
         }
 
         return [
             "status" => 'true',
             "message" => SELF::SUCCESS
         ];
-
     }
 
     public function theoryanswer(Request $request)
@@ -262,7 +260,6 @@ class AssignmentController extends Controller
 
     public function objectivemark(Request $request)
     {
-
         $user = Auth::user();
         $data = $request->json()->all();
 
@@ -287,7 +284,44 @@ class AssignmentController extends Controller
                 'teacher_mark' =>  $item['teacher_mark'],
                 'week' => $item['week']
             ]);
+        }
 
+        return [
+            "status" => 'true',
+            "message" => SELF::SUCCESS
+        ];
+
+    }
+
+    public function updateobjectivemark(Request $request)
+    {
+        $user = Auth::user();
+        $data = $request->json()->all();
+
+        foreach ($data as $item) {
+            $assign = AssignmentMark::where('id', $item['id'])->first();
+
+            if(!$assign){
+                return $this->error('', SELF::ASSIGNMENT_MARK_ERROR, 400);
+            }
+
+            $assign->update([
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question' => $item['question'],
+                'question_number' => $item['question_number'],
+                'question_type' => $item['question_type'],
+                'answer' =>  $item['answer'],
+                'correct_answer' =>  $item['correct_answer'],
+                'mark' => "marked",
+                'submitted' =>  $item['submitted'],
+                'teacher_mark' =>  $item['teacher_mark'],
+                'week' => $item['week']
+            ]);
         }
 
         return [
@@ -299,7 +333,6 @@ class AssignmentController extends Controller
 
     public function theorymark(Request $request)
     {
-
         $user = Auth::user();
         $data = $request->json()->all();
 
@@ -328,7 +361,45 @@ class AssignmentController extends Controller
         }
 
         return $this->success(null, SELF::SUCCESS, 200);
+    }
 
+    public function updatetheorymark(Request $request)
+    {
+        $user = Auth::user();
+        $data = $request->json()->all();
+
+        foreach ($data as $item) {
+            $assign = AssignmentMark::where('id', $item['id'])->first();
+
+            if(!$assign){
+                return $this->error('', SELF::ASSIGNMENT_MARK_ERROR, 400);
+            }
+
+            $assign->update([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question' => $item['question'],
+                'question_number' => $item['question_number'],
+                'question_type' => $item['question_type'],
+                'answer' =>  $item['answer'],
+                'correct_answer' =>  $item['correct_answer'],
+                'mark' => "marked",
+                'submitted' =>  $item['submitted'],
+                'teacher_mark' =>  $item['teacher_mark'],
+                'week' => $item['week']
+            ]);
+        }
+
+        return [
+            "status" => 'true',
+            "message" => SELF::SUCCESS
+        ];
     }
 
     public function marked(Request $request)
@@ -456,28 +527,42 @@ class AssignmentController extends Controller
 
     public function result (Request $request)
     {
+        $request->validate([
+            '*.period' => 'required',
+            '*.term' => 'required',
+            '*.session' => 'required',
+            '*.assignment_id' => 'required',
+            '*.student_id' => 'required',
+            '*.subject_id' => 'required',
+            '*.question_type' => 'required',
+            '*.student_mark' => 'required',
+            '*.total_mark' => 'required',
+            '*.score' => 'required',
+            '*.week' => 'required',
+        ], [
+            '*.student_mark' => 'student mark is required'
+        ]);
+
         $user = Auth::user();
         $data = $request->json()->all();
 
-
-            foreach($data as $item){
-
-                AssignmentResult::create([
-                    'sch_id' => $user->sch_id,
-                    'campus' => $user->campus,
-                    'period' => $item['period'],
-                    'term' => $item['term'],
-                    'session' => $item['session'],
-                    'assignment_id' => $item['assignment_id'],
-                    'student_id' => $item['student_id'],
-                    'subject_id' => $item['subject_id'],
-                    'question_type' => $item['question_type'],
-                    'student_mark' => $item['student_mark'],
-                    'total_mark' => $item['total_mark'],
-                    'score' => $item['score'],
-                    'week' => $item['week']
-                ]);
-            }
+        foreach($data as $item){
+            AssignmentResult::create([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $item['period'],
+                'term' => $item['term'],
+                'session' => $item['session'],
+                'assignment_id' => $item['assignment_id'],
+                'student_id' => $item['student_id'],
+                'subject_id' => $item['subject_id'],
+                'question_type' => $item['question_type'],
+                'student_mark' => $item['student_mark'],
+                'total_mark' => $item['total_mark'],
+                'score' => $item['score'],
+                'week' => $item['week']
+            ]);
+        }
 
         return [
             "status" => 'true',
