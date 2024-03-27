@@ -8,6 +8,7 @@ use App\Http\Controllers\AdmissionNumSearchController;
 use App\Http\Controllers\AssignClassController;
 use App\Http\Controllers\AssignedVehicleController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\AssignmentPerformanceController;
 use App\Http\Controllers\AssignSubjectsController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
@@ -303,6 +304,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::patch("/publish/assignment", [AssignmentController::class, 'publish']);
     Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassignstu'])
     ->where('session', '.+');
+
+    Route::get('/assignment/performance', [AssignmentPerformanceController::class, 'chart']);
 
     //Assign Subjects to class
     Route::post('/subjects-to-class', [AssignSubjectsController::class, 'assign']);
