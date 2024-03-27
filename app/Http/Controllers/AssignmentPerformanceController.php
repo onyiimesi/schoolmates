@@ -21,14 +21,12 @@ class AssignmentPerformanceController extends Controller
         $session = $request->input('session');
         $studentId = $request->input('student_id');
         $subjectId = $request->input('subject_id');
-        $type = $request->input('type');
 
         $query = DB::table('assignment_marks')
             ->select('student_id', 'week', DB::raw('SUM(teacher_mark) as total_score'))
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('subject_id', $subjectId)
-            ->where('question_type', $type);
+            ->where('subject_id', $subjectId);
 
         if ($studentId) {
             $query->where('student_id', $studentId);
@@ -49,7 +47,7 @@ class AssignmentPerformanceController extends Controller
                 'student_id' => $studentId,
                 'week' => $assignment->week,
                 'total_score' => $totalScore,
-                'percentage_score' => $percentageScore,
+                'average_percentage_score' => $percentageScore,
             ];
 
             $studentsData[] = $studentData;
@@ -60,7 +58,6 @@ class AssignmentPerformanceController extends Controller
             'term' => $term,
             'session' => $session,
             'subject_id' => $subjectId,
-            'type' => $type,
             'students' => $studentsData
         ];
 
