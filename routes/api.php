@@ -304,8 +304,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassignstu'])
     ->where('session', '.+');
 
-    Route::get();
-
     //Assign Subjects to class
     Route::post('/subjects-to-class', [AssignSubjectsController::class, 'assign']);
     Route::post("/add-dos", [SchoolsController::class, 'dos']);
