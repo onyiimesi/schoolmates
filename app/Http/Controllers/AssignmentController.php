@@ -535,12 +535,12 @@ class AssignmentController extends Controller
             '*.student_id' => 'required',
             '*.subject_id' => 'required',
             '*.question_type' => 'required',
-            '*.student_mark' => 'required',
+            '*.mark' => 'required',
             '*.total_mark' => 'required',
             '*.score' => 'required',
             '*.week' => 'required',
         ], [
-            '*.student_mark' => 'student mark is required'
+            '*.mark' => 'student mark is required'
         ]);
 
         $user = Auth::user();
@@ -557,7 +557,7 @@ class AssignmentController extends Controller
                 'student_id' => $item['student_id'],
                 'subject_id' => $item['subject_id'],
                 'question_type' => $item['question_type'],
-                'student_mark' => $item['student_mark'],
+                'student_mark' => $item['mark'],
                 'total_mark' => $item['total_mark'],
                 'score' => $item['score'],
                 'week' => $item['week']

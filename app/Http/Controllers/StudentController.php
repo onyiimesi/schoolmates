@@ -28,7 +28,7 @@ class StudentController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
 
         $students = Student::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
@@ -36,7 +36,7 @@ class StudentController extends Controller
         ->paginate(25);
 
         $studentCollection = StudentResource::collection($students);
-        
+
         return [
             'status' => 'true',
             'message' => 'Students List',

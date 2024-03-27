@@ -282,11 +282,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::patch("/edit-obj-assignment", [AssignmentController::class, 'editObjAssign']);
     Route::patch("/edit-thoery-assignment/{id}", [AssignmentController::class, 'editTheoAssign']);
     Route::delete("/assignment/{id}", [AssignmentController::class, 'delAssign']);
-
-    // Assignment
     Route::get('/assignment/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'assign'])
     ->where('session', '.+');
-
     Route::post('/objective-assignment-answer', [AssignmentController::class, 'objectiveanswer']);
     Route::post('/theory-assignment-answer', [AssignmentController::class, 'theoryanswer']);
     Route::get('/assignment-answer/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'getanswer'])
@@ -304,9 +301,10 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/get-assignment-result/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'resultassign'])
     ->where('session', '.+');
     Route::patch("/publish/assignment", [AssignmentController::class, 'publish']);
-
     Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassignstu'])
     ->where('session', '.+');
+
+    Route::get();
 
     //Assign Subjects to class
     Route::post('/subjects-to-class', [AssignSubjectsController::class, 'assign']);
