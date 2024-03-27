@@ -22,8 +22,8 @@ jobs:
       with:
         files: 'composer.json'
 
-    - name: Run composer update
-      run: composer update
+    - name: Run composer install
+      run: composer install
 
     - name: 🛑 Put site into maintenance mode
       run: php artisan down --refresh=15 --secret="1630542a-246b-4b66-afa1-dd72a4c43515"
