@@ -25,24 +25,6 @@ jobs:
     - name: Run composer install
       run: composer install
 
-    - name: 🛑 Put site into maintenance mode
-      run: php artisan down --refresh=15 --secret="1630542a-246b-4b66-afa1-dd72a4c43515"
-
-    - name: 🗑 Clear Laravel cache
-      run: php artisan cache:clear
-
-    - name: 📝 Cache routes
-      run: php artisan route:cache
-
-    - name: 📝 Cache config
-      run: php artisan config:cache
-
-    - name: 📝 Cache views
-      run: php artisan view:cache
-
-    - name: ✅ Turn off maintenance mode
-      run: php artisan up
-
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
@@ -52,5 +34,6 @@ jobs:
         exclude: |
           **/.git*
           **/.git*/**
+          **/public*/**
           fileToExclude.txt
 
