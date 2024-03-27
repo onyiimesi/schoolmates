@@ -21,6 +21,7 @@ class AssignmentController extends Controller
     use HttpResponses;
 
     const SUCCESS = 'Submitted Successfully';
+    const UPDATE = 'Updated Successfully';
     const ASSIGNMENT_ERROR = 'Assignment does not exist';
     const ASSIGNMENT_MARK_ERROR = 'Does not exist';
 
@@ -326,7 +327,7 @@ class AssignmentController extends Controller
 
         return [
             "status" => 'true',
-            "message" => SELF::SUCCESS
+            "message" => SELF::UPDATE
         ];
 
     }
@@ -369,7 +370,8 @@ class AssignmentController extends Controller
         $data = $request->json()->all();
 
         foreach ($data as $item) {
-            $assign = AssignmentMark::where('id', $item['id'])->first();
+            $assign = AssignmentMark::where('id', $item['id'])
+            ->first();
 
             if(!$assign){
                 return $this->error('', SELF::ASSIGNMENT_MARK_ERROR, 400);
@@ -398,7 +400,7 @@ class AssignmentController extends Controller
 
         return [
             "status" => 'true',
-            "message" => SELF::SUCCESS
+            "message" => SELF::UPDATE
         ];
     }
 
@@ -535,12 +537,12 @@ class AssignmentController extends Controller
             '*.student_id' => 'required',
             '*.subject_id' => 'required',
             '*.question_type' => 'required',
-            '*.student_mark' => 'required',
+            '*.mark' => 'required',
             '*.total_mark' => 'required',
             '*.score' => 'required',
             '*.week' => 'required',
         ], [
-            '*.student_mark' => 'student mark is required'
+            '*.mark' => 'student mark is required'
         ]);
 
         $user = Auth::user();
@@ -557,7 +559,7 @@ class AssignmentController extends Controller
                 'student_id' => $item['student_id'],
                 'subject_id' => $item['subject_id'],
                 'question_type' => $item['question_type'],
-                'student_mark' => $item['student_mark'],
+                'student_mark' => $item['mark'],
                 'total_mark' => $item['total_mark'],
                 'score' => $item['score'],
                 'week' => $item['week']
