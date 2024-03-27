@@ -43,7 +43,7 @@ class AssignmentPerformanceController extends Controller
         foreach ($assignments as $assignment) {
             $studentId = $assignment->student_id;
             $totalScore = $assignment->total_score;
-            $percentageScore = $totalScore / ($assignment->week * 100);
+            $percentageScore = number_format($totalScore / ($assignment->week * 100), 2);
 
             $studentData = [
                 'student_id' => $studentId,
