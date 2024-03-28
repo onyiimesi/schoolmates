@@ -549,7 +549,7 @@ class AssignmentController extends Controller
         $data = $request->json()->all();
 
         foreach($data as $item){
-            AssignmentResult::create([
+            AssignmentResult::updateOrCreate([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
                 'period' => $item['period'],
