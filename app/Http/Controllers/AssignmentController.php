@@ -11,10 +11,12 @@ use App\Models\AcademicPeriod;
 use App\Models\Assignment;
 use App\Models\AssignmentAnswer;
 use App\Models\AssignmentMark;
+use App\Models\AssignmentPerformance;
 use App\Models\AssignmentResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\HttpResponses;
+use Illuminate\Support\Facades\DB;
 
 class AssignmentController extends Controller
 {
@@ -541,29 +543,65 @@ class AssignmentController extends Controller
             '*.total_mark' => 'required',
             '*.score' => 'required',
             '*.week' => 'required',
+            'performance.period' => 'required',
+            'performance.term' => 'required',
+            'performance.session' => 'required',
+            'performance.assignment_id' => 'required',
+            'performance.student_id' => 'required',
+            'performance.subject_id' => 'required',
+            'performance.question_type' => 'required',
+            'performance.total_mark' => 'required',
+            'performance.percentage_score' => 'required',
+            'performance.week' => 'required',
         ], [
-            '*.mark' => 'student mark is required'
+            '*.mark' => 'student mark is required',
+            'performance.percentage_score.required' => 'percentage score is required'
         ]);
 
         $user = Auth::user();
         $data = $request->json()->all();
 
-        foreach($data as $item){
-            AssignmentResult::updateOrCreate([
+        try {
+            DB::beginTransaction();
+
+            foreach ($data['result'] as $item) {
+                AssignmentResult::updateOrCreate([
+                    'sch_id' => $user->sch_id,
+                    'campus' => $user->campus,
+                    'period' => $item['period'],
+                    'term' => $item['term'],
+                    'session' => $item['session'],
+                    'assignment_id' => $item['assignment_id'],
+                    'student_id' => $item['student_id'],
+                    'subject_id' => $item['subject_id'],
+                    'question_type' => $item['question_type'],
+                    'student_mark' => $item['student_mark'],
+                    'total_mark' => $item['total_mark'],
+                    'score' => $item['score'],
+                    'week' => $item['week']
+                ]);
+            }
+
+            $performanceData = $data['performance'];
+            AssignmentPerformance::updateOrCreate([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
-                'period' => $item['period'],
-                'term' => $item['term'],
-                'session' => $item['session'],
-                'assignment_id' => $item['assignment_id'],
-                'student_id' => $item['student_id'],
-                'subject_id' => $item['subject_id'],
-                'question_type' => $item['question_type'],
-                'student_mark' => $item['mark'],
-                'total_mark' => $item['total_mark'],
-                'score' => $item['score'],
-                'week' => $item['week']
+                'period' => $performanceData['period'],
+                'term' => $performanceData['term'],
+                'session' => $performanceData['session'],
+                'assignment_id' => $performanceData['assignment_id'],
+                'student_id' => $performanceData['student_id'],
+                'subject_id' => $performanceData['subject_id'],
+                'question_type' => $performanceData['question_type'],
+                'total_mark' => $performanceData['total_mark'],
+                'percentage_score' => $performanceData['percentage_score'],
+                'week' => $performanceData['week']
             ]);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->error(null, $e->getMessage(), 400);
         }
 
         return [

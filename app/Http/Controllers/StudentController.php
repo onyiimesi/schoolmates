@@ -155,6 +155,7 @@ class StudentController extends Controller
             'email_address' => $request->email_address,
             'file_id' => $fileId,
             'status' => 'active',
+            'is_preschool' => $campus->is_preschool,
             'created_by' => $user->surname .' '. $user->firstname .' '. $user->middlename,
         ]);
 
@@ -255,6 +256,7 @@ class StudentController extends Controller
             'home_address' => $request->home_address,
             'phone_number' => $request->phone_number,
             'email_address' => $request->email_address,
+            'is_preschool' => $campus->is_preschool,
             'file_id' => $fileId,
         ]);
 
