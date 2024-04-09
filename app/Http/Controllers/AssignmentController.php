@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AssignmentResultRequest;
 use App\Http\Resources\AssignmentAnswerResource;
 use App\Http\Resources\AssignmentMarkResource;
 use App\Http\Resources\AssignmentResource;
@@ -529,34 +530,9 @@ class AssignmentController extends Controller
         return response(null, 204);
     }
 
-    public function result (Request $request)
+    public function result (AssignmentResultRequest $request)
     {
-        $request->validate([
-            '*.period' => 'required',
-            '*.term' => 'required',
-            '*.session' => 'required',
-            '*.assignment_id' => 'required',
-            '*.student_id' => 'required',
-            '*.subject_id' => 'required',
-            '*.question_type' => 'required',
-            '*.mark' => 'required',
-            '*.total_mark' => 'required',
-            '*.score' => 'required',
-            '*.week' => 'required',
-            'performance.period' => 'required',
-            'performance.term' => 'required',
-            'performance.session' => 'required',
-            'performance.assignment_id' => 'required',
-            'performance.student_id' => 'required',
-            'performance.subject_id' => 'required',
-            'performance.question_type' => 'required',
-            'performance.total_mark' => 'required',
-            'performance.percentage_score' => 'required',
-            'performance.week' => 'required',
-        ], [
-            '*.mark' => 'student mark is required',
-            'performance.percentage_score.required' => 'percentage score is required'
-        ]);
+        $request->validated();
 
         $user = Auth::user();
         $data = $request->json()->all();
@@ -601,7 +577,7 @@ class AssignmentController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->error(null, $e->getMessage(), 400);
+            return $this->error(null, 'An error occurred while processing the request. Please try again later.', 500);
         }
 
         return [
