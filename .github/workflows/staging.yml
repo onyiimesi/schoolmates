@@ -22,8 +22,8 @@ jobs:
       with:
         files: 'composer.json'
 
-    - name: Run composer install
-      run: composer install
+    - name: Run composer update
+      run: composer update
 
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
