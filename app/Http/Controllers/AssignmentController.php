@@ -577,7 +577,7 @@ class AssignmentController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->error(null, 'An error occurred while processing the request. Please try again later.', 500);
+            return $this->error(null, $e->getMessage(), 400);
         }
 
         return [
