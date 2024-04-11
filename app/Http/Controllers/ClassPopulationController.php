@@ -13,23 +13,17 @@ class ClassPopulationController extends Controller
 {
     public function getclasspopulation()
     {
-
         $staff = Auth::user();
-        $period = AcademicPeriod::where('sch_id', $staff->sch_id)
-        ->where('campus', $staff->campus)
-        ->first();
 
         $class = Student::where('present_class', $staff->class_assigned)
         ->where('sch_id', $staff->sch_id)
         ->where('campus', $staff->campus)
-        ->where("session_admitted", $period->session)->get();
-
-        $popu = $class->count();
+        ->count();
 
         return [
             'status' => 'true',
             'message' => 'Class Population',
-            'data' => $popu
+            'data' => $class
         ];
     }
 
@@ -69,7 +63,7 @@ class ClassPopulationController extends Controller
     public function getteacherpopulation()
     {
         $staff = Auth::user();
-        
+
         $all = Staff::where('designation_id', '4')
         ->where('sch_id', $staff->sch_id)
         ->get();

@@ -22,8 +22,8 @@ class AssignmentPerformanceController extends Controller
         $studentId = $request->input('student_id');
         $subjectId = $request->input('subject_id');
 
-        $query = DB::table('assignment_marks')
-            ->select('student_id', 'week', DB::raw('SUM(teacher_mark) as total_score'))
+        $query = DB::table('assignment_performances')
+            ->select('student_id', 'week', DB::raw('SUM(percentage_score) as total_score'))
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('subject_id', $subjectId);
@@ -41,7 +41,7 @@ class AssignmentPerformanceController extends Controller
         foreach ($assignments as $assignment) {
             $studentId = $assignment->student_id;
             $totalScore = $assignment->total_score;
-            $percentageScore = number_format($totalScore / ($assignment->week * 100), 2);
+            $percentageScore = number_format($totalScore / 2, 2);
 
             $studentData = [
                 'student_id' => $studentId,

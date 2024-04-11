@@ -42,6 +42,7 @@ class Student extends Authenticatable implements Auditable
         'email_address',
         'status',
         'created_by',
+        'is_preschool',
         'file_id'
     ];
 

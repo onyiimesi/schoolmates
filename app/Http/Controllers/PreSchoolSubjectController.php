@@ -46,7 +46,7 @@ class PreSchoolSubjectController extends Controller
                 'data' => $presub
             ];
 
-        }else if(!empty($subjects)){
+        }elseif(!empty($subjects)){
 
             $subjects->update([
                 'topic' => $request->topic
@@ -161,7 +161,7 @@ class PreSchoolSubjectController extends Controller
                 'data' => $presub
             ];
 
-        }else if(!empty($pre)){
+        }elseif(!empty($pre)){
 
             $pre->update([
                 'subjects' => $request->subjects
