@@ -12,6 +12,7 @@ class Campus extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
+        'sch_id',
         'name',
         'email',
         'image',
