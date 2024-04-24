@@ -22,6 +22,8 @@ class CbtSettingsResource extends JsonResource
                 'period' => (string)$this->period,
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
+                'subject_id' => (string)$this->subject_id,
+                'question_type' => (string)$this->question_type,
                 'instruction' => (string)$this->instruction,
                 'duration' => (string)$this->duration,
                 'mark' => (string)$this->mark
