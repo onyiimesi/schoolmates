@@ -15,6 +15,8 @@ class CbtSetting extends Model
         'period',
         'term',
         'session',
+        'subject_id',
+        'question_type',
         'instruction',
         'duration',
         'mark'

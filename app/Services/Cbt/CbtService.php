@@ -21,6 +21,8 @@ class CbtService {
                 $period = $request->period;
                 $term = $request->term;
                 $session = $request->session;
+                $subject_id = $request->subject_id;
+                $question_type = $request->question_type;
 
                 CbtSetting::updateOrCreate(
                     [
@@ -28,7 +30,9 @@ class CbtService {
                         'campus' => $user->campus,
                         'period' => $period,
                         'term' => $term,
-                        'session' => $session
+                        'session' => $session,
+                        'subject_id' => $subject_id,
+                        'question_type' => $question_type
                     ],
                     [
                         'instruction' => $request->instruction,

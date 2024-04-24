@@ -25,6 +25,8 @@ class CbtSetupRequest extends FormRequest
             'period' => ['required'],
             'term' => ['required'],
             'session' => ['required'],
+            'subject_id' => ['required'],
+            'question_type' => ['required', 'string'],
             'instruction' => ['required'],
             'duration' => ['required'],
             'mark' => ['required'],

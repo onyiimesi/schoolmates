@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('period');
             $table->string('term');
             $table->string('session');
+            $table->string('subject_id');
+            $table->string('question_type');
             $table->longText('instruction');
             $table->string('duration');
             $table->string('mark');
