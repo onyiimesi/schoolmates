@@ -13,7 +13,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::prefix('cbt')->group(function () {
         Route::post('/setup', [CbtController::class, 'addSetup']);
-        Route::get('/setup/{period}/{term}/{session}', [CbtController::class, 'getSetup'])
+        Route::get('/setup/{period}/{term}/{session}/{subject_id}/{question_type}', [CbtController::class, 'getSetup'])
         ->where('session', '.+');
 
         Route::post('/add/question', [CbtController::class, 'addQuestion']);

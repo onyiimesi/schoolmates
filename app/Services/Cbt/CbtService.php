@@ -55,6 +55,8 @@ class CbtService {
         ->where('period', $request->period)
         ->where('term', $request->term)
         ->where('session', $request->session)
+        ->where('subject_id', $request->subject_id)
+        ->where('question_type', $request->question_type)
         ->first();
 
         if(!$data){
