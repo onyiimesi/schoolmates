@@ -67,9 +67,8 @@ class CbtController extends Controller
         return $this->cbt->getAnswerSubject($user, $request);
     }
 
-    public function getAnswerStudent(Request $request)
+    public function getStudentAnswer(Request $request)
     {
-        dd($request);
         $user = Auth::user();
         return $this->cbt->getAnswerOneStudent($user, $request);
     }
