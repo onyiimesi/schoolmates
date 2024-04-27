@@ -19,6 +19,16 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         Route::post('/add/question', [CbtController::class, 'addQuestion']);
         Route::get('/questions/{period}/{term}/{session}/{subject_id}/{question_type}/get', [CbtController::class, 'getQuestions'])
         ->where('session', '.+');
+        Route::patch('/update/question/{id}', [CbtController::class, 'editQuestion']);
+        Route::delete('/delete/question/{id}', [CbtController::class, 'deleteQuestion']);
+
+        Route::prefix('answer')->group(function () {
+            Route::post('/add', [CbtController::class, 'addAnswer']);
+            Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}', [CbtController::class, 'getAnswerSubject'])
+            ->where('session', '.+');
+            Route::get('/student/{period}/{term}/{session}/{question_type}/{subject_id}/{student_id}', [CbtController::class, 'getAnswerStudent'])
+            ->where('session', '.+');
+        });
 
     });
 

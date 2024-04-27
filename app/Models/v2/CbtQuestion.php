@@ -31,4 +31,9 @@ class CbtQuestion extends Model
         'teacher_id',
         'status'
     ];
+
+    public function cbtanswer()
+    {
+        return $this->hasMany(CbtAnswer::class, 'cbt_question_id');
+    }
 }

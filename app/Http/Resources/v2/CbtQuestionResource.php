@@ -31,6 +31,7 @@ class CbtQuestionResource extends JsonResource
                 'option4' => (string)$this->option4,
                 'answer' => (string)$this->answer,
                 'question_mark' => (string)$this->question_mark,
+                'question_number' => (string)$this->question_number,
                 'status' => (string)$this->status,
             ]
         ];
