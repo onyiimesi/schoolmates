@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v2;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v2\CbtAddAnswerRequest;
 use App\Http\Requests\v2\CbtAddQuestionRequest;
+use App\Http\Requests\v2\CbtPublishRequest;
 use App\Http\Requests\v2\CbtSetupRequest;
 use App\Services\Cbt\CbtService;
 use Illuminate\Http\Request;
@@ -71,5 +72,11 @@ class CbtController extends Controller
     {
         $user = Auth::user();
         return $this->cbt->getAnswerOneStudent($user, $request);
+    }
+
+    public function publish(CbtPublishRequest $request)
+    {
+        $user = Auth::user();
+        return $this->cbt->cbtPublish($user, $request);
     }
 }
