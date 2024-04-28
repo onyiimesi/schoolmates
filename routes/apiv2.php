@@ -21,15 +21,15 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         ->where('session', '.+');
         Route::patch('/update/question/{id}', [CbtController::class, 'editQuestion']);
         Route::delete('/delete/question/{id}', [CbtController::class, 'deleteQuestion']);
+        Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}/{student_id}/student', [CbtController::class, 'getStudentAnswer'])
+        ->where('session', '.+');
+        Route::patch("/publish", [CbtController::class, 'publish']);
 
         Route::prefix('answer')->group(function () {
             Route::post('/add', [CbtController::class, 'addAnswer']);
             Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}', [CbtController::class, 'getAnswerSubject'])
             ->where('session', '.+');
         });
-
-        Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}/{student_id}/student', [CbtController::class, 'getStudentAnswer'])
-            ->where('session', '.+');
 
     });
 

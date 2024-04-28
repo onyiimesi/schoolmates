@@ -93,7 +93,7 @@ class CbtService {
                     'answer' => $request->answer,
                     'question_mark' => $request->question_mark,
                     'question_number' => $request->question_number,
-                    'status' => 'active',
+                    'status' => 'unpublished',
                 ]);
             });
 
@@ -144,6 +144,7 @@ class CbtService {
                 'answer' => $request->answer,
                 'question_mark' => $request->question_mark,
                 'question_number' => $request->question_number,
+                'status' => $request->status
             ]);
 
             return $this->success(null, "Updated Successful");
@@ -242,6 +243,38 @@ class CbtService {
         $data = CbtAnswerResource::collection($data);
 
         return $this->success($data, "Successful");
+    }
+
+    public function cbtPublish($user, $request)
+    {
+        try {
+            $assign = CbtQuestion::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->where('subject_id', $request->subject_id)
+            ->where('question_type', $request->question_type)
+            ->get();
+
+            if ($request->is_publish == 1) {
+                $assign->each(function ($cbt) {
+                    $cbt->update([
+                        'status' => 'published'
+                    ]);
+                });
+            } else {
+                $assign->each(function ($cbt) {
+                    $cbt->update([
+                        'status' => 'unpublished'
+                    ]);
+                });
+            }
+
+            return $this->success(null, "Published successfully!");
+        } catch (\Throwable $th) {
+            throw new Exception($th);
+        }
     }
 
 }
