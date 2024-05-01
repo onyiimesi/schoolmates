@@ -20,10 +20,10 @@ class DepartmentController extends Controller
         $user = Auth::user();
 
         $depart = DepartmentResource::collection(
-            Department::where('sch_id', $user->sch_id
+            Department::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->get()
-        ));
+        );
 
         return [
             'status' => 'true',
