@@ -27,7 +27,6 @@ class StaffController extends Controller
      */
     public function index()
     {
-
         $user = Auth::user();
 
         if($user->designation_id == 6){
