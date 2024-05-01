@@ -45,4 +45,9 @@ class CbtAnswer extends Model
     {
         return $this->belongsTo(Subject::class);
     }
+
+    public function cbtresult()
+    {
+        return $this->hasMany(CbtResult::class, 'cbt_answer_id');
+    }
 }
