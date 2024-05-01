@@ -31,6 +31,12 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
             ->where('session', '.+');
         });
 
+        Route::prefix('result')->group(function () {
+            Route::post('/add', [CbtController::class, 'addResult']);
+            Route::get('/{student_id}/{period}/{term}/{session}/{question_type}/{subject_id}', [CbtController::class, 'getResultStudent'])
+            ->where('session', '.+');
+        });
+
     });
 
 });

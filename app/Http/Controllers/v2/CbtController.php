@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\v2\CbtAddAnswerRequest;
 use App\Http\Requests\v2\CbtAddQuestionRequest;
 use App\Http\Requests\v2\CbtPublishRequest;
+use App\Http\Requests\v2\CbtResultRequest;
 use App\Http\Requests\v2\CbtSetupRequest;
 use App\Services\Cbt\CbtService;
 use Illuminate\Http\Request;
@@ -78,5 +79,17 @@ class CbtController extends Controller
     {
         $user = Auth::user();
         return $this->cbt->cbtPublish($user, $request);
+    }
+
+    public function addResult(CbtResultRequest $request)
+    {
+        $user = Auth::user();
+        return $this->cbt->createResult($user, $request);
+    }
+
+    public function getResultStudent(Request $request)
+    {
+        $user = Auth::user();
+        return $this->cbt->getStudentResult($user, $request);
     }
 }
