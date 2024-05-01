@@ -6,6 +6,7 @@ use App\Http\Requests\StudentRequest;
 use App\Http\Resources\StudentResource;
 use App\Mail\StudentWelcomeMail;
 use App\Models\Campus;
+use App\Models\Pricing;
 use App\Models\SchoolPayment;
 use App\Models\Schools;
 use App\Models\Student;
@@ -75,21 +76,14 @@ class StudentController extends Controller
         $count = $getstudents->count();
 
         $plan = SchoolPayment::where('sch_id', $user->sch_id)->first();
-        if(!$plan){
-            return "An error occured";
+        if($plan){
+            $getplan = Pricing::where('id', $plan->pricing_id)->first();
+        } else {
+            $school = Schools::where('sch_id', $user->sch_id)->first();
+            $getplan = Pricing::where('id', $school->pricing_id)->first();
         }
 
-        if($count >= 50 && $plan->pricing_id == 1){
-            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
-        }
-
-        if($count >= 250 && $plan->pricing_id == 2){
-            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
-        }
-
-        if($count >= 500 && $plan->pricing_id == 3){
-            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
-        }
+        $this->handleCount($count, $getplan);
 
         $campus = Campus::where('sch_id', $user->sch_id)
         ->where('name', $request->campus)
@@ -278,5 +272,20 @@ class StudentController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    private function handleCount($count, $getplan)
+    {
+        if($count >= 50 && $getplan->id == 1){
+            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+        }
+
+        if($count >= 250 && $getplan->id == 2){
+            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+        }
+
+        if($count >= 500 && $getplan->id == 3){
+            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+        }
     }
 }
