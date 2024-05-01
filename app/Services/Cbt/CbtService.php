@@ -347,6 +347,54 @@ class CbtService {
         return $this->success($data, "Successful");
     }
 
+    public function getChart($user, $request)
+    {
+        $period = $request->input('period');
+        $term = $request->input('term');
+        $session = $request->input('session');
+        $studentId = $request->input('student_id');
+        $subjectId = $request->input('subject_id');
+
+        $query = DB::table('cbt_performances')
+            ->select('student_id', DB::raw('SUM(student_total_mark) as total_score'))
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('subject_id', $subjectId);
+
+        if ($studentId) {
+            $query->where('student_id', $studentId);
+        }
+
+        $assignments = $query->groupBy('student_id')
+            ->orderBy('student_id')
+            ->get();
+
+        $studentsData = [];
+        foreach ($assignments as $assignment) {
+            $studentId = $assignment->student_id;
+            $totalScore = $assignment->total_score;
+            $percentageScore = number_format($totalScore / 2, 2);
+
+            $studentData = [
+                'student_id' => $studentId,
+                'total_score' => $totalScore,
+                'average_percentage_score' => $percentageScore,
+            ];
+
+            $studentsData[] = $studentData;
+        }
+
+        $data[] = [
+            'period' => $period,
+            'term' => $term,
+            'session' => $session,
+            'subject_id' => $subjectId,
+            'students' => $studentsData
+        ];
+
+        return $this->success($data, "Performance Chart", 200);
+    }
+
 }
 
 

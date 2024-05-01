@@ -24,6 +24,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}/{student_id}/student', [CbtController::class, 'getStudentAnswer'])
         ->where('session', '.+');
         Route::patch("/publish", [CbtController::class, 'publish']);
+        Route::get("/performance", [CbtController::class, 'performance']);
 
         Route::prefix('answer')->group(function () {
             Route::post('/add', [CbtController::class, 'addAnswer']);

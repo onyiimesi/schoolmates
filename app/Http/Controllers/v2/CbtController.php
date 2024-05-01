@@ -92,4 +92,10 @@ class CbtController extends Controller
         $user = Auth::user();
         return $this->cbt->getStudentResult($user, $request);
     }
+
+    public function performance(Request $request)
+    {
+        $user = Auth::user();
+        return $this->cbt->getChart($user, $request);
+    }
 }
