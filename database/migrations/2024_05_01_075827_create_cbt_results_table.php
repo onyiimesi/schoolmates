@@ -23,6 +23,9 @@ return new class extends Migration
             $table->string('subject_id');
             $table->string('question_type');
             $table->longText('answer_score');
+            $table->string('correct_answer');
+            $table->string('incorrect_answer');
+            $table->string('total_answer');
             $table->string('student_total_mark');
             $table->string('test_total_mark');
             $table->string('student_duration');
@@ -43,6 +46,9 @@ return new class extends Migration
             $table->string('student_id');
             $table->string('subject_id');
             $table->string('question_type');
+            $table->string('correct_answer');
+            $table->string('incorrect_answer');
+            $table->string('total_answer');
             $table->string('student_total_mark');
             $table->string('test_total_mark');
             $table->string('student_duration');
