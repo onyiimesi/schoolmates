@@ -24,7 +24,10 @@ class CbtPerformance extends Model
         'student_total_mark',
         'test_total_mark',
         'student_duration',
-        'test_duration'
+        'test_duration',
+        'correct_answer',
+        'incorrect_answer',
+        'total_answer'
     ];
 
     public function cbtresult()

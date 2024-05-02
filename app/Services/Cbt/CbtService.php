@@ -296,6 +296,9 @@ class CbtService {
                     'subject_id' => $result['subject_id'],
                     'question_type' => $result['question_type'],
                     'answer_score' => $result['answer_score'],
+                    'correct_answer' => $result['correct_answer'],
+                    'incorrect_answer' => $result['incorrect_answer'],
+                    'total_answer' => $result['total_answer'],
                     'student_total_mark' => $result['student_total_mark'],
                     'test_total_mark' => $result['test_total_mark'],
                     'student_duration' => $result['student_duration'],
@@ -314,6 +317,9 @@ class CbtService {
                     'subject_id' => $performanceData['subject_id'],
                     'question_type' => $performanceData['question_type'],
                     'student_total_mark' => $performanceData['student_total_mark'],
+                    'correct_answer' => $performanceData['correct_answer'],
+                    'incorrect_answer' => $performanceData['incorrect_answer'],
+                    'total_answer' => $performanceData['total_answer'],
                     'test_total_mark' => $performanceData['test_total_mark'],
                     'student_duration' => $performanceData['student_duration'],
                     'test_duration' => $performanceData['test_duration']
@@ -356,7 +362,8 @@ class CbtService {
         $subjectId = $request->input('subject_id');
 
         $query = DB::table('cbt_performances')
-            ->select('student_id', DB::raw('SUM(student_total_mark) as total_score'))
+            ->select('student_id', 'student_total_mark', 'test_total_mark', 'student_duration', 'test_duration', 'correct_answer',
+            'incorrect_answer', 'total_answer')
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('subject_id', $subjectId);
@@ -365,20 +372,30 @@ class CbtService {
             $query->where('student_id', $studentId);
         }
 
-        $assignments = $query->groupBy('student_id')
+        $cbts = $query->groupBy('student_id', 'student_total_mark', 'test_total_mark', 'student_duration', 'test_duration', 'correct_answer', 'incorrect_answer', 'total_answer')
             ->orderBy('student_id')
             ->get();
 
         $studentsData = [];
-        foreach ($assignments as $assignment) {
-            $studentId = $assignment->student_id;
-            $totalScore = $assignment->total_score;
-            $percentageScore = number_format($totalScore / 2, 2);
+        foreach ($cbts as $cbt) {
+            $studentId = $cbt->student_id;
+            $studentMark = $cbt->student_total_mark;
+            $testMark = $cbt->test_total_mark;
+            $studentDuration = $cbt->student_duration;
+            $testDuration = $cbt->test_duration;
+            $correctAnswer = $cbt->correct_answer;
+            $incorrectAnswer = $cbt->incorrect_answer;
+            $totalAnswer = $cbt->total_answer;
 
             $studentData = [
                 'student_id' => $studentId,
-                'total_score' => $totalScore,
-                'average_percentage_score' => $percentageScore,
+                'student_total_mark' => $studentMark,
+                'test_total_mark' => $testMark,
+                'student_duration' => $studentDuration,
+                'test_duration' => $testDuration,
+                'correct_answer' => $correctAnswer,
+                'incorrect_answer' => $incorrectAnswer,
+                'total_answer' => $totalAnswer
             ];
 
             $studentsData[] = $studentData;
