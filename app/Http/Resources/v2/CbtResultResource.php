@@ -28,6 +28,7 @@ class CbtResultResource extends JsonResource
                 'answer_score' => (array)$this->answer_score,
                 'correct_answer' => (string)$this->correct_answer,
                 'incorrect_answer' => (string)$this->incorrect_answer,
+                'unattempted_question' => (string)$this->unattempted_question,
                 'total_answer' => (string)$this->total_answer,
                 'student_total_mark' => (string)$this->student_total_mark,
                 'test_total_mark' => (string)$this->test_total_mark,

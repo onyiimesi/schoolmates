@@ -39,6 +39,7 @@ class CbtResultRequest extends FormRequest
             'result.test_duration' => ['required'],
             'result.correct_answer' => ['required'],
             'result.incorrect_answer' => ['required'],
+            'result.unattempted_question' => ['required'],
             'result.total_answer' => ['required'],
             'performance.period' => ['required'],
             'performance.term' => ['required'],
@@ -53,6 +54,7 @@ class CbtResultRequest extends FormRequest
             'performance.test_duration' => ['required'],
             'performance.correct_answer' => ['required'],
             'performance.incorrect_answer' => ['required'],
+            'performance.unattempted_question' => ['required'],
             'performance.total_answer' => ['required'],
         ];
     }

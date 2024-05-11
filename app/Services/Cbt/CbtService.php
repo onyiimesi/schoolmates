@@ -298,6 +298,7 @@ class CbtService {
                     'answer_score' => $result['answer_score'],
                     'correct_answer' => $result['correct_answer'],
                     'incorrect_answer' => $result['incorrect_answer'],
+                    'unattempted_question' => $result['unattempted_question'],
                     'total_answer' => $result['total_answer'],
                     'student_total_mark' => $result['student_total_mark'],
                     'test_total_mark' => $result['test_total_mark'],
@@ -319,6 +320,7 @@ class CbtService {
                     'student_total_mark' => $performanceData['student_total_mark'],
                     'correct_answer' => $performanceData['correct_answer'],
                     'incorrect_answer' => $performanceData['incorrect_answer'],
+                    'unattempted_question' => $performanceData['unattempted_question'],
                     'total_answer' => $performanceData['total_answer'],
                     'test_total_mark' => $performanceData['test_total_mark'],
                     'student_duration' => $performanceData['student_duration'],
@@ -363,7 +365,7 @@ class CbtService {
 
         $query = DB::table('cbt_performances')
             ->select('student_id', 'student_total_mark', 'test_total_mark', 'student_duration', 'test_duration', 'correct_answer',
-            'incorrect_answer', 'total_answer')
+            'incorrect_answer', 'unattempted_question', 'total_answer')
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('subject_id', $subjectId);
@@ -372,7 +374,7 @@ class CbtService {
             $query->where('student_id', $studentId);
         }
 
-        $cbts = $query->groupBy('student_id', 'student_total_mark', 'test_total_mark', 'student_duration', 'test_duration', 'correct_answer', 'incorrect_answer', 'total_answer')
+        $cbts = $query->groupBy('student_id', 'student_total_mark', 'test_total_mark', 'student_duration', 'test_duration', 'correct_answer', 'incorrect_answer', 'unattempted_question', 'total_answer')
             ->orderBy('student_id')
             ->get();
 
@@ -385,6 +387,7 @@ class CbtService {
             $testDuration = $cbt->test_duration;
             $correctAnswer = $cbt->correct_answer;
             $incorrectAnswer = $cbt->incorrect_answer;
+            $unattempt = $cbt->unattempted_question;
             $totalAnswer = $cbt->total_answer;
 
             $studentData = [
@@ -395,6 +398,7 @@ class CbtService {
                 'test_duration' => $testDuration,
                 'correct_answer' => $correctAnswer,
                 'incorrect_answer' => $incorrectAnswer,
+                'unattempted_question' => $unattempt,
                 'total_answer' => $totalAnswer
             ];
 
