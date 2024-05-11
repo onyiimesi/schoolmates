@@ -26,7 +26,8 @@ class CbtResult extends Model
         'test_duration',
         'correct_answer',
         'incorrect_answer',
-        'total_answer'
+        'total_answer',
+        'unattempted_question'
     ];
 
     protected $casts = [
