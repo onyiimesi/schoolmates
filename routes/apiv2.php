@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\v2\CbtController;
+use App\Http\Controllers\v2\LessonNoteController;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,7 +38,18 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
             Route::get('/{student_id}/{period}/{term}/{session}/{question_type}/{subject_id}', [CbtController::class, 'getResultStudent'])
             ->where('session', '.+');
         });
+    });
 
+    Route::prefix('lessonnote')->group(function () {
+        Route::post('/add', [LessonNoteController::class, 'addLesson']);
+        Route::get('/single/{lesson_id}/{class_id}/{subject_id}/{week}/{term}/{session}', [LessonNoteController::class, 'getOneLesson'])
+        ->where('session', '.+');
+        Route::get('/{class_id}/{subject_id}/{week}/{term}/{session}', [LessonNoteController::class, 'getLesson'])
+        ->where('session', '.+');
+        Route::patch('/edit/{lesson_id}', [LessonNoteController::class, 'editLesson']);
+        Route::delete('/remove/{lesson_id}', [LessonNoteController::class, 'deleteLesson']);
+        Route::patch('/approve/{lesson_id}', [LessonNoteController::class, 'approveLesson']);
+        Route::patch('/unapprove/{lesson_id}', [LessonNoteController::class, 'unapproveLesson']);
     });
 
 });

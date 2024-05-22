@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\v2\LessonNote;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -49,5 +50,9 @@ class Staff extends Authenticatable implements Auditable
 
     public function subjectteacher(){
         return $this->hasMany(SubjectTeacher::class, 'staff_id');
+    }
+
+    public function lessonnotes(){
+        return $this->hasMany(LessonNote::class, 'staff_id');
     }
 }
