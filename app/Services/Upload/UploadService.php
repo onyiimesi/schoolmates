@@ -27,10 +27,26 @@ class UploadService
 
             $file = $this->file;
             $folderName = $this->name;
-            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1);
-            $sig = str_replace($replace, '', $file);
-            $sig = str_replace(' ', '+', $sig);
+
+            // Extract the file's MIME type
+            $rawMimeType = substr($file, 5, strpos($file, ';') - 5);
+            $mimeType = str_replace('@file/', '', $rawMimeType);
+
+            // Map MIME types to file extensions
+            $mimeToExt = [
+                'application/pdf' => 'pdf',
+                'application/msword' => 'doc',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+                'vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+            ];
+
+            $extension = isset($mimeToExt[$mimeType]) ? $mimeToExt[$mimeType] : 'bin';
+
+            // Remove the base64 header
+            $replace = substr($file, 0, strpos($file, ',') + 1);
+            $base64Content = str_replace($replace, '', $file);
+            $base64Content = str_replace(' ', '+', $base64Content);
+
             $file_name = time().'.'.$extension;
             $sch = $this->schId;
             $path = $folderName . '/' . $sch;
