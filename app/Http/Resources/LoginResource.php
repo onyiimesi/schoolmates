@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ClassModel;
 use App\Models\Pricing;
 use App\Models\SchoolPayment;
 use App\Models\Schools;
@@ -20,11 +21,17 @@ class LoginResource extends JsonResource
         $plan = SchoolPayment::where('sch_id', $this->sch_id)->first();
         if($plan){
             $getplan = Pricing::where('id', $plan->pricing_id)->first();
-            
+
         } else {
             $school = Schools::where('sch_id', $this->sch_id)->first();
             $getplan = Pricing::where('id', $school->pricing_id)->first();
         }
+
+        $classid = ClassModel::where([
+            "sch_id" => $this->sch_id,
+            "campus" => $this->campus,
+            "class_name" => $this->class_assigned
+        ])->value('id');
 
         return [
             'id' => (string)$this->id,
@@ -40,6 +47,7 @@ class LoginResource extends JsonResource
             'phoneno' => (string)$this->phoneno,
             'address' => (string)$this->address,
             'image' => (string)$this->image,
+            'class_id' => (string)$classid,
             'class_assigned' => (string)$this->class_assigned,
             'teacher_type' => (string)$this->teacher_type,
             'signature' => (string)$this->signature,
