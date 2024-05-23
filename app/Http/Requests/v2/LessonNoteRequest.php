@@ -29,6 +29,7 @@ class LessonNoteRequest extends FormRequest
             'topic' => ['required', 'string', 'max:200'],
             'description' => ['required', 'string'],
             'file' => ['required'],
+            'file_name' => ['required'],
         ];
     }
 }

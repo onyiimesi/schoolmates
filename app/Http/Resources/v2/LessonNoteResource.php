@@ -4,6 +4,7 @@ namespace App\Http\Resources\v2;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 class LessonNoteResource extends JsonResource
 {
@@ -29,11 +30,13 @@ class LessonNoteResource extends JsonResource
                 'topic' => (string)$this->topic,
                 'description' => (string)$this->description,
                 'file' => (string)$this->file,
+                'file_name' => (string)$this->file_name,
                 'submitted_by' => (string)$this->submitted_by,
                 'week' => (int)$this->week,
-                'status' => (string)$this->status
+                'status' => (string)$this->status,
+                'date_submitted' => $this->date_submitted ? Carbon::parse($this->date_submitted)->format('d M Y, h:i A') : null,
+                'date_approved' => $this->date_approved ? Carbon::parse($this->date_approved)->format('d M Y, h:i A') : null,
             ]
-
         ];
     }
 }

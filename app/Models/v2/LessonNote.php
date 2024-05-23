@@ -24,9 +24,12 @@ class LessonNote extends Model
         'topic',
         'description',
         'file',
+        'file_name',
         'file_id',
         'submitted_by',
-        'status'
+        'status',
+        'date_submitted',
+        'date_approved'
     ];
 
     public function staff()
