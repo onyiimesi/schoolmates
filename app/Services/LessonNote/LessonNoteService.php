@@ -10,6 +10,7 @@ use App\Models\v2\LessonNote;
 use App\Services\ImageKit\DeleteService;
 use App\Services\Upload\UploadService;
 use App\Traits\HttpResponses;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use ImageKit\ImageKit;
 
@@ -32,7 +33,7 @@ class LessonNoteService extends Controller
             $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
             $data = (new UploadService($request->file, 'lessonnote', $cleanSchId))->run();
-            
+
             LessonNote::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -45,8 +46,10 @@ class LessonNoteService extends Controller
                 'topic' => $request->topic,
                 'description' => $request->description,
                 'file' => $data->url ?? $data['url'] ?? $data,
+                'file_name' => $request->file_name,
                 'file_id' => $data->file_id ?? $data['file_id'] ?? null,
                 'submitted_by' => $user->surname . ' '. $user->firstname . ' ' . $user->middlename,
+                'date_submitted' => Carbon::now(),
                 'status' => "not approved"
             ]);
 
@@ -128,6 +131,7 @@ class LessonNoteService extends Controller
             'topic' => $request->topic,
             'description' => $request->description,
             'file' => $data->url ?? $data['url'] ?? $data,
+            'file_name' => $request->file_name,
             'file_id' => $data->file_id ?? $data['file_id'] ?? null,
         ]);
 
@@ -179,7 +183,8 @@ class LessonNoteService extends Controller
         }
 
         $lesson->update([
-            'status' => "approved"
+            'status' => "approved",
+            'date_approved' => Carbon::now(),
         ]);
 
         return $this->success(null, "Approved successfully");
