@@ -128,6 +128,8 @@ class LessonNoteService extends Controller
         }
 
         $lesson->update([
+            'term' => $request->term,
+            'session' => $request->session,
             'topic' => $request->topic,
             'description' => $request->description,
             'file' => $data->url ?? $data['url'] ?? $data,
