@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\v2\CbtController;
+use App\Http\Controllers\v2\CommunicationBookController;
 use App\Http\Controllers\v2\LessonNoteController;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,15 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         Route::delete('/remove/{lesson_id}', [LessonNoteController::class, 'deleteLesson']);
         Route::patch('/approve/{lesson_id}', [LessonNoteController::class, 'approveLesson']);
         Route::patch('/unapprove/{lesson_id}', [LessonNoteController::class, 'unapproveLesson']);
+    });
+
+    Route::prefix('communicationbook')->controller(CommunicationBookController::class)->group(function () {
+        Route::post('/', 'store');
+        Route::get('/', 'show');
+        Route::get('/closed', 'closed');
+        Route::post('/{id}/replies', 'replies');
+        Route::get('/{id}/replies', 'getReplies');
+        Route::patch('/close/{id}', 'close');
     });
 
 });

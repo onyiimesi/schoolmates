@@ -38,6 +38,8 @@ class UploadService
                 'application/msword' => 'doc',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
                 'vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
             ];
 
             $extension = isset($mimeToExt[$mimeType]) ? $mimeToExt[$mimeType] : 'bin';
@@ -63,7 +65,7 @@ class UploadService
 
             $file = $this->file;
             $folderName = config('services.base_url').$this->name;
-            
+
             // Extract the file's MIME type
             $rawMimeType = substr($file, 5, strpos($file, ';') - 5);
             $mimeType = str_replace('@file/', '', $rawMimeType);
@@ -74,6 +76,8 @@ class UploadService
                 'application/msword' => 'doc',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
                 'vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
             ];
 
             $extension = isset($mimeToExt[$mimeType]) ? $mimeToExt[$mimeType] : 'bin';
