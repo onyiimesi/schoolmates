@@ -22,9 +22,9 @@ class CommunicationBookController extends Controller
         return $this->service->store($request);
     }
 
-    public function show()
+    public function show($classId)
     {
-        return $this->service->show();
+        return $this->service->show($classId);
     }
 
     public function replies(CommunicationBookReplyRequest $request, $id)
