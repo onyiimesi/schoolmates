@@ -22,16 +22,16 @@ class CommunicationBookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'period' => 'required|string',
-            'term' => 'required|string',
-            'session' => 'required|string',
-            'class_id' => 'required|integer|exists:class_models,id',
-            'staff_id' => 'required|integer|exists:staff,id',
-            'student_id' => 'required|integer|exists:students,id',
-            'admission_number' => 'required|string|exists:students,admission_number',
-            'subject' => 'required|string',
-            'message' => 'required|string',
-            'attachment' => 'nullable|string'
+            '.*period' => 'required|string',
+            '.*term' => 'required|string',
+            '.*session' => 'required|string',
+            '.*class_id' => 'required|integer|exists:class_models,id',
+            '.*staff_id' => 'required|integer|exists:staff,id',
+            '.*student_id' => 'required|integer|exists:students,id',
+            '.*admission_number' => 'required|string|exists:students,admission_number',
+            '.*subject' => 'required|string',
+            '.*message' => 'required|string',
+            '.*attachment' => 'nullable|string'
         ];
     }
 }

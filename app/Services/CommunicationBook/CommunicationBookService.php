@@ -20,37 +20,44 @@ class CommunicationBookService extends Controller
     {
         try {
 
-            $auth = $this->auth();
-            $user = Staff::where('id', $request->staff_id)
-            ->where('sch_id', $auth->sch_id)
-            ->where('campus', $auth->campus)->first();
+            $data = $request->json()->all();
 
-            if(!$user){
-                throw new \Exception("User does not exist", 400);
+            foreach ($data as $item) {
+
+                $auth = $this->auth();
+                $user = Staff::where('id', $item['staff_id'])
+                ->where('sch_id', $auth->sch_id)
+                ->where('campus', $auth->campus)->first();
+
+                if(!$user){
+                    throw new \Exception("User does not exist", 400);
+                }
+
+                $dataFile = null;
+
+                if($item['attachment']){
+                    $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+                    $dataFile = (new UploadService($item['attachment'], 'communicationbook', $cleanSchId))->run();
+                }
+
+                CommunicationBook::create([
+                    'sch_id' => $user->sch_id,
+                    'campus' => $user->campus,
+                    'period' => $item['period'],
+                    'term' => $item['term'],
+                    'session' => $item['session'],
+                    'class_id' => $item['class_id'],
+                    'staff_id' => $item['staff_id'],
+                    'student_id' => $item['student_id'],
+                    'admission_number' => $item['admission_number'],
+                    'subject' => $item['subject'],
+                    'message' => $item['message'],
+                    'pinned' => "1",
+                    'file' => $dataFile->url ?? $dataFile['url'] ?? $dataFile,
+                    'file_id' => $dataFile->file_id ?? $dataFile['file_id'] ?? null,
+                    'status' => "active"
+                ]);
             }
-
-            if($request->attachment){
-                $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
-                $data = (new UploadService($request->attachment, 'communicationbook', $cleanSchId))->run();
-            }
-
-            CommunicationBook::create([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'period' => $request->period,
-                'term' => $request->term,
-                'session' => $request->session,
-                'class_id' => $request->class_id,
-                'staff_id' => $request->staff_id,
-                'student_id' => $request->student_id,
-                'admission_number' => $request->admission_number,
-                'subject' => $request->subject,
-                'message' => $request->message,
-                'pinned' => "1",
-                'file' => $data->url ?? $data['url'] ?? $data,
-                'file_id' => $data->file_id ?? $data['file_id'] ?? null,
-                'status' => "active"
-            ]);
 
             return $this->success(null, "Message sent successfully", 201);
         } catch (\Exception $e) {
@@ -58,9 +65,14 @@ class CommunicationBookService extends Controller
         }
     }
 
-    public function show()
+    public function show($classId)
     {
+        $user = $this->auth();
+
         $info = CommunicationBook::with(['staff', 'student', 'replies'])
+        ->where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('class_id', $classId)
         ->where('status', 'active')->get();
         $data = CommunicationBookResource::collection($info);
 
@@ -102,7 +114,13 @@ class CommunicationBookService extends Controller
 
     public function getReplies($id)
     {
-        $info = CommunicationBookReply::with(['communicationBook', 'sender', 'receiver'])->where('communication_book_id', $id)->get();
+        $user = $this->auth();
+
+        $info = CommunicationBookReply::with(['communicationBook', 'sender', 'receiver'])
+        ->where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('communication_book_id', $id)
+        ->get();
         $data = CommunicationBookReplyResource::collection($info);
 
         return $this->success($data, "Detail");
@@ -121,8 +139,13 @@ class CommunicationBookService extends Controller
 
     public function closed()
     {
+        $user = $this->auth();
+        
         $info = CommunicationBook::with(['staff', 'student', 'replies'])
-        ->where('status', 'closed')->get();
+        ->where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('status', 'closed')
+        ->get();
 
         $data = CommunicationBookResource::collection($info);
 
