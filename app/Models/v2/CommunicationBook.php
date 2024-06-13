@@ -19,12 +19,11 @@ class CommunicationBook extends Model
         'session',
         'class_id',
         'staff_id',
-        'student_id',
-        'admission_number',
         'subject',
         'message',
         'pinned',
         'file',
+        'file_name',
         'file_id',
         'status'
     ];
@@ -37,6 +36,11 @@ class CommunicationBook extends Model
     public function student()
     {
         return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(CommunicationBookMessage::class);
     }
 
     public function replies()
