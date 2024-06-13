@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class CommunicationBookReply extends Model
 {
-    protected $table = "communication_book_replies";
-
     use HasFactory;
 
     protected $fillable = [

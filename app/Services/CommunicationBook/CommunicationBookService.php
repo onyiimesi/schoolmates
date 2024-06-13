@@ -11,6 +11,7 @@ use App\Models\v2\CommunicationBook;
 use App\Models\v2\CommunicationBookReply;
 use App\Services\Upload\UploadService;
 use App\Traits\HttpResponses;
+use Illuminate\Support\Facades\DB;
 
 class CommunicationBookService extends Controller
 {
@@ -20,12 +21,9 @@ class CommunicationBookService extends Controller
     {
         try {
 
-            $data = $request->json()->all();
-
-            foreach ($data as $item) {
-
+            DB::transaction(function () use ($request) {
                 $auth = $this->auth();
-                $user = Staff::where('id', $item['staff_id'])
+                $user = Staff::where('id', $request->staff_id)
                 ->where('sch_id', $auth->sch_id)
                 ->where('campus', $auth->campus)->first();
 
@@ -34,30 +32,36 @@ class CommunicationBookService extends Controller
                 }
 
                 $dataFile = null;
-
-                if($item['attachment']){
+                
+                if (!empty($request->file)) {
                     $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
-                    $dataFile = (new UploadService($item['attachment'], 'communicationbook', $cleanSchId))->run();
+                    $dataFile = (new UploadService($request->file, 'communicationbook', $cleanSchId))->run();
                 }
 
-                CommunicationBook::create([
+                $book = CommunicationBook::create([
                     'sch_id' => $user->sch_id,
                     'campus' => $user->campus,
-                    'period' => $item['period'],
-                    'term' => $item['term'],
-                    'session' => $item['session'],
-                    'class_id' => $item['class_id'],
-                    'staff_id' => $item['staff_id'],
-                    'student_id' => $item['student_id'],
-                    'admission_number' => $item['admission_number'],
-                    'subject' => $item['subject'],
-                    'message' => $item['message'],
+                    'period' => $request->period,
+                    'term' => $request->term,
+                    'session' => $request->session,
+                    'class_id' => $request->class_id,
+                    'staff_id' => $request->staff_id,
+                    'subject' => $request->subject,
+                    'message' => $request->message,
                     'pinned' => "1",
                     'file' => $dataFile->url ?? $dataFile['url'] ?? $dataFile,
+                    'file_name' => $request->file_name,
                     'file_id' => $dataFile->file_id ?? $dataFile['file_id'] ?? null,
                     'status' => "active"
                 ]);
-            }
+
+                foreach ($request->students as $messageData) {
+                    $book->messages()->create([
+                        'student_id' => $messageData['student_id'],
+                        'admission_number' => $messageData['admission_number']
+                    ]);
+                }
+            });
 
             return $this->success(null, "Message sent successfully", 201);
         } catch (\Exception $e) {
@@ -73,8 +77,8 @@ class CommunicationBookService extends Controller
         ->where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->where('class_id', $classId)
-        ->where('status', 'active')->get();
-        $data = CommunicationBookResource::collection($info);
+        ->where('status', 'active')->first();
+        $data = new CommunicationBookResource($info);
 
         return $this->success($data, "Detail");
     }
@@ -114,11 +118,7 @@ class CommunicationBookService extends Controller
 
     public function getReplies($id)
     {
-        $user = $this->auth();
-
         $info = CommunicationBookReply::with(['communicationBook', 'sender', 'receiver'])
-        ->where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
         ->where('communication_book_id', $id)
         ->get();
         $data = CommunicationBookReplyResource::collection($info);
@@ -134,7 +134,7 @@ class CommunicationBookService extends Controller
             'status' => "closed"
         ]);
 
-        return $this->success(null, "Updated successfully", 200);
+        return $this->success(null, "Updated successfully");
     }
 
     public function closed($classId)
@@ -146,11 +146,73 @@ class CommunicationBookService extends Controller
         ->where('campus', $user->campus)
         ->where('class_id', $classId)
         ->where('status', 'closed')
-        ->get();
+        ->first();
 
-        $data = CommunicationBookResource::collection($info);
+        $data = new CommunicationBookResource($info);
 
         return $this->success($data, "Closed");
+    }
+
+    public function edit($request, $id)
+    {
+        $info = CommunicationBook::findOrFail($id);
+        $user = $this->auth();
+ 
+        try {
+            if (!empty($request->file)) {
+                $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+                $dataFile = (new UploadService($request->file, 'communicationbook', $cleanSchId))->run();
+            }else {
+                $dataFile = [
+                    'url' => $info->file,
+                    'file_id' => $info->file_id
+                ];
+            }
+    
+            $info->update([
+                'subject' => $request->subject,
+                'message' => $request->message,
+                'pinned' => "1",
+                'file' => $dataFile->url ?? $dataFile['url'] ?? $dataFile,
+                'file_name' => $request->file_name,
+                'file_id' => $dataFile->file_id ?? $dataFile['file_id'] ?? null,
+                'status' => "active"
+            ]);
+    
+            return $this->success(null, "Updated successfully");
+        } catch (\Exception $e) {
+            return $this->error(null, $e->getMessage());
+        }
+    }
+
+    public function editReply($request, $id)
+    {
+        $info = CommunicationBookReply::findOrFail($id);
+
+        $info->update([
+            'message' => $request->message
+        ]);
+
+        return $this->success(null, "Updated successfully");
+    }
+
+    public function deleteReply($id)
+    {
+        $info = CommunicationBookReply::findOrFail($id);
+        $info->delete();
+
+        return $this->success(null, "Deleted successfully");
+    }
+
+    public function unreadCount()
+    {
+        $auth = $this->auth();
+
+        $info = CommunicationBookReply::where('receiver_id', $auth->id)
+        ->where('status', 'unread')
+        ->count();
+
+        return $this->success($info, "Unread message count");
     }
 }
 

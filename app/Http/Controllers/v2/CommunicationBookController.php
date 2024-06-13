@@ -46,4 +46,24 @@ class CommunicationBookController extends Controller
     {
         return $this->service->close($id);
     }
+
+    public function edit(Request $request, $id)
+    {
+        return $this->service->edit($request, $id);
+    }
+
+    public function editReply(Request $request, $id)
+    {
+        return $this->service->editReply($request, $id);
+    }
+
+    public function deleteReply($id)
+    {
+        return $this->service->deleteReply($id);
+    }
+
+    public function unreadCount()
+    {
+        return $this->service->unreadCount();
+    }
 }

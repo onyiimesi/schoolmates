@@ -58,8 +58,12 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         Route::get('/{class_id}', 'show');
         Route::get('/closed/{class_id}', 'closed');
         Route::post('/{id}/replies', 'replies');
-        Route::get('/{id}/replies', 'getReplies');
+        Route::get('/replies/{id}', 'getReplies');
         Route::patch('/close/{id}', 'close');
+        Route::patch('/edit/{id}', 'edit');
+        Route::patch('/reply/edit/{id}', 'editReply');
+        Route::delete('/reply/delete/{id}', 'deleteReply');
+        Route::get('/unread/count', 'unreadCount');
     });
 
 });

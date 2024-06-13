@@ -4,6 +4,7 @@ namespace App\Http\Resources\v2;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 class CommunicationBookResource extends JsonResource
 {
@@ -24,13 +25,12 @@ class CommunicationBookResource extends JsonResource
                 'session' => (string)$this->session,
                 'class_id' => (int)$this->class_id,
                 'staff_id' => (int)$this->staff_id,
-                'student_id' => (int)$this->student_id,
-                'admission_number' => (string)$this->admission_number,
                 'subject' => (string)$this->subject,
                 'message' => (string)$this->message,
                 'pinned' => (string)$this->pinned,
                 'attachment' => (string)$this->file,
-                'status' => (string)$this->status
+                'status' => (string)$this->status,
+                'date' => Carbon::parse($this->created_at)->format('d M Y h:i A'),
             ]
         ];
     }

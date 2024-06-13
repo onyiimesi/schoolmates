@@ -20,17 +20,28 @@ return new class extends Migration
             $table->string('session');
             $table->bigInteger('class_id');
             $table->unsignedBigInteger('staff_id');
+            $table->enum('status', ['active', 'closed'])->default('active');
+
+            $table->index(['sch_id', 'campus', 'class_id', 'staff_id'], 'comm_book_idx');
+
+            $table->foreign('staff_id')->references('id')->on('staff')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        Schema::create('communication_book_messages', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('communication_book_id');
             $table->bigInteger('student_id');
             $table->string('admission_number');
             $table->string('subject');
             $table->longText('message');
             $table->boolean('pinned')->default(false);
-            $table->string('attachment')->nullable();
-            $table->enum('status', ['active', 'closed'])->default('active');
+            $table->string('file')->nullable();
+            $table->string('file_name')->nullable();
 
-            $table->index(['sch_id', 'campus']);
+            $table->index(['communication_book_id', 'student_id', 'admission_number'], 'comm_book_message_idx');
 
-            $table->foreign('staff_id')->references('id')->on('staff')->onDelete('cascade');
+            $table->foreign('communication_book_id')->references('id')->on('communication_books')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -56,7 +67,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('communication_book_replies');
         Schema::dropIfExists('communication_books');
+        Schema::dropIfExists('communication_book_messages');
+        Schema::dropIfExists('communication_book_replies');
     }
 };

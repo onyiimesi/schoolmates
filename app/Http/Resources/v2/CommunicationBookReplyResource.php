@@ -16,7 +16,11 @@ class CommunicationBookReplyResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $this->updateRead($this->communication_book_id);
+        $currentUserId = $request->user()->id;
+
+        if ($currentUserId === $this->sender_id || $currentUserId === $this->receiver_id) {
+            $this->updateRead($this->communication_book_id);
+        }
 
         return [
             'communication_book' => [
@@ -24,7 +28,7 @@ class CommunicationBookReplyResource extends JsonResource
                 'message' => (string)$this->communicationBook->message,
                 'pinned' => (string)$this->communicationBook->pinned,
                 'attachment' => (string)$this->communicationBook->file,
-                'date' => Carbon::parse($this->communicationBook->created_at)->format('d M Y')
+                'date' => Carbon::parse($this->communicationBook->created_at)->format('d M Y h:i A')
             ],
             'id' => $this->id,
             'communication_book_id' => $this->communication_book_id,
@@ -46,11 +50,13 @@ class CommunicationBookReplyResource extends JsonResource
                 'last_name' => $this->receiver->surname,
                 'designation' => $this->receiver->designation_id,
             ],
+            'date' => Carbon::parse($this->created_at)->format('d M Y h:i A'),
         ];
     }
 
     private function updateRead($id)
     {
-        CommunicationBookReply::where('communication_book_id', $id)->update(['status' => "read"]);
+        CommunicationBookReply::where('communication_book_id', $id)
+        ->update(['status' => "read"]);
     }
 }
