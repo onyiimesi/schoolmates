@@ -137,13 +137,14 @@ class CommunicationBookService extends Controller
         return $this->success(null, "Updated successfully", 200);
     }
 
-    public function closed()
+    public function closed($classId)
     {
         $user = $this->auth();
         
         $info = CommunicationBook::with(['staff', 'student', 'replies'])
         ->where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
+        ->where('class_id', $classId)
         ->where('status', 'closed')
         ->get();
 

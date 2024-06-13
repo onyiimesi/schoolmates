@@ -56,7 +56,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::prefix('communicationbook')->controller(CommunicationBookController::class)->group(function () {
         Route::post('/', 'store');
         Route::get('/{class_id}', 'show');
-        Route::get('/closed', 'closed');
+        Route::get('/closed/{class_id}', 'closed');
         Route::post('/{id}/replies', 'replies');
         Route::get('/{id}/replies', 'getReplies');
         Route::patch('/close/{id}', 'close');
