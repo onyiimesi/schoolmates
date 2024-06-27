@@ -66,7 +66,7 @@ class CommunicationBookService extends Controller
 
                 foreach ($request->recipients as $messageData) {
                     $book->messages()->create([
-                        'recipient_id' => $messageData['recipient_id'],
+                        'receiver_id' => $messageData['recipient_id'],
                         'receiver_type' => $messageData['receiver_type']
                     ]);
                 }
