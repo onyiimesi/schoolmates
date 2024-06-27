@@ -119,8 +119,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/getacademicperiod', [AcademicPeriodController::class, 'getperiod']);
     Route::get('/getacademicsessions', [AcademicPeriodController::class, 'getsessions']);
 
-    Route::post('/communicationbook', [CommunicationBookController::class, 'communicate']);
-    Route::get('/communicationbook', [CommunicationBookController::class, 'getmessage']);
+    // Route::post('/communicationbook', [CommunicationBookController::class, 'communicate']);
+    // Route::get('/communicationbook', [CommunicationBookController::class, 'getmessage']);
 
     Route::get('/payment/{invoice_id}/get', [OtherController::class, 'paymentinvoice']);
 

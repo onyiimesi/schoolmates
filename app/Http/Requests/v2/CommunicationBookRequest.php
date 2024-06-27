@@ -26,10 +26,10 @@ class CommunicationBookRequest extends FormRequest
             'term' => 'required|string',
             'session' => 'required|string',
             'class_id' => 'required|integer|exists:class_models,id',
-            'staff_id' => 'required|integer|exists:staff,id',
-            'students' => 'required|array',
-            'students.*.student_id' => 'required|integer|exists:students,id',
-            'students.*.admission_number' => 'required|string|exists:students,admission_number'
+            'sender_id' => 'required|integer',
+            'sender_type' => 'required|string',
+            'recipients' => 'required|array',
+            'recipients.*.recipient_id' => 'required|integer'
         ];
     }
 }

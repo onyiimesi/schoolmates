@@ -32,6 +32,7 @@ class StaffsResource extends JsonResource
                 'sch_id' => (string)$this->sch_id,
                 'campus' => (string)$this->campus,
                 'designation_id' => (string)$this->designation_id,
+                'designation' => (string)optional($this->designation)->name,
                 'department' => (string)$this->department,
                 'surname' => (string)$this->surname,
                 'firstname' => (string)$this->firstname,

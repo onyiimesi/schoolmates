@@ -44,6 +44,10 @@ class Staff extends Authenticatable implements Auditable
         return $this->belongsTo(Staff::class);
     }
 
+    public function designation(){
+        return $this->belongsTo(Designation::class, 'designation_id');
+    }
+
     public function result(){
         return $this->hasMany(Result::class, 'teacher_id');
     }
