@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ClassModel;
 use App\Models\Pricing;
 use App\Models\SchoolPayment;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,6 +22,12 @@ class StudentLoginResource extends JsonResource
             return "An error occured";
         }
         $getplan = Pricing::where('id', $plan->pricing_id)->first();
+
+        $classid = ClassModel::where([
+            "sch_id" => $this->sch_id,
+            "campus" => $this->campus,
+            "class_name" => $this->present_class
+        ])->value('id');
 
         return [
             'id' => (string)$this->id,
@@ -43,6 +50,7 @@ class StudentLoginResource extends JsonResource
             'state' => (string)$this->state,
             'session_admitted' => (string)$this->session_admitted,
             'class' => (string)$this->class,
+            'class_id' => $classid,
             'present_class' => (string)$this->present_class,
             'home_address' => (string)$this->home_address,
             'status' => (string)$this->status,
