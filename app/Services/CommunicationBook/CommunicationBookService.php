@@ -32,7 +32,7 @@ class CommunicationBookService extends Controller
                 }
 
                 $dataFile = null;
-                
+
                 if (!empty($request->file)) {
                     $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
                     $dataFile = (new UploadService($request->file, 'communicationbook', $cleanSchId))->run();
@@ -140,7 +140,7 @@ class CommunicationBookService extends Controller
     public function closed($classId)
     {
         $user = $this->auth();
-        
+
         $info = CommunicationBook::with(['staff', 'student', 'replies'])
         ->where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
@@ -157,7 +157,7 @@ class CommunicationBookService extends Controller
     {
         $info = CommunicationBook::findOrFail($id);
         $user = $this->auth();
- 
+
         try {
             if (!empty($request->file)) {
                 $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
@@ -168,7 +168,7 @@ class CommunicationBookService extends Controller
                     'file_id' => $info->file_id
                 ];
             }
-    
+
             $info->update([
                 'subject' => $request->subject,
                 'message' => $request->message,
@@ -178,7 +178,7 @@ class CommunicationBookService extends Controller
                 'file_id' => $dataFile->file_id ?? $dataFile['file_id'] ?? null,
                 'status' => "active"
             ]);
-    
+
             return $this->success(null, "Updated successfully");
         } catch (\Exception $e) {
             return $this->error(null, $e->getMessage());
