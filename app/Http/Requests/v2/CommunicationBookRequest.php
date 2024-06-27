@@ -26,10 +26,15 @@ class CommunicationBookRequest extends FormRequest
             'term' => 'required|string',
             'session' => 'required|string',
             'class_id' => 'required|integer|exists:class_models,id',
-            'sender_id' => 'required|integer',
-            'sender_type' => 'required|string',
+            'sender_id' => 'required|integer|exists:'. $this->getSenderTableName() .',id',
+            'sender_type' => 'required|string|in:staff,student',
             'recipients' => 'required|array',
             'recipients.*.recipient_id' => 'required|integer'
         ];
+    }
+
+    private function getSenderTableName()
+    {
+        return request('sender_type') === 'staff' ? 'staff' : 'students';
     }
 }

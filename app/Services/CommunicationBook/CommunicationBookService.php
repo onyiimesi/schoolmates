@@ -87,6 +87,11 @@ class CommunicationBookService extends Controller
         ->where('campus', $user->campus)
         ->where('class_id', $classId)
         ->where('status', 'active')->first();
+
+        if(!$info){
+            return $this->error(null, "Not found!", 404);
+        }
+
         $data = new CommunicationBookResource($info);
 
         return $this->success($data, "Detail");

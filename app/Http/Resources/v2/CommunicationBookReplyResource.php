@@ -49,8 +49,8 @@ class CommunicationBookReplyResource extends JsonResource
                 'campus' => $this->receiver->campus,
                 'first_name' => $this->receiver->firstname,
                 'last_name' => $this->receiver->surname,
-                'email' => $this->receiver->email,
-                'designation' => $this->receiver->designation_id,
+                'email' => $this->receiver->email_address,
+                'designation' => (int)$this->receiver->designation_id,
             ],
             'date' => Carbon::parse($this->created_at)->format('d M Y h:i A'),
         ];
