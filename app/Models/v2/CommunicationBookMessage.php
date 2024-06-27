@@ -10,7 +10,8 @@ class CommunicationBookMessage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id',
+        'receiver_id',
+        'receiver_type',
         'admission_number',
         'subject',
         'message',

@@ -45,7 +45,8 @@ class CommunicationBookService extends Controller
                     'term' => $request->term,
                     'session' => $request->session,
                     'class_id' => $request->class_id,
-                    'staff_id' => $request->staff_id,
+                    'sender_id' => $request->sender_id,
+                    'sender_type' => $request->sender_type,
                     'subject' => $request->subject,
                     'message' => $request->message,
                     'pinned' => "1",
@@ -57,8 +58,8 @@ class CommunicationBookService extends Controller
 
                 foreach ($request->students as $messageData) {
                     $book->messages()->create([
-                        'student_id' => $messageData['student_id'],
-                        'admission_number' => $messageData['admission_number']
+                        'recipient_id' => $messageData['recipient_id'],
+                        'receiver_type' => $messageData['receiver_type']
                     ]);
                 }
             });
@@ -94,7 +95,7 @@ class CommunicationBookService extends Controller
 
             if ($senderType === Student::class) {
                 $receiverType = Staff::class;
-                $receiverId = $data->staff_id;
+                $receiverId = $data->sender_id;
             } else {
                 $receiverType = Student::class;
                 $receiverId = $request->receiver_id;
