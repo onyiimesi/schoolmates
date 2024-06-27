@@ -23,11 +23,19 @@ class CommunicationBookService extends Controller
 
             DB::transaction(function () use ($request) {
                 $auth = $this->auth();
-                $user = Staff::where('id', $request->staff_id)
+
+                $user = Staff::where('id', $auth->id)
                 ->where('sch_id', $auth->sch_id)
                 ->where('campus', $auth->campus)->first();
 
-                if(!$user){
+                if (!$user) {
+                    $user = Student::where('id', $auth->id)
+                        ->where('sch_id', $auth->sch_id)
+                        ->where('campus', $auth->campus)
+                        ->first();
+                }
+                
+                if (!$user) {
                     throw new \Exception("User does not exist", 400);
                 }
 
