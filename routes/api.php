@@ -323,6 +323,9 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get("/broadsheet/{class_name}/{term}/{session}", [BroadSheetController::class, 'broadsheet'])
     ->where('session', '.+');
 
+    // Staff by class
+    Route::get("/staffbyclass/{class}", [OtherController::class, 'staffByClass']);
+
     Route::post('/changepassword', [AuthController::class, 'change']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });

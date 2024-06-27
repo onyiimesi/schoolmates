@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\DesignationResource;
+use App\Http\Resources\StaffsResource;
 use App\Models\AcademicPeriod;
 use App\Models\Designation;
 use App\Models\ExtraCurricular;
 use App\Models\Payment;
 use App\Models\PreSchoolExtraCurricular;
 use App\Models\Schools;
+use App\Models\Staff;
 use App\Traits\HttpResponses;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -101,7 +103,7 @@ class OtherController extends Controller
                 Designation::whereNotIn('id', $roleNot)->get()
             );
 
-        } else if($user->designation_id === 1){
+        } elseif($user->designation_id === 1){
 
             $school = Schools::where('sch_id', $user->sch_id)->first();
 
@@ -232,5 +234,19 @@ class OtherController extends Controller
         }
 
         return $this->success([], "Payment by invoice ID", 200);
+    }
+
+    public function staffByClass($class)
+    {
+        $user = Auth::user();
+
+        $staffs = Staff::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where("class_assigned", $class)
+        ->get();
+
+        $data = StaffsResource::collection($staffs);
+
+        return $this->success($data, "List staffs by class");
     }
 }
