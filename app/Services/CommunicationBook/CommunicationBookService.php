@@ -64,7 +64,7 @@ class CommunicationBookService extends Controller
                     'status' => "active"
                 ]);
 
-                foreach ($request->students as $messageData) {
+                foreach ($request->recipients as $messageData) {
                     $book->messages()->create([
                         'recipient_id' => $messageData['recipient_id'],
                         'receiver_type' => $messageData['receiver_type']
