@@ -21,6 +21,12 @@ return new class extends Migration
             $table->bigInteger('class_id');
             $table->unsignedBigInteger('sender_id');
             $table->string('sender_type');
+            $table->string('subject');
+            $table->longText('message');
+            $table->boolean('pinned')->default(false);
+            $table->string('file')->nullable();
+            $table->string('file_id')->nullable();
+            $table->string('file_name')->nullable();
             $table->enum('status', ['active', 'closed'])->default('active');
 
             $table->index(['sch_id', 'campus', 'class_id', 'sender_id'], 'comm_book_idx');
@@ -34,11 +40,6 @@ return new class extends Migration
             $table->bigInteger('receiver_id');
             $table->string('receiver_type');
             $table->string('admission_number')->nullable();
-            $table->string('subject');
-            $table->longText('message');
-            $table->boolean('pinned')->default(false);
-            $table->string('file')->nullable();
-            $table->string('file_name')->nullable();
 
             $table->index(['communication_book_id', 'receiver_id', 'admission_number'], 'comm_book_message_idx');
 

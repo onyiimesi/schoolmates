@@ -23,11 +23,19 @@ class CommunicationBookService extends Controller
 
             DB::transaction(function () use ($request) {
                 $auth = $this->auth();
-                $user = Staff::where('id', $request->staff_id)
+
+                $user = Staff::where('id', $auth->id)
                 ->where('sch_id', $auth->sch_id)
                 ->where('campus', $auth->campus)->first();
 
-                if(!$user){
+                if (!$user) {
+                    $user = Student::where('id', $auth->id)
+                        ->where('sch_id', $auth->sch_id)
+                        ->where('campus', $auth->campus)
+                        ->first();
+                }
+                
+                if (!$user) {
                     throw new \Exception("User does not exist", 400);
                 }
 
@@ -56,9 +64,9 @@ class CommunicationBookService extends Controller
                     'status' => "active"
                 ]);
 
-                foreach ($request->students as $messageData) {
+                foreach ($request->recipients as $messageData) {
                     $book->messages()->create([
-                        'recipient_id' => $messageData['recipient_id'],
+                        'receiver_id' => $messageData['recipient_id'],
                         'receiver_type' => $messageData['receiver_type']
                     ]);
                 }
@@ -79,6 +87,11 @@ class CommunicationBookService extends Controller
         ->where('campus', $user->campus)
         ->where('class_id', $classId)
         ->where('status', 'active')->first();
+
+        if(!$info){
+            return $this->error(null, "Not found!", 404);
+        }
+
         $data = new CommunicationBookResource($info);
 
         return $this->success($data, "Detail");
