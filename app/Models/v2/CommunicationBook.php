@@ -31,12 +31,12 @@ class CommunicationBook extends Model
 
     public function staff()
     {
-        return $this->belongsTo(Staff::class, 'staff_id');
+        return $this->belongsTo(Staff::class, 'sender_id');
     }
 
     public function student()
     {
-        return $this->belongsTo(Student::class, 'student_id');
+        return $this->belongsTo(Student::class, 'sender_id');
     }
 
     public function messages()
