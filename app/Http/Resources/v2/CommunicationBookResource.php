@@ -30,33 +30,74 @@ class CommunicationBookResource extends JsonResource
                 'message' => (string)$this->message,
                 'pinned' => (string)$this->pinned,
                 'attachment' => (string)$this->file,
+                'file_name' => (string)$this->file_name,
                 'status' => (string)$this->status,
-                'date' => Carbon::parse($this->created_at)->format('d M Y h:i A'),
-                'recipients' => $this->messages->map(function ($reply) {
-                    return [
-                        'sender' => [
-                            'id' => (int)$this->sender_id,
-                            'campus' => $this->sender_type === "staff" ? $this->staff->campus : $this->student->campus,
-                            'first_name' => $this->sender_type === "staff" ? $this->staff->firstname : $this->student->firstname,
-                            'last_name' => $this->sender_type === "staff" ? $this->staff->surname : $this->student->surname,
-                            'email' => $this->sender_type === "staff" ? $this->staff->email : $this->student->email_address,
-                            'designation' => $this->sender_type === "staff" ? $this->staff->designation_id : $this->student->designation_id,
-                        ],
-                        'receivers' => $reply->communicationbook->messages->map(function ($message) {
-                            return [
-                                'id' => $message->receiver_type === "student" ? $message->student->id : $message->staff->id,
-                                'campus' => $message->receiver_type === "student" ? $message->student->campus : $message->staff->campus,
-                                'first_name' => $message->receiver_type === "student" ? $message->student->firstname : $message->staff->firstname,
-                                'last_name' => $message->receiver_type === "student" ? $message->student->surname : $message->staff->surname,
-                                'email' => $message->receiver_type === "student" ? $message->student->email_address : $message->staff->email,
-                                'designation' => $message->receiver_type === "student" ? $message->student->designation_id : $message->staff->designation_id,
-                            ];
-                        })->toArray(),
-                    ];
-                })->flatMap(function ($reply) {
-                    return $reply;
-                })->toArray(),
+                'date' => $this->formatDate($this->created_at),
+                'recipients' => $this->getRecipients(),
             ]
         ];
+    }
+
+    private function formatDate($date): string
+    {
+        return Carbon::parse($date)->format('d M Y h:i A');
+    }
+
+    private function getSenderAttributes(): array
+    {
+        if ($this->sender_type === "staff") {
+            return [
+                'campus' => $this->staff->campus,
+                'first_name' => $this->staff->firstname,
+                'last_name' => $this->staff->surname,
+                'email' => $this->staff->email,
+                'designation' => $this->staff->designation_id,
+            ];
+        } else {
+            return [
+                'campus' => $this->student->campus,
+                'first_name' => $this->student->firstname,
+                'last_name' => $this->student->surname,
+                'email' => $this->student->email_address,
+                'designation' => $this->student->designation_id,
+            ];
+        }
+    }
+
+    private function getReceiverAttributes($message): array
+    {
+        if ($message->receiver_type === "student") {
+            return [
+                'id' => $message->student->id,
+                'campus' => $message->student->campus,
+                'first_name' => $message->student->firstname,
+                'last_name' => $message->student->surname,
+                'email' => $message->student->email_address,
+                'designation' => $message->student->designation_id,
+            ];
+        } else {
+            return [
+                'id' => $message->staff->id,
+                'campus' => $message->staff->campus,
+                'first_name' => $message->staff->firstname,
+                'last_name' => $message->staff->surname,
+                'email' => $message->staff->email,
+                'designation' => $message->staff->designation_id,
+            ];
+        }
+    }
+
+    private function getRecipients(): array
+    {
+        return $this->messages->map(function ($reply) {
+            return [
+                'sender' => $this->getSenderAttributes(),
+                'receivers' => $reply->communicationbook->messages->map(function ($message) {
+                    return $this->getReceiverAttributes($message);
+                })->toArray(),
+            ];
+        })->flatMap(function ($reply) {
+            return $reply;
+        })->toArray();
     }
 }

@@ -157,9 +157,9 @@ class CommunicationBookService extends Controller
         ->where('campus', $user->campus)
         ->where('class_id', $classId)
         ->where('status', 'closed')
-        ->first();
+        ->get();
 
-        $data = new CommunicationBookResource($info);
+        $data = CommunicationBookResource::collection($info);
 
         return $this->success($data, "Closed");
     }
