@@ -34,7 +34,7 @@ class CommunicationBookService extends Controller
                         ->where('campus', $auth->campus)
                         ->first();
                 }
-                
+
                 if (!$user) {
                     throw new \Exception("User does not exist", 400);
                 }
@@ -82,17 +82,14 @@ class CommunicationBookService extends Controller
     {
         $user = $this->auth();
 
-        $info = CommunicationBook::with(['staff', 'student', 'replies'])
+        $info = CommunicationBook::with(['staff', 'student', 'replies', 'messages'])
         ->where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->where('class_id', $classId)
-        ->where('status', 'active')->first();
+        ->where('status', 'active')->get();
 
-        if(!$info){
-            return $this->error(null, "Not found!", 404);
-        }
 
-        $data = new CommunicationBookResource($info);
+        $data = CommunicationBookResource::collection($info);
 
         return $this->success($data, "Detail");
     }
@@ -160,9 +157,9 @@ class CommunicationBookService extends Controller
         ->where('campus', $user->campus)
         ->where('class_id', $classId)
         ->where('status', 'closed')
-        ->first();
+        ->get();
 
-        $data = new CommunicationBookResource($info);
+        $data = CommunicationBookResource::collection($info);
 
         return $this->success($data, "Closed");
     }
