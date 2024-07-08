@@ -30,7 +30,8 @@ class ResultRequest extends FormRequest
             'class_name' => ['required', 'string', 'max:255'],
             'period' => ['required', 'string', 'max:255'],
             'term' => ['required', 'string', 'max:255'],
-            'session' => ['required', 'string', 'max:255']
+            'session' => ['required', 'string', 'max:255'],
+            'abacus.name' => ['required']
         ];
     }
 }

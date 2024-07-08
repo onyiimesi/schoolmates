@@ -74,7 +74,7 @@ class ResultTwoController extends Controller
                     "message" => 'Computed Successfully',
                 ];
 
-            }else if(!empty($getResult)){
+            }elseif(!empty($getResult)){
 
                 $getResult->update([
                     'student_id' => $request->student_id,
@@ -208,7 +208,7 @@ class ResultTwoController extends Controller
                     "message" => 'Computed Successfully',
                 ];
 
-            }else if(!empty($getResult)){
+            }elseif(!empty($getResult)){
 
                 $getResult->update([
                     'student_id' => $request->student_id,
@@ -294,7 +294,7 @@ class ResultTwoController extends Controller
                         $compute->resultextracurricular()->save($ext);
                     }
 
-                    if($teacher->campus_type == "Elementary"){
+                    if($teacher->campus_type === "Elementary"){
                         $compute->abacus()->create([
                             'name' => $request->abacus['name']
                         ]);
@@ -316,7 +316,7 @@ class ResultTwoController extends Controller
                     "message" => 'Computed Successfully',
                 ];
 
-            }else if(!empty($getsecondresult)){
+            }elseif(!empty($getsecondresult)){
 
                 if($teacher->teacher_type === "subject teacher")
                 {

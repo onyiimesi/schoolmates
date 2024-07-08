@@ -17,6 +17,7 @@ class ClassResource extends JsonResource
         return [
             'id' => (string)$this->id,
             'attributes' => [
+                'campus' => (string)$this->campus,
                 'class_name' => (string)$this->class_name,
                 'sub_class' => (string)$this->sub_class,
             ]
