@@ -34,4 +34,11 @@ class ResultRequest extends FormRequest
             'abacus.name' => ['required']
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'abacus.name' => "abacus field is required"
+        ];
+    }
 }
