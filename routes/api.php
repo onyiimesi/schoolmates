@@ -157,6 +157,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     //New result form
     Route::post('midTermResult', [ResultTwoController::class, 'mid']);
     Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
+    Route::patch('release/result', [ResultTwoController::class, 'release']);
+    Route::patch('withhold/result', [ResultTwoController::class, 'hold']);
 
     //PreSchool Subject
     Route::post('/preschoolsubject', [PreSchoolSubjectController::class, 'addSubject']);

@@ -24,7 +24,18 @@ class ReleaseResultRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'period' => ['required', 'string'],
+            'term' => ['required', 'string'],
+            'session' => ['required', 'string'],
+            'students' => ['required', 'array'],
+            'students.*.student_id' => ['required', 'integer', 'exists:students,id']
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'students.*.student_id' => "The selected student id is invalid"
         ];
     }
 }
