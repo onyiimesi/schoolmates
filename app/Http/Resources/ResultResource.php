@@ -25,7 +25,7 @@ class ResultResource extends JsonResource
         $hod = null;
         if($class->class_type === "upper"){
             $hod = Staff::where('class_type', 'upper')->get();
-        }else if($class->class_type === "lower"){
+        }elseif($class->class_type === "lower"){
             $hod = Staff::where('class_type', 'lower')->get();
         }
         return [
@@ -102,7 +102,8 @@ class ResultResource extends JsonResource
                 'hos_comment' => (string)$this->hos_comment,
                 'hos_fullname' => (string)$this->hos_fullname,
                 'computed_endterm' => (string)$this->computed_endterm,
-                'dos' => $dos->dos
+                'dos' => $dos->dos,
+                'status' => (string)$this->status
             ]
         ];
     }
