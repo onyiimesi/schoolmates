@@ -15,12 +15,7 @@ class CommunicationBookMessage extends Model
         'receiver_id',
         'receiver_type',
         'admission_number',
-        'subject',
-        'message',
-        'pinned',
-        'file',
-        'file_name',
-        'file_id',
+        'status'
     ];
 
     public function communicationbook()

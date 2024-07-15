@@ -8,6 +8,7 @@ use App\Http\Resources\v2\CommunicationBookResource;
 use App\Models\Staff;
 use App\Models\Student;
 use App\Models\v2\CommunicationBook;
+use App\Models\v2\CommunicationBookMessage;
 use App\Models\v2\CommunicationBookReply;
 use App\Services\Upload\UploadService;
 use App\Traits\HttpResponses;
@@ -219,11 +220,17 @@ class CommunicationBookService extends Controller
     {
         $auth = $this->auth();
 
-        $info = CommunicationBookReply::where('receiver_id', $auth->id)
-        ->where('status', 'unread')
-        ->count();
+        $unreadRepliesCount = CommunicationBookReply::where('receiver_id', $auth->id)
+            ->where('status', 'unread')
+            ->count();
 
-        return $this->success($info, "Unread message count");
+        $totalMessagesCount = CommunicationBookMessage::where('receiver_id', $auth->id)
+            ->where('status', 'unread')
+            ->count();
+
+        $totalCount = $unreadRepliesCount + $totalMessagesCount;
+
+        return $this->success($totalCount, "Unread message count");
     }
 }
 
