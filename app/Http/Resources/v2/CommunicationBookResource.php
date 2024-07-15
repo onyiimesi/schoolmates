@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources\v2;
 
+use App\Models\v2\CommunicationBookMessage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class CommunicationBookResource extends JsonResource
 {
@@ -15,6 +17,10 @@ class CommunicationBookResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $userId = Auth::user()->id;
+
+        $this->updateRead($userId, $this->id);
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -99,5 +105,12 @@ class CommunicationBookResource extends JsonResource
         })->flatMap(function ($reply) {
             return $reply;
         })->toArray();
+    }
+
+    private function updateRead($userId, $id)
+    {
+        CommunicationBookMessage::where('receiver_id', $userId)
+        ->where('communication_book_id', $id)
+        ->update(['status' => "read"]);
     }
 }
