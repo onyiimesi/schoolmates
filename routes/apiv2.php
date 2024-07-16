@@ -11,8 +11,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::middleware(['throttle:apis'])->group(function () {
-
+// Route::middleware(['throttle:apis'])->group(function () {
+// });
     Route::group(['middleware' => ['auth:sanctum']], function(){
 
         Route::prefix('cbt')->group(function () {
@@ -70,5 +70,5 @@ Route::middleware(['throttle:apis'])->group(function () {
 
     });
 
-});
+
 
