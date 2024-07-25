@@ -156,11 +156,29 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         Route::resource('/skills', SkillsController::class);
         Route::resource('/preschool', PreSchoolController::class);
         Route::resource('/reports', ReportsController::class);
-        //New result form
-        Route::post('midTermResult', [ResultTwoController::class, 'mid']);
-        Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
-        Route::patch('release/result', [ResultTwoController::class, 'release']);
-        Route::patch('withhold/result', [ResultTwoController::class, 'hold']);
+
+        Route::middleware(['throttle:apis'])->group(function () {
+            //New result form
+            Route::post('midTermResult', [ResultTwoController::class, 'mid']);
+            Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
+            Route::patch('release/result', [ResultTwoController::class, 'release']);
+            Route::patch('withhold/result', [ResultTwoController::class, 'hold']);
+
+            Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
+            ->where('session', '.+');
+            Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
+            ->where('session', '.+');
+            Route::get("/result/firstassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'first'])
+            ->where('session', '.+');
+            Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
+            ->where('session', '.+');
+            Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
+            ->where('session', '.+');
+            Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
+            ->where('session', '.+');
+            Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
+            ->where('session', '.+');
+        });
 
         //PreSchool Subject
         Route::post('/preschoolsubject', [PreSchoolSubjectController::class, 'addSubject']);
@@ -228,23 +246,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
         ->where('date', '.+');
 
-        Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
-        ->where('session', '.+');
-        Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
-        ->where('session', '.+');
-        Route::get("/result/firstassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'first'])
-        ->where('session', '.+');
-        Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
-        ->where('session', '.+');
 
-        Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
-        ->where('session', '.+');
-
-        Route::get("/end-term-class-average/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
-        ->where('session', '.+');
-
-        Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
-        ->where('session', '.+');
     });
 
     Route::group(['middleware' => ['auth:sanctum']], function(){

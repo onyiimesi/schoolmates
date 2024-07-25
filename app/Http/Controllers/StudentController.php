@@ -33,7 +33,6 @@ class StudentController extends Controller
 
         $students = Student::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
-        ->where('status', 'active')
         ->paginate(25);
 
         $studentCollection = StudentResource::collection($students);
