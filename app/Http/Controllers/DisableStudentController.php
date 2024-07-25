@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\DisableStudentRequest;
 use App\Models\Student;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
@@ -11,9 +10,9 @@ class DisableStudentController extends Controller
 {
     use HttpResponses;
 
-    public function disable(DisableStudentRequest $request, Student $student){
+    public function disable($id){
 
-        $student = Student::find($request->id);
+        $student = Student::find($id);
 
         if(!$student){
             return $this->error('', 'Student does not exist', 400);

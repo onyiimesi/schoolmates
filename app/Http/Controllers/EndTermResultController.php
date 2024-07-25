@@ -7,22 +7,26 @@ use App\Http\Resources\ResultResource;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Student;
+use App\Traits\CummulativeResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EndTermResultController extends Controller
 {
-    public function endterm(Request $request){
+    use CummulativeResult;
+
+    public function endterm(Request $request)
+    {
 
         $user = Auth::user();
 
         $search = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where("student_id", $request->student_id)
-        ->where("period", 'Second Half')
-        ->where("term", $request->term)
-        ->where("session", $request->session)->get();
+            ->where('campus', $user->campus)
+            ->where("student_id", $request->student_id)
+            ->where("period", 'Second Half')
+            ->where("term", $request->term)
+            ->where("session", $request->session)->get();
 
         $s = ResultResource::collection($search);
 
@@ -31,169 +35,84 @@ class EndTermResultController extends Controller
             'message' => '',
             'data' => $s
         ];
-
     }
 
     public function cummulative(Request $request)
     {
-
         $user = Auth::user();
+        $results = $this->getResults($user, $request);
+        $subjects = $this->initializeSubjects($results);
+        $totalStudentsData = $this->calculateStudentScores($results, $subjects);
 
-        $results = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('student_id', $request->student_id)
-        ->where('period', $request->period)
-        ->where('session', $request->session)
-        ->with('studentscore')
-        ->get();
+        $classAverage = $this->calculateClassAverage($totalStudentsData['totalStudents'], $totalStudentsData['totalStudentsAverage']);
+        $this->finalizeSubjectData($subjects, $classAverage, $user);
 
-        $subjects = [];
-        $totalStudents = 0;
-        $totalStudentsAverage = 0;
-
-        foreach ($results as $result) {
-            $studentTotalScore = 0;
-            $studentTotalSubjects = 0;
-            foreach ($result->studentscore as $score) {
-                $subject = $score->subject;
-                $term = $result->term;
-                $scoreValue = $score->score;
-
-                $studentTotalScore += $scoreValue;
-                $studentTotalSubjects++;
-
-
-                if (!isset($subjects[$subject])) {
-                    $subjects[$subject] = [
-                        'subject' => $subject,
-                        'First Term' => 0,
-                        'Second Term' => 0,
-                        'Third Term' => 0,
-                        'Total Score' => 0,
-                        'Average Score' => 0,
-                        'Remark' => "",
-                        'Rank' => null,
-                        'Class Average' => null,
-                        'Highest' => null,
-                        'Lowest' => null
-                    ];
-                }
-
-                if (is_null($subjects[$subject]['Highest']) || $scoreValue > $subjects[$subject]['Highest']) {
-                    $subjects[$subject]['Highest'] = $scoreValue;
-                }
-
-                if (is_null($subjects[$subject]['Lowest']) || $scoreValue < $subjects[$subject]['Lowest']) {
-                    $subjects[$subject]['Lowest'] = $scoreValue;
-                }
-
-                $subjects[$subject][$term] = $scoreValue;
-                $subjects[$subject]['Total Score'] += $scoreValue;
-            }
-
-            if ($studentTotalSubjects > 0) {
-                $studentAverage = $studentTotalScore / $studentTotalSubjects;
-                $totalStudentsAverage += $studentAverage;
-                $totalStudents++;
-            }
-        }
-
-        $classAverage = $totalStudents > 0 ? $totalStudentsAverage / $totalStudents : 0;
-
-        foreach ($subjects as &$subject) {
-            $subject['Average Score'] = $subject['Total Score'] / 3;
-        }
-
-        $totalScores = array_column($subjects, null, 'subject');
-        arsort($totalScores);
-
-        $rank = 1;
-        foreach ($totalScores as &$subject) {
-            $subject['Rank'] = $rank++;
-        }
-
-        // $totalScoreSum = array_sum(array_column($totalScores, 'Total Score'));
-        // $classAverage = $totalScoreSum / count($totalScores);
-
-        foreach ($totalScores as &$subject) {
-            $scores = [
-                $subject['First Term'],
-                $subject['Second Term'],
-                $subject['Third Term']
-            ];
-
-            $scoreToCheck = max($scores);
-            $grades = GradingSystem::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('score_to', '>=', $scoreToCheck)->get();
-            $remark = null;
-
-            if ($grades->isNotEmpty()) {
-                $remark = $grades->first()->remark;
-            }
-
-            $subject['Remark'] = $remark;
-            $subject['Class Average'] = $classAverage;
-
-        }
-
-        $displayData = array_values($totalScores);
-
-        $resourceCollection = CummulativeScoreResource::collection(collect($displayData));
+        $resourceCollection = CummulativeScoreResource::collection(collect(array_values($subjects)));
 
         return [
             'status' => 'true',
             'message' => '',
             'data' => $resourceCollection
         ];
-
     }
 
     public function endaverage(Request $request)
     {
-        $user = Auth::user();
-
-        $results = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
+        $results = Result::with(['studentscore'])
+        ->where('student_id', $request->student_id)
         ->where('class_name', $request->class_name)
         ->where('session', $request->session)
-        ->with('studentscore')
         ->get();
-
-        $count = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
+            
+        $allResults = Result::with(['studentscore'])
         ->where('class_name', $request->class_name)
-        ->count();
-
-        $totalScore = 0;
-
+        ->where('session', $request->session)
+        ->get();
+    
+        $totalStudentScores = 0;
+        $totalStudentSubjectCount = 0;
         $totalScores = 0;
-        $totalSubject = 0;
-
-        foreach ($results as $result) {
+        $totalSubjectCount = 0;
+    
+        // Calculate total scores and total number of subjects for student average for all students
+        foreach ($allResults as $result) {
             foreach ($result->studentscore as $score) {
-                $totalScore += $score->score;
+                $totalStudentScores += $score->score;
+                if ($result->period === "Second Half" && $score->score > 0) {
+                    $totalStudentSubjectCount++;
+                }
             }
         }
-
-        $classAverage = $totalScore > 0 ? $totalScore / $count : 0;
-
+        
+        // Calculate total scores and total number of subjects for student average for a student
         foreach ($results as $result) {
             foreach ($result->studentscore as $score) {
                 $totalScores += $score->score;
-                $totalSubject++;
+                if ($result->period === "Second Half" && $score->score > 0) {
+                    $totalSubjectCount++;
+                }
             }
         }
+        
+        // Calculate student average
+        $studentAverage = 0;
+        if ($totalSubjectCount > 0) {
+            $studentAverage = $totalScores / $totalSubjectCount;
+        }
 
-        $studentAverage = $totalScores > 0 ? $totalScores / $totalSubject : 0;
-
+        // Calculate class average
+        $classAverage = 0;
+        if ($totalScores > 0) {
+            $classAverage = $totalStudentScores / $totalScores;
+        }
+    
         $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
 
         return [
             "status" => "true",
             "Class Average" => $classAverage,
             "Student Average" => $studentAverage,
-            "Grade" => $grade->remark
+            "Grade" => $grade ? $grade->remark : 'No grade'
         ];
     }
 
@@ -202,21 +121,21 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         $results = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('student_id', $request->student_id)
-        ->where('class_name', $request->class_name)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->with('studentscore')
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('student_id', $request->student_id)
+            ->where('class_name', $request->class_name)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->with('studentscore')
+            ->get();
 
         $res = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('class_name', $request->class_name)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->with('studentscore')
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('class_name', $request->class_name)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->with('studentscore')
+            ->get();
         $count = Student::where('present_class', $request->class_name)->count();
 
         $totalScores = 0;
@@ -247,11 +166,11 @@ class EndTermResultController extends Controller
         $totalSubject = count(array_unique($uniqueSubjects));
         $studentAverage = $totalSubject > 0 ? $totalScore / $totalSubject : 0;
         $grade = GradingSystem::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('score_to', '>=', $studentAverage)->first();
-        if($studentAverage > 90){
+            ->where('campus', $user->campus)
+            ->where('score_to', '>=', $studentAverage)->first();
+        if ($studentAverage > 90) {
             $grades = "EXCELLENT";
-        }else{
+        } else {
             $grades = $grade->remark ?? "";
         }
 
