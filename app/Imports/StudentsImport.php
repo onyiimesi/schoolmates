@@ -13,10 +13,10 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class StudentsImport implements 
-ToModel, 
+class StudentsImport implements
+ToModel,
 WithHeadingRow,
-WithValidation, 
+WithValidation,
 WithBatchInserts,
 WithChunkReading
 {
