@@ -7,25 +7,28 @@ use App\Http\Resources\AcademicPeriodResource;
 use App\Models\AcademicPeriod;
 use App\Models\AcademicSessions;
 use App\Models\Schools;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AcademicPeriodController extends Controller
 {
+    use HttpResponses;
+
     public function changeperiod(AcademicPeriodRequest $request){
 
         $request->validated($request->all());
-
         $user = Auth::user();
 
-        $aced = AcademicPeriod::where('sch_id', $user->sch_id)
+        $academicPeriod  = AcademicPeriod::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
+        ->where('session', $request->session)
         ->first();
 
         $sch = Schools::where('sch_id', $user->sch_id)
         ->first();
 
-        if(empty($aced)){
+        if(!$academicPeriod){
 
             $aced = AcademicPeriod::create([
                 'sch_id' => $sch->sch_id,
@@ -41,15 +44,11 @@ class AcademicPeriodController extends Controller
                 'academic_session' => $request->session,
             ]);
 
-            return [
-                "status" => 'true',
-                "message" => 'Academic Period Added Successfully',
-                "data" => $aced
-            ];
+            return $this->success($aced, "Academic Period Added Successfully");
 
-        }elseif(!empty($aced)){
+        }else {
 
-            $aced->update([
+            $academicPeriod ->update([
                 'sch_id' => $sch->sch_id,
                 'campus' => $user->campus,
                 'period' => $request->period,
@@ -60,7 +59,6 @@ class AcademicPeriodController extends Controller
             $sess = AcademicSessions::where('academic_session', $request->session)->first();
 
             if(!$sess){
-
                 AcademicSessions::create([
                     'sch_id' => $sch->sch_id,
                     'campus' => $user->campus,
@@ -68,13 +66,9 @@ class AcademicPeriodController extends Controller
                 ]);
             }
 
-            $aaa = new AcademicPeriodResource($aced);
+            $aaa = new AcademicPeriodResource($academicPeriod);
 
-            return [
-                "status" => 'true',
-                "message" => 'Academic Period Updated Successfully',
-                "data" => $aaa
-            ];
+            return $this->success($aaa, "Academic Period Updated Successfully");
         }
     }
 

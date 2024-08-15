@@ -3,30 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\StudentResource;
+use App\Models\AcademicSessions;
 use App\Models\Student;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class StudentBySessionTermClassController extends Controller
 {
+    use HttpResponses;
+
     public function studentsessionclassterm(Request $request){
 
         $user = Auth::user();
 
+        $session = AcademicSessions::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('academic_session', $request->session)
+        ->first();
+
+        if(!$session){
+            return $this->error(null, "Academic session does not match");
+        }
+
         $search = Student::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
-        ->where("session_admitted", $request->session)
         ->where("present_class", $request->class)
         ->get();
 
-        $s = StudentResource::collection($search);
+        $data = StudentResource::collection($search);
 
-        return [
-            'status' => 'true',
-            'message' => '',
-            'data' => $s
-        ];
-
+        return $this->success($data, "Student list");
     }
 
     // Student By Class (Principal)
@@ -39,13 +46,8 @@ class StudentBySessionTermClassController extends Controller
         ->where("present_class", $request->present_class)
         ->get();
 
-        $se = StudentResource::collection($searchStud);
+        $data = StudentResource::collection($searchStud);
 
-        return [
-            'status' => 'true',
-            'message' => '',
-            'data' => $se
-        ];
-
+        return $this->success($data, "Student list");
     }
 }
