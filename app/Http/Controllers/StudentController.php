@@ -30,7 +30,6 @@ class StudentController extends Controller
     {
         $user = Auth::user();
 
-
         $students = Student::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->paginate(25);
