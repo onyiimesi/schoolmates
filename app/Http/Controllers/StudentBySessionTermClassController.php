@@ -23,7 +23,7 @@ class StudentBySessionTermClassController extends Controller
         ->first();
 
         if(!$session){
-            return $this->error(null, "Academic session does not match");
+            return $this->error(null, "Academic session does not match", 400);
         }
 
         $search = Student::where('sch_id', $user->sch_id)
