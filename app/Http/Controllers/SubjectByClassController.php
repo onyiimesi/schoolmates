@@ -56,32 +56,27 @@ class SubjectByClassController extends Controller
 
     public function subjectbyCampus(){
         $user = Auth::user();
-        if($user->teacher_type == "subject teacher"){
-            $sub = SubjectTeacher::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('class_name', $user->class_assigned)
-            ->where('staff_id', $user->id)
-            ->get();
-            $subs = SubjectResource::collection($sub);
-            return [
-                'status' => 'true',
-                'message' => 'Subjects',
-                'data' => $subs
-            ];
 
-        } elseif($user->teacher_type == "class teacher"){
-            $subject = SubjectClassResultResource::collection(
-                ClassModel::where('sch_id', $user->sch_id)
+        if ($user->teacher_type == "subject teacher") {
+            $sub = SubjectTeacher::where('sch_id', $user->sch_id)
                 ->where('campus', $user->campus)
                 ->where('class_name', $user->class_assigned)
-                ->get()
-            );
-            return [
-                'status' => 'true',
-                'message' => 'Subjects',
-                'data' => $subject
-            ];
+                ->where('staff_id', $user->id)
+                ->get();
+            $subs = SubjectResource::collection($sub);
+        } else {
+            $subject = ClassModel::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('class_name', $user->class_assigned)
+                ->get();
+            $subs = SubjectClassResultResource::collection($subject);
         }
+
+        return [
+            'status' => 'true',
+            'message' => 'Subjects',
+            'data' => $subs
+        ];
     }
 
     public function studentExcelImport(){
