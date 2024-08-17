@@ -30,9 +30,14 @@ class StudentController extends Controller
     {
         $user = Auth::user();
 
-        $students = Student::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->paginate(25);
+        if ($user->designation_id == 6) {
+            $students = Student::where('sch_id', $user->sch_id)
+                ->paginate(25);
+        } else {
+            $students = Student::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->paginate(25);
+        }
 
         $studentCollection = StudentResource::collection($students);
 
@@ -48,7 +53,6 @@ class StudentController extends Controller
                 'next_page_url' => $students->nextPageUrl()
             ],
         ];
-
     }
 
     /**

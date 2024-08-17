@@ -29,38 +29,23 @@ class StaffController extends Controller
     {
         $user = Auth::user();
 
-        if($user->designation_id == 6){
+        if ($user->designation_id == 6) {
             $staff = Staff::where('sch_id', $user->sch_id)
-            ->where('status', 'active')
-            ->paginate(25);
-
-            $staffcollection = StaffsResource::collection($staff);
-
-            return [
-                'status' => 'true',
-                'message' => 'Staff List',
-                'data' => $staffcollection,
-                'pagination' => [
-                    'current_page' => $staff->currentPage(),
-                    'last_page' => $staff->lastPage(),
-                    'per_page' => $staff->perPage(),
-                    'prev_page_url' => $staff->previousPageUrl(),
-                    'next_page_url' => $staff->nextPageUrl(),
-                ],
-            ];
+                ->where('status', 'active')
+                ->paginate(25);
+        } else {
+            $staff = Staff::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('status', 'active')
+                ->paginate(25);
         }
 
-        $staff = Staff::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('status', 'active')
-        ->paginate(25);
-
-        $staffcollection = StaffsResource::collection($staff);
+        $staffCollection = StaffsResource::collection($staff);
 
         return [
-            'status' => 'true',
+            'status' => true,
             'message' => 'Staff List',
-            'data' => $staffcollection,
+            'data' => $staffCollection,
             'pagination' => [
                 'current_page' => $staff->currentPage(),
                 'last_page' => $staff->lastPage(),
@@ -69,7 +54,6 @@ class StaffController extends Controller
                 'next_page_url' => $staff->nextPageUrl(),
             ],
         ];
-
     }
 
     /**
