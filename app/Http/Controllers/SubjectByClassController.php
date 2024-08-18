@@ -29,12 +29,7 @@ class SubjectByClassController extends Controller
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Subjects',
-            'data' => $subject
-        ];
-
+        return $this->success($subject, "Subjects");
     }
 
     public function subjectbyId(Request $request){
@@ -47,11 +42,7 @@ class SubjectByClassController extends Controller
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Subjects',
-            'data' => $subject
-        ];
+        return $this->success($subject, "Subjects");
     }
 
     public function subjectbyCampus(){
@@ -72,22 +63,14 @@ class SubjectByClassController extends Controller
             $subs = SubjectClassResultResource::collection($subject);
         }
 
-        return [
-            'status' => 'true',
-            'message' => 'Subjects',
-            'data' => $subs
-        ];
+        return $this->success($subs, "Subjects");
     }
 
     public function studentExcelImport(){
 
         $subject = StudentExcelImportResource::collection(StudentExcelImport::get());
 
-        return [
-            'status' => 'true',
-            'message' => '',
-            'data' => $subject
-        ];
+        return $this->success($subject, "");
 
     }
 
@@ -95,19 +78,23 @@ class SubjectByClassController extends Controller
 
         $user = Auth::user();
 
-        $subject = SubjectResource::collection(
-            SubjectTeacher::where('sch_id', $user->sch_id)
-            ->where('staff_id', $user->id)
-            ->where('campus', $user->campus)
-            ->where('class_name', $user->class_assigned)
-            ->get()
-        );
+        if ($user->teacher_type == "subject teacher") {
+            $sub = SubjectTeacher::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('class_name', $user->class_assigned)
+                ->where('staff_id', $user->id)
+                ->get();
+            $subs = SubjectResource::collection($sub);
 
-        return [
-            'status' => 'true',
-            'message' => 'Subjects',
-            'data' => $subject
-        ];
+        } else {
+            $subject = ClassModel::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('class_name', $user->class_assigned)
+                ->get();
+            $subs = SubjectClassResultResource::collection($subject);
+        }
+
+        return $this->success($subs, "Subjects");
     }
 
     public function subjectbystudent(){
@@ -125,11 +112,6 @@ class SubjectByClassController extends Controller
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Student Subjects',
-            'data' => $subject
-        ];
-
+        return $this->success($subject, "Student Subjects");
     }
 }
