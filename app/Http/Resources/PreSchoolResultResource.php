@@ -60,7 +60,7 @@ class PreSchoolResultResource extends JsonResource
                 'hos_comment' => (string)$this->hos_comment,
                 'hos_id' => (string)$this->hos_id,
                 'hos_fullname' => (string)$this->hos_fullname,
-                'hos_signature' => $hosId->signature,
+                'hos_signature' => $hosId?->signature,
                 'status' => (string)$this->status,
             ]
         ];
