@@ -4,14 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ReleaseResultRequest;
 use App\Http\Requests\ResultRequest;
-use App\Models\AffectiveDisposition;
-use App\Models\PsychomotorPerformance;
-use App\Models\PsychomotorSkill;
-use App\Models\PupilReport;
 use App\Models\Result;
-use App\Models\ResultExtraCurricular;
 use App\Models\Staff;
-use App\Models\StudentScore;
 use App\Traits\HttpResponses;
 use App\Traits\ResultBase;
 use Illuminate\Http\Request;
@@ -60,7 +54,7 @@ class ResultTwoController extends Controller
             $getsecondresult = $this->getSecondResult($request, $teacher);
 
             $hosId = Staff::find($request->hos_id);
-            if (!$hosId) {
+            if (!$hosId || !$request->filled('hos_comment')) {
                 return $this->error(null, "Hod needs to add comments", 400);
             }
 
