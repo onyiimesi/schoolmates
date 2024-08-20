@@ -52,9 +52,9 @@ class PreSchoolResultController extends Controller
                     'teacher_comment' => $request->teacher_comment,
                     'teacher_id' => $request->teacher_id,
                     'hos_comment' => $request->hos_comment,
-                    'hos_id' => $hosId->id,
-                    'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
-                    'hos_signature' => $hosId->signature,
+                    'hos_id' => $hosId?->id,
+                    'hos_fullname' => $hosId?->surname . ' '. $hosId?->firstname,
+                    'hos_signature' => $hosId?->signature,
                     'status' => 'active',
                 ]);
 
@@ -64,7 +64,7 @@ class PreSchoolResultController extends Controller
                     "data" => $compute
                 ];
 
-            }else if(!empty($getresult)){
+            }elseif(!empty($getresult)){
 
                 $getresult->update([
                     'student_id' => $request->student_id,
@@ -93,7 +93,7 @@ class PreSchoolResultController extends Controller
 
             }
 
-        }else if($request->period == 'Second Half'){
+        }elseif($request->period == 'Second Half'){
 
             $getsecondresult = PreSchoolResult::where('sch_id', $teacher->sch_id)
             ->where('campus', $teacher->campus)
@@ -147,7 +147,7 @@ class PreSchoolResultController extends Controller
                     "data" => $compute
                 ];
 
-            }else if(!empty($getsecondresult)){
+            }elseif(!empty($getsecondresult)){
 
                 $getsecondresult->update([
                     'sch_id' => $teacher->sch_id,
