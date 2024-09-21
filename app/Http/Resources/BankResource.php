@@ -25,6 +25,7 @@ class BankResource extends JsonResource
             ],
             'payments' => $this->payments ? $this->payments->map(function ($payment) {
                 return [
+                    'id' => (int)$payment->id,
                     'student_id' => (int)$payment->student_id,
                     'student_fullname' => (string)$payment->student_fullname,
                     'admission_number' => $payment->invoice->admission_number,

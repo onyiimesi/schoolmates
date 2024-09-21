@@ -23,6 +23,6 @@ class Bank extends Model implements Auditable
 
     public function payments()
     {
-        return $this->belongsTo(Payment::class, 'bank_id');
+        return $this->hasMany(Payment::class, 'bank_id');
     }
 }
