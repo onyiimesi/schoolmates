@@ -16,6 +16,7 @@ class Payment extends Model implements Auditable
         'campus',
         'term',
         'session',
+        'bank_id',
         'bank_name',
         'account_name',
         'student_id',
@@ -28,6 +29,11 @@ class Payment extends Model implements Auditable
         'type',
         'status'
     ];
+
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class, 'bank_id');
+    }
 
     public function invoice()
     {

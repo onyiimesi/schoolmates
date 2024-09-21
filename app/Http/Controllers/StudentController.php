@@ -155,13 +155,9 @@ class StudentController extends Controller
             'created_by' => $user->surname .' '. $user->firstname .' '. $user->middlename,
         ]);
 
-        Mail::to($request->email_address)->send(new StudentWelcomeMail($student));
+        defer_email($request->email_address, new StudentWelcomeMail($student));
 
-        return [
-            "status" => 'true',
-            "message" => 'Student Created Successfully',
-            "data" => $student
-        ];
+        return $this->success($student, 'Student Created Successfully');
     }
 
     /**

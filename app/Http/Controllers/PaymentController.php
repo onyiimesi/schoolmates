@@ -27,10 +27,10 @@ class PaymentController extends Controller
         ->where('campus', $user->campus)
         ->first();
 
-        $pay = Payment::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('term', $period->term)
-        ->where('session', $period->session)
+        $pay = Payment::where('sch_id', $user?->sch_id)
+        ->where('campus', $user?->campus)
+        ->where('term', $period?->term)
+        ->where('session', $period?->session)
         ->with('invoice')
         ->get();
 
@@ -49,6 +49,7 @@ class PaymentController extends Controller
                     return [
                         'id' => $payment->id,
                         'invoice_id' => $payment->invoice_id,
+                        'bank_id' => $payment->bank_id,
                         'bank_name' => $payment->bank_name,
                         'account_name' => $payment->account_name,
                         'payment_method' => $payment->payment_method,
@@ -126,6 +127,7 @@ class PaymentController extends Controller
             'invoice_id' => $request->invoice_id,
             'term' => $period->term,
             'session' => $period->session,
+            'bank_id' => $request->bank_id,
             'bank_name' => $request->bank_name,
             'account_name' => $request->account_name,
             'student_fullname' => $request->student_fullname,

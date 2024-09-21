@@ -21,6 +21,7 @@ class PaymentResource extends JsonResource
                 'campus' => (string)$this->campus,
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
+                'bank_id' => (int)$this->bank_id,
                 'bank_name' => (string)$this->bank_name,
                 'account_name' => (string)$this->account_name,
                 'student_id' => (string)$this->student_id,
