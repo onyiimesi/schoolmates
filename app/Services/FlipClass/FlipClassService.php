@@ -2,6 +2,7 @@
 
 namespace App\Services\FlipClass;
 
+use App\Http\Controllers\Controller;
 use App\Http\Resources\v2\FlipClassResource;
 use App\Models\Staff;
 use App\Models\v2\FlipClass;
@@ -10,14 +11,14 @@ use App\Services\Upload\UploadService;
 use App\Traits\HttpResponses;
 use Illuminate\Support\Facades\App;
 
-class FlipClassService
+class FlipClassService extends Controller
 {
     use HttpResponses;
 
     public function addFlipClass($request)
     {
         try {
-            $auth = auth();
+            $auth = userAuth();
 
             $user = Staff::where('id', $request->staff_id)
             ->where('sch_id', $auth->sch_id)

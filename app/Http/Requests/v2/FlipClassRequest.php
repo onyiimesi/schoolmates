@@ -30,6 +30,7 @@ class FlipClassRequest extends FormRequest
             'description' => ['required', 'string'],
             'file' => ['required'],
             'file_name' => ['required'],
+            'video_url' => ['nullable', 'url'],
         ];
     }
 }
