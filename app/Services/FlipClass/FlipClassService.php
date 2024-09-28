@@ -63,7 +63,7 @@ class FlipClassService extends Controller
 
     public function getFlipClass($request)
     {
-        $auth = auth();
+        $auth = userAuth();
         $user = Staff::where('sch_id', $auth->sch_id)
         ->where('campus', $auth->campus)->firstOrFail();
 
@@ -83,7 +83,7 @@ class FlipClassService extends Controller
 
     public function getOneFlipClass($request)
     {
-        $auth = auth();
+        $auth = userAuth();
         $user = Staff::where('sch_id', $auth->sch_id)
         ->where('campus', $auth->campus)->firstOrFail();
 
@@ -108,7 +108,7 @@ class FlipClassService extends Controller
 
     public function editFlipClass($request, $id)
     {
-        $auth = auth();
+        $auth = userAuth();
         $user = Staff::where('sch_id', $auth->sch_id)
         ->where('campus', $auth->campus)->firstOrFail();
 
@@ -138,7 +138,7 @@ class FlipClassService extends Controller
 
     public function deleteFlipClass($id)
     {
-        $auth = auth();
+        $auth = userAuth();
         $user = Staff::where('sch_id', $auth->sch_id)
         ->where('campus', $auth->campus)->firstOrFail();
 
@@ -166,7 +166,7 @@ class FlipClassService extends Controller
 
     public function approveFlipClass($id)
     {
-        $auth = auth();
+        $auth = userAuth();
         Staff::where('sch_id', $auth->sch_id)
         ->where('campus', $auth->campus)->firstOrFail();
 
@@ -182,7 +182,7 @@ class FlipClassService extends Controller
 
     public function unapproveFlipClass($id)
     {
-        $auth = auth();
+        $auth = userAuth();
         Staff::where('sch_id', $auth->sch_id)
         ->where('campus', $auth->campus)->firstOrFail();
 
