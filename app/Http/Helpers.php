@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 if (!function_exists('defer_email')) {
@@ -12,7 +13,7 @@ if (!function_exists('defer_email')) {
 
 if (!function_exists('auth')) {
     function auth() {
-        return auth()->user();
+        return Auth::user();
     }
 }
 
