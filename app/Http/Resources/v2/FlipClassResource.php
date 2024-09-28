@@ -34,7 +34,7 @@ class FlipClassResource extends JsonResource
                 'video_url' => (string)$this->video_url,
                 'submitted_by' => (string)$this->submitted_by,
                 'week' => (int)$this->week,
-                'status' => (string)$this->status,
+                'status' => $this->status === 'active' ? 'approved' : 'not approved',
                 'date_submitted' => $this->date_submitted ? Carbon::parse($this->date_submitted)->format('d M Y, h:i A') : null,
                 'date_approved' => $this->date_approved ? Carbon::parse($this->date_approved)->format('d M Y, h:i A') : null,
             ]
