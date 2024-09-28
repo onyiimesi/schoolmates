@@ -10,7 +10,11 @@ if (!function_exists('defer_email')) {
     }
 }
 
-
+if (!function_exists('auth')) {
+    function auth() {
+        return auth()->user();
+    }
+}
 
 
 
