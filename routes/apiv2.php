@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\v2\CbtController;
 use App\Http\Controllers\v2\CommunicationBookController;
+use App\Http\Controllers\v2\FlipClassController;
 use App\Http\Controllers\v2\LessonNoteController;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // });
     Route::group(['middleware' => ['auth:sanctum']], function(){
 
+        // CBT
         Route::prefix('cbt')->group(function () {
             Route::post('/setup', [CbtController::class, 'addSetup']);
             Route::get('/setup/{period}/{term}/{session}/{subject_id}/{question_type}', [CbtController::class, 'getSetup'])
@@ -43,6 +45,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
             });
         });
 
+        // Lesson note
         Route::prefix('lessonnote')->group(function () {
             Route::post('/add', [LessonNoteController::class, 'addLesson']);
             Route::get('/single/{lesson_id}/{class_id}/{subject_id}/{week}/{term}/{session}', [LessonNoteController::class, 'getOneLesson'])
@@ -55,6 +58,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
             Route::patch('/unapprove/{lesson_id}', [LessonNoteController::class, 'unapproveLesson']);
         });
 
+        // Communication book
         Route::prefix('communicationbook')->controller(CommunicationBookController::class)->group(function () {
             Route::post('/', 'store');
             Route::get('/{class_id}', 'show');
@@ -66,6 +70,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
             Route::patch('/reply/edit/{id}', 'editReply');
             Route::delete('/reply/delete/{id}', 'deleteReply');
             Route::get('/unread/count', 'unreadCount');
+        });
+
+        // Flip class
+        Route::prefix('flipclass')->controller(FlipClassController::class)->group(function () {
+            Route::post('/add', 'addFlipClass');
+            Route::get('/single/{id}/{class_id}/{subject_id}/{week}/{term}/{session}', 'getOneFlipClass')
+            ->where('session', '.+');
+            Route::get('/{class_id}/{subject_id}/{week}/{term}/{session}', 'getFlipClass')
+            ->where('session', '.+');
+            Route::patch('/edit/{id}', 'editFlipClass');
+            Route::delete('/remove/{id}', 'deleteFlipClass');
+            Route::patch('/approve/{id}', 'approveFlipClass');
+            Route::patch('/unapprove/{id}', 'unapproveFlipClass');
         });
 
     });

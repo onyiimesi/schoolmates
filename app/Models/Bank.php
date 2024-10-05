@@ -20,4 +20,9 @@ class Bank extends Model implements Auditable
         'account_number',
         'account_purpose'
     ];
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'bank_id');
+    }
 }

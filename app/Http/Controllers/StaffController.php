@@ -202,15 +202,9 @@ class StaffController extends Controller
             'status' => 'active'
         ]);
 
-        Mail::to($request->email)->send(new StaffWelcomeMail($staff));
+        defer_email($request->email, new StaffWelcomeMail($staff));
 
-        return [
-            "status" => 'true',
-            "message" => 'Staff Created Successfully',
-            "data" => $staff
-        ];
-
-        // return new StaffsResource($staff);
+        return $this->success($staff, 'Staff Created Successfully');
     }
 
     /**
