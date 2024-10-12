@@ -46,4 +46,9 @@ class FlipClass extends Model
     {
         return $this->belongsTo(Subject::class, 'subject_id');
     }
+
+    public function assessments()
+    {
+        return $this->hasMany(FlipClassAssessment::class, 'flip_class_id');
+    }
 }

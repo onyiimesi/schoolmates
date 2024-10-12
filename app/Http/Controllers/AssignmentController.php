@@ -60,10 +60,7 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Created Successfully'
-        ];
+        return $this->success(null, 'Created Successfully');
     }
 
     public function theory(Request $request)
@@ -125,11 +122,7 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Created Successfully'
-        ];
-
+        return $this->success(null, 'Created Successfully');
     }
 
     public function assign(Request $request)
@@ -489,10 +482,7 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully'
-        ];
+        return $this->success(null, 'Updated Successfully');
     }
 
     public function editTheoAssign(Request $request)

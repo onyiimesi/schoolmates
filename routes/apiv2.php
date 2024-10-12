@@ -83,6 +83,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
             Route::delete('/remove/{id}', 'deleteFlipClass');
             Route::patch('/approve/{id}', 'approveFlipClass');
             Route::patch('/unapprove/{id}', 'unapproveFlipClass');
+
+            Route::prefix('assessment')->controller(FlipClassController::class)->group(function () {
+                Route::post('/add-obj', 'addObjAssessment');
+                Route::post('/add-theory', 'addTheoryAssessment');
+                Route::get('/{id}/{type}', 'getSingleQuestion');
+                Route::get('/{period}/{term}/{session}/{flip_class_id}/{type}/{week}/{subject_id}', 'getObjQuestions')
+                    ->where('session', '.+');
+                Route::patch("/edit-obj", 'editObj');
+                Route::patch("/edit-theory", 'editThoery');
+                Route::delete("/delete/{id}", 'delAssessment');
+                Route::patch("/publish", 'publish');
+            });
         });
 
     });
