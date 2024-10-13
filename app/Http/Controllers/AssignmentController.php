@@ -404,7 +404,8 @@ class AssignmentController extends Controller
     {
         $user = Auth::user();
 
-        $assign = AssignmentMark::where('sch_id', $user->sch_id)
+        $assign = AssignmentMark::with('assignment')
+        ->where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->where('period', $request->period)
         ->where('term', $request->term)

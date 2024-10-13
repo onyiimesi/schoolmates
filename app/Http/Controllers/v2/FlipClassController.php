@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v2;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v2\FlipClassAssessmentRequest;
+use App\Http\Requests\v2\FlipClassAssessmentResultRequest;
 use App\Http\Requests\v2\FlipClassRequest;
 use App\Services\FlipClass\FlipClassService;
 use Illuminate\Http\Request;
@@ -98,7 +99,62 @@ class FlipClassController extends Controller
             'week' => ['required', 'string'],
             'is_publish' => ['required', 'numeric', 'in:0,1']
         ]);
-        
+
         return $this->service->publish($request);
+    }
+
+    public function objAnswer(Request $request)
+    {
+        return $this->service->objAnswer($request);
+    }
+
+    public function theoryAnswer(Request $request)
+    {
+        return $this->service->theoryAnswer($request);
+    }
+
+    public function getAnswer(Request $request)
+    {
+        return $this->service->getAnswer($request);
+    }
+
+    public function mark(Request $request)
+    {
+        return $this->service->mark($request);
+    }
+
+    public function updateMark(Request $request)
+    {
+        return $this->service->updateMark($request);
+    }
+
+    public function marked(Request $request)
+    {
+        return $this->service->marked($request);
+    }
+
+    public function markedByStudent(Request $request)
+    {
+        return $this->service->markedByStudent($request);
+    }
+
+    public function addResult(FlipClassAssessmentResultRequest $request)
+    {
+        return $this->service->addResult($request);
+    }
+
+    public function getResult(Request $request)
+    {
+        return $this->service->getResult($request);
+    }
+
+    public function resultStudent(Request $request)
+    {
+        return $this->service->resultStudent($request);
+    }
+
+    public function performanceChart(Request $request)
+    {
+        return $this->service->performanceChart($request);
     }
 }

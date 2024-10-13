@@ -94,6 +94,30 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
                 Route::patch("/edit-theory", 'editThoery');
                 Route::delete("/delete/{id}", 'delAssessment');
                 Route::patch("/publish", 'publish');
+
+                // Student Answer
+                Route::post('/obj-answer', 'objAnswer');
+                Route::post('/theory-answer', 'theoryAnswer');
+                Route::get('/answer/{period}/{term}/{session}/{type}/{week}', 'getAnswer')
+                ->where('session', '.+');
+
+                // Mark Assessment
+                Route::post('/mark', 'mark');
+                Route::patch('/update-mark', 'updateMark');
+                Route::get('/marked/{period}/{term}/{session}/{type}/{week}', 'marked')
+                ->where('session', '.+');
+                Route::get('/marked-student/{student_id}/{period}/{term}/{session}/{type}/{week}', 'markedByStudent')
+                ->where('session', '.+');
+
+                // Result
+                Route::post('/result', 'addResult');
+                Route::get('/get-result/{period}/{term}/{session}/{type}/{week}', 'getResult')
+                ->where('session', '.+');
+                Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', 'resultStudent')
+                ->where('session', '.+');
+
+                // Performance
+                Route::get('/performance', 'performanceChart');
             });
         });
 

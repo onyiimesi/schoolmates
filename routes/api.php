@@ -291,6 +291,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         Route::delete("/assignment/{id}", [AssignmentController::class, 'delAssign']);
         Route::get('/assignment/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'assign'])
         ->where('session', '.+');
+
         Route::post('/objective-assignment-answer', [AssignmentController::class, 'objectiveanswer']);
         Route::post('/theory-assignment-answer', [AssignmentController::class, 'theoryanswer']);
         Route::get('/assignment-answer/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'getanswer'])
@@ -304,6 +305,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         ->where('session', '.+');
         Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'markedbystudent'])
         ->where('session', '.+');
+        
         Route::post('/assignment-result', [AssignmentController::class, 'result']);
         Route::get('/get-assignment-result/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'resultassign'])
         ->where('session', '.+');
