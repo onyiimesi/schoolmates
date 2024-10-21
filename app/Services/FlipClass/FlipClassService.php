@@ -417,7 +417,7 @@ class FlipClassService extends Controller
                 'submitted' =>  $request->submitted,
                 'week' => $request->week
             ]);
-    
+
             return $this->success(null, 'Successful!');
 
         } catch (\Throwable $th) {
@@ -454,7 +454,7 @@ class FlipClassService extends Controller
                 'submitted' =>  $request->submitted,
                 'week' => $request->week
             ]);
-    
+
             return $this->success(null, 'Successful!');
 
         } catch (\Throwable $th) {
@@ -511,7 +511,7 @@ class FlipClassService extends Controller
                 'teacher_mark' =>  $request->teacher_mark,
                 'week' => $request->week
             ]);
-    
+
             return $this->success(null, 'Marked');
 
         } catch (\Throwable $th) {
@@ -611,7 +611,7 @@ class FlipClassService extends Controller
                         'week' => $item['week']
                     ]);
                 }
-    
+
                 $performanceData = $data['performance'];
                 FlipClassAssessmentPerformance::updateOrCreate([
                     'sch_id' => $user->sch_id,

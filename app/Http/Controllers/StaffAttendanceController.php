@@ -16,7 +16,7 @@ class StaffAttendanceController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   
+    {
         $user = Auth::user();
 
         $attend = StaffAttendance::where('sch_id', $user->sch_id)

@@ -59,4 +59,9 @@ class Staff extends Authenticatable implements Auditable
     public function lessonnotes(){
         return $this->hasMany(LessonNote::class, 'staff_id');
     }
+
+    public function staffScanAttendances()
+    {
+        return $this->hasMany(StaffScanAttendance::class, 'staff_id');
+    }
 }
