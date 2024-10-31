@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Staff;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Auth;
 
 class MidTermResultResource extends JsonResource
 {
@@ -15,7 +16,12 @@ class MidTermResultResource extends JsonResource
      */
     public function toArray($request)
     {
-        $signature = Staff::where('class_assigned', $this->class_name)->get();
+        $auth = Auth::user();
+
+        $signature = Staff::where('sch_id', $auth->sch_id)
+            ->where('campus', $auth->campus)
+            ->where('class_assigned', $this->class_name)->get();
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
