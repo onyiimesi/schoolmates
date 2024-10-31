@@ -83,6 +83,42 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
             Route::delete('/remove/{id}', 'deleteFlipClass');
             Route::patch('/approve/{id}', 'approveFlipClass');
             Route::patch('/unapprove/{id}', 'unapproveFlipClass');
+
+            Route::prefix('assessment')->controller(FlipClassController::class)->group(function () {
+                Route::post('/add-obj', 'addObjAssessment');
+                Route::post('/add-theory', 'addTheoryAssessment');
+                Route::get('/{id}/{type}', 'getSingleQuestion');
+                Route::get('/{period}/{term}/{session}/{flip_class_id}/{type}/{week}/{subject_id}', 'getObjQuestions')
+                    ->where('session', '.+');
+                Route::patch("/edit-obj", 'editObj');
+                Route::patch("/edit-theory", 'editThoery');
+                Route::delete("/delete/{id}", 'delAssessment');
+                Route::patch("/publish", 'publish');
+
+                // Student Answer
+                Route::post('/obj-answer', 'objAnswer');
+                Route::post('/theory-answer', 'theoryAnswer');
+                Route::get('/answer/{period}/{term}/{session}/{type}/{week}', 'getAnswer')
+                ->where('session', '.+');
+
+                // Mark Assessment
+                Route::post('/mark', 'mark');
+                Route::patch('/update-mark', 'updateMark');
+                Route::get('/marked/{period}/{term}/{session}/{type}/{week}', 'marked')
+                ->where('session', '.+');
+                Route::get('/marked-student/{student_id}/{period}/{term}/{session}/{type}/{week}', 'markedByStudent')
+                ->where('session', '.+');
+
+                // Result
+                Route::post('/result', 'addResult');
+                Route::get('/get-result/{period}/{term}/{session}/{type}/{week}', 'getResult')
+                ->where('session', '.+');
+                Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', 'resultStudent')
+                ->where('session', '.+');
+
+                // Performance
+                Route::get('/performance', 'performanceChart');
+            });
         });
 
     });

@@ -22,14 +22,9 @@ class MidTermResultController extends Controller
         ->where("result_type", 'midterm')
         ->get();
 
-        $s = MidTermResultResource::collection($search);
+        $data = MidTermResultResource::collection($search);
 
-        return [
-            'status' => 'true',
-            'message' => '',
-            'data' => $s
-        ];
-
+        return $this->success($data, 'Mid term result');
     }
 
     public function first(Request $request){

@@ -60,10 +60,7 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Created Successfully'
-        ];
+        return $this->success(null, 'Created Successfully');
     }
 
     public function theory(Request $request)
@@ -125,11 +122,7 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Created Successfully'
-        ];
-
+        return $this->success(null, 'Created Successfully');
     }
 
     public function assign(Request $request)
@@ -411,7 +404,8 @@ class AssignmentController extends Controller
     {
         $user = Auth::user();
 
-        $assign = AssignmentMark::where('sch_id', $user->sch_id)
+        $assign = AssignmentMark::with('assignment')
+        ->where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->where('period', $request->period)
         ->where('term', $request->term)
@@ -489,10 +483,7 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully'
-        ];
+        return $this->success(null, 'Updated Successfully');
     }
 
     public function editTheoAssign(Request $request)
