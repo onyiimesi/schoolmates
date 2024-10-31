@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\MidTermResultResource;
 use App\Models\Result;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MidTermResultController extends Controller
 {
+    use HttpResponses;
+
     public function midterm(Request $request){
 
         $user = Auth::user();
@@ -40,13 +43,9 @@ class MidTermResultController extends Controller
         ->where("result_type", 'first_assesment')
         ->get();
 
-        $s = MidTermResultResource::collection($search);
+        $data = MidTermResultResource::collection($search);
 
-        return [
-            'status' => 'true',
-            'message' => '',
-            'data' => $s
-        ];
+        return $this->success($data, 'Result');
 
     }
 
@@ -63,13 +62,9 @@ class MidTermResultController extends Controller
         ->where("result_type", 'second_assesment')
         ->get();
 
-        $s = MidTermResultResource::collection($search);
+        $data = MidTermResultResource::collection($search);
 
-        return [
-            'status' => 'true',
-            'message' => '',
-            'data' => $s
-        ];
+        return $this->success($data, 'Result');
 
     }
 }
