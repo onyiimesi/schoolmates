@@ -84,7 +84,7 @@ class ResultTwoController extends Controller
                     'student_id' => $student['student_id']
                 ])->update(['status' => 'released']);
             }
-    
+
             return $this->success(null, "Result released");
         } catch (\Exception $e) {
             return $this->error(null, $e->getMessage(), 500);
@@ -107,7 +107,7 @@ class ResultTwoController extends Controller
                     'student_id' => $student['student_id']
                 ])->update(['status' => 'withheld']);
             }
-    
+
             return $this->success(null, "Result withheld");
         } catch (\Exception $e) {
             return $this->error(null, $e->getMessage(), 500);

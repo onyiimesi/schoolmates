@@ -6,11 +6,14 @@ use App\Http\Requests\ClassRequest;
 use App\Http\Resources\ClassResource;
 use App\Models\Campus;
 use App\Models\ClassModel;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ClassController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -19,17 +22,13 @@ class ClassController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $class = ClassResource::collection(
+        ClassResource::collection(
             ClassModel::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Class List',
-            'data' => $class
-        ];
+        return $this->success(null, 'Class List');
     }
 
 
@@ -46,7 +45,7 @@ class ClassController extends Controller
         $user = Auth::user();
         $campus = Campus::where('name', $request->campus)->first();
 
-        $class = ClassModel::create([
+        ClassModel::create([
             'sch_id' => $user->sch_id,
             'campus' => $request->campus,
             'campus_type' => $campus->campus_type,
@@ -54,11 +53,7 @@ class ClassController extends Controller
             'sub_class' => $request->sub_class
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Class Created Successfully',
-            "data" => $class
-        ];
+        return $this->success(null, 'Class Created Successfully');
     }
 
     /**

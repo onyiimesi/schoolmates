@@ -302,7 +302,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     ->where('session', '.+');
     Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'markedbystudent'])
     ->where('session', '.+');
-    
+
     Route::post('/assignment-result', [AssignmentController::class, 'result']);
     Route::get('/get-assignment-result/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'resultassign'])
     ->where('session', '.+');
