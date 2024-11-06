@@ -22,11 +22,20 @@ class ClassController extends Controller
     public function index()
     {
         $user = Auth::user();
-        ClassResource::collection(
-            ClassModel::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->get()
-        );
+
+        if ($user->designation_id == 6) {
+            ClassResource::collection(
+                ClassModel::where('sch_id', $user->sch_id)
+                ->get()
+            );
+
+        }else {
+            ClassResource::collection(
+                ClassModel::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->get()
+            );
+        }
 
         return $this->success(null, 'Class List');
     }
