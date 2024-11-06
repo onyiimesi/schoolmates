@@ -24,20 +24,20 @@ class ClassController extends Controller
         $user = Auth::user();
 
         if ($user->designation_id == 6) {
-            ClassResource::collection(
+            $data = ClassResource::collection(
                 ClassModel::where('sch_id', $user->sch_id)
                 ->get()
             );
 
         }else {
-            ClassResource::collection(
+            $data = ClassResource::collection(
                 ClassModel::where('sch_id', $user->sch_id)
                 ->where('campus', $user->campus)
                 ->get()
             );
         }
 
-        return $this->success(null, 'Class List');
+        return $this->success($data, 'Class List');
     }
 
 
