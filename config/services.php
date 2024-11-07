@@ -38,5 +38,6 @@ return [
     ],
 
     'base_url' => env('BASE_URL'),
+    'campus_url' => env('CAMPUS_URL'),
 
 ];
