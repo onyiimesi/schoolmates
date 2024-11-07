@@ -101,6 +101,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/upload-campus-image', [CampusController::class, 'uploadImage']);
+Route::post('/storage-link', [OtherController::class, 'storageLink']);
 
 Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::resource('/designation', DesignationController::class);
