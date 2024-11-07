@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CampusRequest;
 use App\Http\Resources\CampusResource;
 use App\Models\Campus;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CampusController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -22,11 +25,7 @@ class CampusController extends Controller
             Campus::where('sch_id', $user->sch_id)->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Campus List',
-            'data' => $campus
-        ];
+        return $this->success($campus, 'Campus List');
     }
 
     /**
@@ -44,7 +43,7 @@ class CampusController extends Controller
         $paths = "";
         if($request->image){
             $file = $request->image;
-            $folderName = env('CAMPUS_URL');
+            $folderName = config('services.campus_url');
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
@@ -56,7 +55,7 @@ class CampusController extends Controller
             $paths = $folderName.'/'.$file_name;
         }
 
-        $campus = Campus::create([
+        Campus::create([
             'sch_id' => $user->sch_id,
             'name' => $request->name,
             'email' => $request->email,
@@ -70,11 +69,7 @@ class CampusController extends Controller
             'created_by' => $user->surname .' '. $user->firstname .' '. $user->middlename,
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Campus Created Successfully',
-            "data" => $campus
-        ];
+        return $this->success(null, 'Campus Created Successfully', 201);
     }
 
     /**
@@ -87,11 +82,7 @@ class CampusController extends Controller
     {
         $campuss = new CampusResource($campus);
 
-        return [
-            'status' => 'true',
-            'message' => 'Campus Details',
-            'data' => $campuss
-        ];
+        return $this->success($campuss, 'Campus Details');
     }
 
 
@@ -104,16 +95,9 @@ class CampusController extends Controller
      */
     public function update(Request $request, Campus $campus)
     {
-
         $campus->update($request->all());
 
-        $campu = new CampusResource($campus);
-
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully',
-            "data" => $campu
-        ];
+        return $this->success(null, 'Updated Successfully');
     }
 
     /**
@@ -127,5 +111,23 @@ class CampusController extends Controller
         $campus->delete();
 
         return response(null, 204);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $path = null;
+
+        if($request->hasFile('image')) {
+            $name = $request->input('name');
+            $path = $request->file('image')->store("campus/{$name}", 'public');
+
+            return response()->json(['image_path' => asset('storage/' . $path)], 200);
+        }
+    
+        return response()->json(['error' => 'No image uploaded'], 400);
     }
 }
