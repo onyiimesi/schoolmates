@@ -7,6 +7,7 @@ use App\Http\Resources\CampusResource;
 use App\Models\Campus;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 
 class CampusController extends Controller
@@ -125,7 +126,13 @@ class CampusController extends Controller
             $name = $request->input('name');
             $path = $request->file('image')->store("campus/{$name}", 'public');
 
-            return response()->json(['image_path' => asset('storage/' . $path)], 200);
+            if(App::environment(['production', 'staging'])) {
+                $res = response()->json(['image_path' => asset('public/storage/' . $path)], 200);
+            } else {
+                $res = response()->json(['image_path' => asset('storage/' . $path)], 200);
+            }
+        
+            return $res;
         }
     
         return response()->json(['error' => 'No image uploaded'], 400);

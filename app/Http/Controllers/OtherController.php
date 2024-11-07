@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class OtherController extends Controller
 {
@@ -248,5 +249,16 @@ class OtherController extends Controller
         $data = StaffsResource::collection($staffs);
 
         return $this->success($data, "List staffs by class");
+    }
+
+    public function storageLink()
+    {
+        if (!File::exists(public_path('storage'))) {
+            File::link(storage_path('app/public'), public_path('storage'));
+            return $this->success(null, 'Storage link created successfully.');
+        } else {
+            return $this->error(null, 'Storage link already exists.', 404);
+        }
+
     }
 }
