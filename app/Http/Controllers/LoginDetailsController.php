@@ -33,7 +33,6 @@ class LoginDetailsController extends Controller
                 'next_page_url' => $students->nextPageUrl(),
             ],
         ];
-
     }
 
     public function staffloginDetails(){
