@@ -11,7 +11,6 @@ use App\Models\Staff;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use ImageKit\ImageKit;
 
 class StaffController extends Controller
@@ -102,17 +101,6 @@ class StaffController extends Controller
             $url = $uploadFile->result->url;
             $fileId = $uploadFile->result->fileId;
 
-            // $userFolder = $cleanSchId;
-            // $folderPath = public_path($baseFolder . '/' . $userFolder);
-            // $folderName = env('STAFF_FOLDER_NAME') . '/' . $cleanSchId;
-            // if (!file_exists(public_path($baseFolder))) {
-            //     mkdir(public_path($baseFolder), 0777, true);
-            // }
-            // if (!file_exists($folderPath)) {
-            //     mkdir($folderPath, 0777, true);
-            // }
-            // file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
-
             $paths = $url;
         }else{
             $paths = "";
@@ -141,28 +129,6 @@ class StaffController extends Controller
             $url = $uploadFile->result->url;
             $sigId = $uploadFile->result->fileId;
 
-            // $file = $request->signature;
-            // $baseFolder = 'staffs/signature';
-            // $userFolder = $cleanSchId;
-            // $folderPath = public_path($baseFolder . '/' . $userFolder);
-            // $folderName = env('SIGNATURE_FOLDER_NAME') . '/' . $cleanSchId;
-            // $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            // $replace = substr($file, 0, strpos($file, ',')+1);
-            // $sig = str_replace($replace, '', $file);
-
-            // $sig = str_replace(' ', '+', $sig);
-            // $file_name = time().'.'.$extension;
-
-            // if (!file_exists(public_path($baseFolder))) {
-            //     mkdir(public_path($baseFolder), 0777, true);
-            // }
-
-            // if (!file_exists($folderPath)) {
-            //     mkdir($folderPath, 0777, true);
-            // }
-
-            // file_put_contents($folderPath.'/'.$file_name, base64_decode($sig));
-
             $pathss = $url;
         }else{
             $pathss = "";
@@ -175,6 +141,15 @@ class StaffController extends Controller
             $type = $request->teacher_type;
         }
 
+        $baseUsername = strtolower($request->firstname . '.' . $request->surname);
+        $username = $baseUsername;
+        $counter = 1;
+
+        while (Staff::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
         $staff = Staff::create([
             'sch_id' => $sch->sch_id,
             'campus' => $request->campus,
@@ -184,7 +159,7 @@ class StaffController extends Controller
             'surname' => $request->surname,
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
-            'username' => $request->username,
+            'username' => $username,
             'email' => $request->email,
             'phoneno' => $request->phoneno,
             'address' => $request->address,
@@ -195,7 +170,7 @@ class StaffController extends Controller
             'is_preschool' => $campus->is_preschool,
             'file_id' => $fileId,
             'sig_id' => $sigId,
-            'password' => Hash::make($request->password),
+            'password' => bcrypt($request->password),
             'pass_word' => $request->password,
             'status' => 'active'
         ]);
@@ -213,29 +188,9 @@ class StaffController extends Controller
      */
     public function show(Staff $staff)
     {
-
-        // if($this->isNotAuthorized($staff)){
-
-        //     return $this->isNotAuthorized($staff);
-
-        // }else{
-
-        //     $staffs = new StaffsResource($staff);
-
-        //     return [
-        //         'status' => 'true',
-        //         'message' => 'Staff Details',
-        //         'data' => $staffs
-        //     ];
-        // }
-
         $staffs = new StaffsResource($staff);
 
-        return [
-            'status' => 'true',
-            'message' => 'Staff Details',
-            'data' => $staffs
-        ];
+        return $this->success($staffs, 'Staff Details');
     }
 
     /**
@@ -247,6 +202,10 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
+        $request->validate([
+            'username' => ['required', 'string', 'unique:staff,username']
+        ]);
+
         $user = Auth::user();
         $imageKit = new ImageKit(
             env('IMAGEKIT_PUBLIC_KEY'),
@@ -341,13 +300,7 @@ class StaffController extends Controller
             'sig_id' => $sigId
         ]);
 
-        $staffs = new StaffsResource($staff);
-
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully',
-            "data" => $staffs
-        ];
+        return $this->success(null, 'Updated Successfully');
     }
 
     /**

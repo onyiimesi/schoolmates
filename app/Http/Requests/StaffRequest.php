@@ -26,23 +26,12 @@ class StaffRequest extends FormRequest
      */
     public function rules()
     {
-        $user = Auth::user();
-        $schoolId = $user ? $user->sch_id : null;
-
         return [
             'designation_id' => ['required', 'string',],
             'department' => ['required', 'string', 'max:255'],
             'surname' => ['required', 'string', 'max:255'],
             'firstname' => ['required', 'string', 'max:255'],
             'middlename' => ['required', 'string', 'max:255'],
-            'username' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('staff')->where(function ($query) use ($schoolId) {
-                    return $query->where('sch_id', $schoolId);
-                })
-            ],
             'campus' => ['required', 'string', 'max:255'],
             'password' => ['string', Rules\Password::defaults()],
             'pass_word' => ['string', 'max:255'],
