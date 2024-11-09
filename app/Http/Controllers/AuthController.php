@@ -7,13 +7,10 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\LoginResource;
 use App\Http\Resources\StudentLoginResource;
-use App\Http\Resources\StudentResource;
 use App\Models\Staff;
 use App\Models\Student;
 use App\Models\User;
 use App\Traits\HttpResponses;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -39,7 +36,11 @@ class AuthController extends Controller
             if($auth->status === "inactive"){
                 return $this->error('', 'Account is inactive, contact support', 400);
             }
-            $user = Staff::where('username', $request->username)->first();
+            
+            $user = Staff::where('sch_id', $auth->sch_id)
+                ->where('username', $auth->username)
+                ->first();
+
             $users = new LoginResource($user);
             $token = $user->createToken('API Token of '. $user->username);
 
@@ -48,13 +49,18 @@ class AuthController extends Controller
                 'token' => $token->plainTextToken,
                 'expires_at' => $token->accessToken->expires_at
             ]);
+
         } elseif ($studGuard->attempt($request->only(['username', 'password']))) {
             $auth = Auth::guard('studs')->user();
 
             if($auth->status === "inactive"){
                 return $this->error('', 'Account is inactive, contact support', 400);
             }
-            $stud = Student::where('username', $request->username)->first();
+
+            $stud = Student::where('sch_id', $auth->sch_id)
+                ->where('username', $auth->username)
+                ->first();
+
             $studs = new StudentLoginResource($stud);
             $token = $stud->createToken('API Token of '. $stud->username);
 
