@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StaffRequest;
 use App\Http\Resources\StaffsResource;
 use App\Mail\StaffWelcomeMail;
@@ -13,7 +12,6 @@ use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use ImageKit\ImageKit;
 
 class StaffController extends Controller
