@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\MaximumScoresResource;
 use App\Models\MaximunScores;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MaximumScoresController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -18,25 +21,11 @@ class MaximumScoresController extends Controller
     {
         $user = Auth::user();
 
-        $maxi = MaximunScores::where('sch_id', $user->sch_id)
+        MaximunScores::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
-        ->first();
+        ->firstOrFail();
 
-        if ($maxi) {
-            $maxiResource = new MaximumScoresResource($maxi);
-
-            return [
-                'status' => 'true',
-                'message' => 'Maximum Scores',
-                'data' => $maxiResource
-            ];
-        } else {
-            return [
-                'status' => 'false',
-                'message' => 'Maximum Scores not found',
-                'data' => []
-            ];
-        }
+        return $this->success(null, 'Maximum Scores');
     }
 
 
@@ -77,10 +66,7 @@ class MaximumScoresController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Saved Successfully',
-        ];
+        return $this->success(null, 'Saved Successfully');
     }
 
     /**
