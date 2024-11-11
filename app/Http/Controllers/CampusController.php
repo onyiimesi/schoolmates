@@ -96,7 +96,32 @@ class CampusController extends Controller
      */
     public function update(Request $request, Campus $campus)
     {
-        $campus->update($request->all());
+        if($request->image){
+            $file = $request->image;
+            $folderName = config('services.campus_url');
+            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
+            $replace = substr($file, 0, strpos($file, ',')+1);
+            $image = str_replace($replace, '', $file);
+
+            $image = str_replace(' ', '+', $image);
+            $file_name = time().'.'.$extension;
+            file_put_contents(public_path().'/campus/'.$file_name, base64_decode($image));
+
+            $paths = $folderName.'/'.$file_name;
+        } else {
+            $paths = $campus->image;
+        }
+
+        $campus->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'image' => $paths,
+            'phoneno' => $request->phoneno,
+            'address' => $request->address,
+            'state' => $request->state,
+            'campus_type' => $request->campus_type,
+            'is_preschool' => $request->is_preschool,
+        ]);
 
         return $this->success(null, 'Updated Successfully');
     }
@@ -131,10 +156,10 @@ class CampusController extends Controller
             } else {
                 $res = response()->json(['image_path' => asset('storage/' . $path)], 200);
             }
-        
+
             return $res;
         }
-    
+
         return response()->json(['error' => 'No image uploaded'], 400);
     }
 }

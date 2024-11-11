@@ -10,10 +10,9 @@ use App\Models\Pricing;
 use App\Models\SchoolPayment;
 use App\Models\Schools;
 use App\Models\Student;
+use App\Services\AdmissionNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use App\Traits\HttpResponses;
 use ImageKit\ImageKit;
 
@@ -61,7 +60,7 @@ class StudentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StudentRequest $request)
+    public function store(StudentRequest $request, AdmissionNumberService $admissionNumberService)
     {
         $request->validated($request->all());
 
@@ -89,10 +88,7 @@ class StudentController extends Controller
 
         $campus = Campus::where('sch_id', $user->sch_id)
         ->where('name', $request->campus)
-        ->first();
-
-        $sch = Schools::where('sch_id', $user->sch_id)
-        ->first();
+        ->firstOrFail();
 
         if($request->image){
             $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
@@ -123,6 +119,17 @@ class StudentController extends Controller
             $fileId = "";
         }
 
+        $sch = Schools::where('sch_id', $user->sch_id)
+        ->first();
+
+        if (!$sch) {
+            throw new \Exception('School not found.');
+        }
+
+        $admissionNumber = $sch->admission_number_initial
+            ? $admissionNumberService->generateUniqueAdmissionNumber($sch->admission_number_initial)
+            : $request->admission_number;
+
         $student = Student::create([
             'sch_id' => $sch->sch_id,
             'campus' => $request->campus,
@@ -131,9 +138,9 @@ class StudentController extends Controller
             'surname' => $request->surname,
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
-            'admission_number' => $request->admission_number,
-            'username' => $request->admission_number,
-            'password' => Hash::make($request->password),
+            'admission_number' => $admissionNumber,
+            'username' => $admissionNumber,
+            'password' => bcrypt($request->password),
             'pass_word' => $request->password,
             'genotype' => $request->genotype,
             'blood_group' => $request->blood_group,
