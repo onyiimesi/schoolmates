@@ -104,8 +104,6 @@ class AcademicPeriodController extends Controller
 
         $academicPeriod  = AcademicPeriod::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
         ->where('session', $request->session)
         ->first();
 
