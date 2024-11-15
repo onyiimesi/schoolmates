@@ -261,4 +261,42 @@ class OtherController extends Controller
         }
 
     }
+
+    public function admissionNumberSettings(Request $request)
+    {
+        $request->validate([
+            'sch_id' => 'required|exists:schools,sch_id',
+            'auto_generate' => 'required|boolean',
+            'initial' => 'nullable|string|max:10',
+        ]);
+
+        $school = Schools::where('sch_id', $request->sch_id)
+            ->first();
+
+        if(! $school) {
+            return $this->error(null, 'School not found');
+        }
+
+        $autoGenerate = $request->auto_generate ? 1 : 0;
+        $initial = $autoGenerate ? $request->initial : null;
+
+        $school->update([
+            'auto_generate' => $autoGenerate,
+            'admission_number_initial' => $initial,
+        ]);
+
+        return $this->success(null, "Successful");
+    }
+
+    public function getAdmissionNumberSettings($schId)
+    {
+        $school = Schools::select('id', 'sch_id', 'auto_generate', 'admission_number_initial')->where('sch_id', $schId)
+            ->first();
+
+        if(! $school) {
+            return $this->error(null, 'School not found');
+        }
+
+        return $this->success($school, "Admission number settings");
+    }
 }

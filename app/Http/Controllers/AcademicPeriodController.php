@@ -26,11 +26,11 @@ class AcademicPeriodController extends Controller
         ->first();
 
         $sch = Schools::where('sch_id', $user->sch_id)
-        ->first();
+        ->firstOrFail();
 
         if(!$academicPeriod){
 
-            $aced = AcademicPeriod::create([
+            AcademicPeriod::create([
                 'sch_id' => $sch->sch_id,
                 'campus' => $user->campus,
                 'period' => $request->period,
@@ -44,7 +44,7 @@ class AcademicPeriodController extends Controller
                 'academic_session' => $request->session,
             ]);
 
-            return $this->success($aced, "Academic Period Added Successfully");
+            return $this->success(null, "Academic Period Added Successfully");
 
         }else {
 
@@ -66,9 +66,7 @@ class AcademicPeriodController extends Controller
                 ]);
             }
 
-            $aaa = new AcademicPeriodResource($academicPeriod);
-
-            return $this->success($aaa, "Academic Period Updated Successfully");
+            return $this->success(null, "Academic Period Updated Successfully");
         }
     }
 
@@ -98,5 +96,46 @@ class AcademicPeriodController extends Controller
             "message" => 'Academic Sessions',
             "data" => $getsess
         ];
+    }
+
+    public function setCurrentAcademicPeriod(Request $request)
+    {
+        $user = Auth::user();
+
+        $academicPeriod  = AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('period', $request->period)
+        ->where('term', $request->term)
+        ->where('session', $request->session)
+        ->first();
+
+        if(! $academicPeriod) {
+            return $this->error(null, "Academic period doesn't exist!", 404);
+        }
+
+        AcademicPeriod::where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->update(['is_current_period' => 0]);
+
+        $academicPeriod->update(['is_current_period' => 1]);
+
+        return $this->success(null, "Current Academic Period Set Successfully");
+    }
+
+    public function getCurrentAcademicPeriod()
+    {
+        $user = Auth::user();
+
+        $academicPeriod = AcademicPeriod::select('id', 'period', 'term', 'session', 'is_current_period')
+        ->where('sch_id', $user->sch_id)
+        ->where('campus', $user->campus)
+        ->where('is_current_period', 1)
+        ->first();
+
+        if(! $academicPeriod) {
+            return $this->error(null, 'Current period has not been set.', 404);
+        }
+
+        return $this->success($academicPeriod, 'Current period');
     }
 }

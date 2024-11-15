@@ -29,6 +29,11 @@ class Schools extends Model implements Auditable
         'signed_up',
         'status',
         'dos',
+        'auto_generate',
         'admission_number_initial',
+    ];
+
+    protected $casts = [
+        'auto_generate' => 'boolean'
     ];
 }

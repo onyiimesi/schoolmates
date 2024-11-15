@@ -12,10 +12,15 @@ class AcademicPeriod extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
-        'sch_id', 
-        'campus', 
-        'period', 
+        'sch_id',
+        'campus',
+        'period',
         'term',
         'session',
+        'is_current_period',
+    ];
+
+    protected $casts = [
+        'is_current_period' => 'boolean'
     ];
 }
