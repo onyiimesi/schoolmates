@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DesignationResource;
 use App\Models\Designation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DesignationController extends Controller
 {
@@ -15,7 +16,9 @@ class DesignationController extends Controller
      */
     public function index()
     {
-        return DesignationResource::collection(Designation::get());
+        return Cache::rememberForever('designations', function () {
+            return DesignationResource::collection(Designation::get());
+        });
     }
 
     /**
