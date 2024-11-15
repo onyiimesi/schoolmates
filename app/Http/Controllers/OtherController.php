@@ -278,7 +278,7 @@ class OtherController extends Controller
         }
 
         $autoGenerate = $request->auto_generate ? 1 : 0;
-        $initial = $autoGenerate ? null : $request->initial;
+        $initial = $autoGenerate ? $request->initial : null;
 
         $school->update([
             'auto_generate' => $autoGenerate,
