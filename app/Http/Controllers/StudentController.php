@@ -126,7 +126,7 @@ class StudentController extends Controller
             throw new \Exception('School not found.');
         }
 
-        $admissionNumber = $sch->admission_number_initial
+        $admissionNumber = $sch->auto_generate
             ? $admissionNumberService->generateUniqueAdmissionNumber($sch->admission_number_initial)
             : $request->admission_number;
 

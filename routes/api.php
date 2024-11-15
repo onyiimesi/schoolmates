@@ -121,9 +121,16 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::patch('/transferstudent/{id}', [TransferStudentController::class, 'transfer']);
 
     Route::post('/studentimport', [StudentImportController::class, 'import']);
-    Route::post('/academicperiod', [AcademicPeriodController::class, 'changeperiod']);
-    Route::get('/getacademicperiod', [AcademicPeriodController::class, 'getperiod']);
-    Route::get('/getacademicsessions', [AcademicPeriodController::class, 'getsessions']);
+
+    Route::controller(AcademicPeriodController::class)->group(function () {
+        Route::post('/academicperiod', 'changeperiod');
+        Route::get('/getacademicperiod', 'getperiod');
+        Route::get('/getacademicsessions', 'getsessions');
+
+        Route::post('/current/academicperiod', 'setCurrentAcademicPeriod');
+        Route::get('/current/academicperiod', 'getCurrentAcademicPeriod');
+    });
+
 
     // Route::post('/communicationbook', [CommunicationBookController::class, 'communicate']);
     // Route::get('/communicationbook', [CommunicationBookController::class, 'getmessage']);
@@ -330,6 +337,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get("/role", [OtherController::class, 'role']);
     Route::get("/broadsheet/{class_name}/{term}/{session}", [BroadSheetController::class, 'broadsheet'])
     ->where('session', '.+');
+
+    // Admission Number Settings
+    Route::post('admission-number/settings', [OtherController::class, 'admissionNumberSettings']);
+    Route::get('admission-number/settings/{sch_id}', [OtherController::class, 'getAdmissionNumberSettings'])
+        ->where('sch_id', '.+');
 
     // Staff by class
     Route::get("/staffbyclass/{class}", [OtherController::class, 'staffByClass']);
