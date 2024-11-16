@@ -29,8 +29,6 @@ class StudentRequest extends FormRequest
             'firstname' => ['required', 'string', 'max:255'],
             'middlename' => ['required', 'string', 'max:255'],
             'email_address' => ['required', 'string', 'max:255'],
-            'admission_number' => ['required', 'string', 'max:255', 'unique:students'],
-            'username' => ['string', 'max:255'],
             'password' => ['required', Rules\Password::defaults()],
             'pass_word' => ['string', 'max:255'],
             'dob' => ['required', 'string', 'max:255'],
