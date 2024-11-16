@@ -62,9 +62,21 @@ class StudentController extends Controller
      */
     public function store(StudentRequest $request, AdmissionNumberService $admissionNumberService)
     {
-        $request->validated($request->all());
-
         $user = Auth::user();
+        
+        $sch = Schools::where('sch_id', $user->sch_id)
+            ->first();
+
+        if (!$sch) {
+            throw new \Exception('School not found.');
+        }
+
+        if(!$sch->auto_generate) {
+            $request->validate([
+                'admission_number' => ['required', 'string', 'max:255', 'unique:students'],
+            ]);
+        }
+
         $imageKit = new ImageKit(
             env('IMAGEKIT_PUBLIC_KEY'),
             env('IMAGEKIT_PRIVATE_KEY'),
@@ -117,13 +129,6 @@ class StudentController extends Controller
         }else{
             $paths = "";
             $fileId = "";
-        }
-
-        $sch = Schools::where('sch_id', $user->sch_id)
-        ->first();
-
-        if (!$sch) {
-            throw new \Exception('School not found.');
         }
 
         $admissionNumber = $sch->auto_generate
