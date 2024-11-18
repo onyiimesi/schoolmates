@@ -267,8 +267,14 @@ class OtherController extends Controller
         $request->validate([
             'sch_id' => 'required|exists:schools,sch_id',
             'auto_generate' => 'required|boolean',
-            'initial' => 'nullable|string|max:10',
+            'initial' => 'nullable|string|max:5',
         ]);
+
+        if($request->auto_generate) {
+            $request->validate([
+                'initial' => 'required|string|max:5',
+            ]);
+        }
 
         $school = Schools::where('sch_id', $request->sch_id)
             ->first();

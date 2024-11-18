@@ -202,11 +202,12 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
+        $user = Auth::user();
+        
         $request->validate([
             'username' => ['required', 'string', 'unique:staff,username']
         ]);
 
-        $user = Auth::user();
         $imageKit = new ImageKit(
             env('IMAGEKIT_PUBLIC_KEY'),
             env('IMAGEKIT_PRIVATE_KEY'),
