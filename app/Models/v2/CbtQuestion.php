@@ -15,6 +15,7 @@ class CbtQuestion extends Model
         'period',
         'term',
         'session',
+        'class_id',
         'cbt_setting_id',
         'subject_id',
         'question',

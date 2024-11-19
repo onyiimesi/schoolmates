@@ -17,33 +17,35 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     Route::group(['middleware' => ['auth:sanctum']], function(){
 
         // CBT
-        Route::prefix('cbt')->group(function () {
-            Route::post('/setup', [CbtController::class, 'addSetup']);
-            Route::get('/setup/{period}/{term}/{session}/{subject_id}/{question_type}', [CbtController::class, 'getSetup'])
-            ->where('session', '.+');
+        Route::prefix('cbt')
+            ->controller(CbtController::class)
+            ->group(function () {
+                Route::post('/setup', 'addSetup');
+                Route::get('/setup/{period}/{term}/{session}/{subject_id}/{question_type}', 'getSetup')
+                    ->where('session', '.+');
 
-            Route::post('/add/question', [CbtController::class, 'addQuestion']);
-            Route::get('/questions/{period}/{term}/{session}/{subject_id}/{question_type}/get', [CbtController::class, 'getQuestions'])
-            ->where('session', '.+');
-            Route::patch('/update/question/{id}', [CbtController::class, 'editQuestion']);
-            Route::delete('/delete/question/{id}', [CbtController::class, 'deleteQuestion']);
-            Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}/{student_id}/student', [CbtController::class, 'getStudentAnswer'])
-            ->where('session', '.+');
-            Route::patch("/publish", [CbtController::class, 'publish']);
-            Route::get("/performance", [CbtController::class, 'performance']);
+                Route::post('/add/question', 'addQuestion');
+                Route::get('/questions/{period}/{term}/{session}/{subject_id}/{question_type}/get', 'getQuestions')
+                    ->where('session', '.+');
+                Route::patch('/update/question/{id}', 'editQuestion');
+                Route::delete('/delete/question/{id}', 'deleteQuestion');
+                Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}/{student_id}/student', 'getStudentAnswer')
+                    ->where('session', '.+');
+                Route::patch("/publish", 'publish');
+                Route::get("/performance", 'performance');
 
-            Route::prefix('answer')->group(function () {
-                Route::post('/add', [CbtController::class, 'addAnswer']);
-                Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}', [CbtController::class, 'getAnswerSubject'])
-                ->where('session', '.+');
+                Route::prefix('answer')->group(function () {
+                    Route::post('/add', 'addAnswer');
+                    Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}', 'getAnswerSubject')
+                        ->where('session', '.+');
+                });
+
+                Route::prefix('result')->group(function () {
+                    Route::post('/add', 'addResult');
+                    Route::get('/{student_id}/{period}/{term}/{session}/{question_type}/{subject_id}', 'getResultStudent')
+                        ->where('session', '.+');
+                });
             });
-
-            Route::prefix('result')->group(function () {
-                Route::post('/add', [CbtController::class, 'addResult']);
-                Route::get('/{student_id}/{period}/{term}/{session}/{question_type}/{subject_id}', [CbtController::class, 'getResultStudent'])
-                ->where('session', '.+');
-            });
-        });
 
         // Lesson note
         Route::prefix('lessonnote')->group(function () {
