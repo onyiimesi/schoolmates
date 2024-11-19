@@ -6,6 +6,7 @@ use App\Http\Resources\v2\CbtAnswerResource;
 use App\Http\Resources\v2\CbtQuestionResource;
 use App\Http\Resources\v2\CbtResultResource;
 use App\Http\Resources\v2\CbtSettingsResource;
+use App\Models\ClassModel;
 use App\Models\v2\CbtAnswer;
 use App\Models\v2\CbtPerformance;
 use App\Models\v2\CbtQuestion;
@@ -76,15 +77,21 @@ class CbtService {
 
     public function addCbtQuestion($user, $request)
     {
+        $classid = ClassModel::where([
+            "sch_id" => $user->sch_id,
+            "campus" => $user->campus,
+            "class_name" => $user->class_assigned
+        ])->value('id');
+
         try {
-            DB::transaction(function() use($user, $request) {
+            DB::transaction(function() use($user, $classid, $request) {
                 CbtQuestion::create([
                     'sch_id' => $user->sch_id,
                     'campus' => $user->campus,
                     'period' => $request->period,
                     'term' => $request->term,
                     'session' => $request->session,
-                    'class_id' => $user->class_id,
+                    'class_id' => $classid,
                     'cbt_setting_id' => $request->cbt_setting_id,
                     'teacher_id' => $user->id,
                     'subject_id' => $request->subject_id,
@@ -109,20 +116,33 @@ class CbtService {
 
     public function getAllQuestions($user, $request)
     {
-        $data = CbtQuestion::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('period', $request->period)
-            ->where('term', $request->term)
-            ->where('session', $request->session)
-            ->where('class_id', $user->class_id)
-            ->where('subject_id', $request->subject_id)
-            ->where('question_type', $request->question_type)
+        $classid = ClassModel::where([
+            "sch_id" => $user->sch_id,
+            "campus" => $user->campus,
+            "class_name" => $user->class_assigned
+        ])->value('id');
+
+        if (!$classid) {
+            return $this->error("Class not found", 404);
+        }
+
+        $data = CbtQuestion::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $request->period,
+                'term' => $request->term,
+                'session' => $request->session,
+                'class_id' => $classid,
+                'subject_id' => $request->subject_id,
+                'question_type' => $request->question_type,
+            ])
             ->get();
 
         $res = CbtQuestionResource::collection($data);
 
         return $this->success($res, "Successful", 200);
     }
+
 
     public function updateQuestion($user, $request, $id)
     {
