@@ -47,7 +47,7 @@ class LoginResource extends JsonResource
             'phoneno' => (string)$this->phoneno,
             'address' => (string)$this->address,
             'image' => (string)$this->image,
-            'class_id' => (string)$classid,
+            'class_id' => (int)$classid,
             'class_assigned' => (string)$this->class_assigned,
             'teacher_type' => (string)$this->teacher_type,
             'signature' => (string)$this->signature,
