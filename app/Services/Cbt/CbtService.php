@@ -84,6 +84,7 @@ class CbtService {
                     'period' => $request->period,
                     'term' => $request->term,
                     'session' => $request->session,
+                    'class_id' => $user->class_id,
                     'cbt_setting_id' => $request->cbt_setting_id,
                     'teacher_id' => $user->id,
                     'subject_id' => $request->subject_id,
@@ -109,13 +110,14 @@ class CbtService {
     public function getAllQuestions($user, $request)
     {
         $data = CbtQuestion::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('subject_id', $request->subject_id)
-        ->where('question_type', $request->question_type)
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->where('class_id', $user->class_id)
+            ->where('subject_id', $request->subject_id)
+            ->where('question_type', $request->question_type)
+            ->get();
 
         if(!$data){
             return $this->error(null, "Not found!", 404);
