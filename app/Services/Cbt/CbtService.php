@@ -119,13 +119,9 @@ class CbtService {
             ->where('question_type', $request->question_type)
             ->get();
 
-        if(!$data){
-            return $this->error(null, "Not found!", 404);
-        }
+        $res = CbtQuestionResource::collection($data);
 
-        $data = CbtQuestionResource::collection($data);
-
-        return $this->success($data, "Successful", 200);
+        return $this->success($res, "Successful", 200);
     }
 
     public function updateQuestion($user, $request, $id)
