@@ -116,8 +116,8 @@ class CbtService {
 
     public function getAllQuestions($user, $request)
     {
-        $class = $user->designation_id === 7 ? $user->present_class : $user->class_assigned;
-        
+        $class = $user->designation_id == 7 ? $user->present_class : $user->class_assigned;
+
         $classid = ClassModel::where([
             "sch_id" => $user->sch_id,
             "campus" => $user->campus,
@@ -125,7 +125,7 @@ class CbtService {
         ])->value('id');
 
         if (!$classid) {
-            return $this->error("Class not found", 404);
+            return $this->error(null, "Class not found", 404);
         }
 
         $data = CbtQuestion::where([
