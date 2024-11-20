@@ -116,10 +116,12 @@ class CbtService {
 
     public function getAllQuestions($user, $request)
     {
+        $class = $user->designation_id === 7 ? $user->present_class : $user->class_assigned;
+        
         $classid = ClassModel::where([
             "sch_id" => $user->sch_id,
             "campus" => $user->campus,
-            "class_name" => $user->class_assigned
+            "class_name" => $class
         ])->value('id');
 
         if (!$classid) {
