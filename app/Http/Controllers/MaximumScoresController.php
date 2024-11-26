@@ -21,11 +21,11 @@ class MaximumScoresController extends Controller
     {
         $user = Auth::user();
 
-        MaximunScores::where('sch_id', $user->sch_id)
+        $data = MaximunScores::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->firstOrFail();
 
-        return $this->success(null, 'Maximum Scores');
+        return $this->success($data, 'Maximum Scores');
     }
 
 
