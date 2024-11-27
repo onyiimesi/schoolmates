@@ -126,6 +126,12 @@ trait ResultBase
         }
 
         if ($teacher->teacher_type === "class teacher") {
+            if ($hosId) {
+                $hosFullName = $hosId->surname . ' ' . $hosId->firstname;
+            } else {
+                $hosFullName = null;
+            }
+
             $this->updateEndTermResult($getsecondresult, $request, [
                 'school_opened' => $request->school_opened,
                 'times_present' => $request->times_present,
@@ -136,7 +142,7 @@ trait ResultBase
                 'teacher_fullname' => $teacher->surname . ' ' . $teacher->firstname,
                 'hos_comment' => $request->hos_comment,
                 'hos_id' => $request->hos_id,
-                'hos_fullname' => $hosId->surname . ' ' . $hosId->firstname,
+                'hos_fullname' => $hosFullName,
                 'computed_endterm' => 'true',
                 'status' => 'not-released'
             ]);
