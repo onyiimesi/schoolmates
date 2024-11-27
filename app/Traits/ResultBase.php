@@ -184,7 +184,7 @@ trait ResultBase
             $this->saveExtraCurricularActivities($compute, $request->extra_curricular_activities);
         }
 
-        if ($teacher->campus_type === "Elementary") {
+        if ($teacher->campus_type === "Elementary" && $request->abacus) {
             $this->saveAbacus($compute, $request->abacus);
         }
 
