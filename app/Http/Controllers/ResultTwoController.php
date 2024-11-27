@@ -54,7 +54,7 @@ class ResultTwoController extends Controller
             $getsecondresult = $this->getSecondResult($request, $teacher);
 
             $hosId = Staff::find($request->hos_id);
-            if (!$hosId || !$request->filled('hos_comment')) {
+            if (!$hosId || empty($request->hos_comment)) {
                 return $this->error(null, "Hod needs to add comments", 400);
             }
 
