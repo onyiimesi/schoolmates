@@ -179,7 +179,10 @@ trait ResultBase
         $this->saveStudentScores($compute, $request->results);
         $this->saveAffectiveDispositions($compute, $request->affective_disposition);
         $this->savePsychomotorSkills($compute, $request->psychomotor_skills);
-        $this->saveExtraCurricularActivities($compute, $request->extra_curricular_activities);
+
+        if ($request->extra_curricular_activities) {
+            $this->saveExtraCurricularActivities($compute, $request->extra_curricular_activities);
+        }
 
         if ($teacher->campus_type === "Elementary") {
             $this->saveAbacus($compute, $request->abacus);
