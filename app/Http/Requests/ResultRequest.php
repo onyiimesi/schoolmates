@@ -31,14 +31,13 @@ class ResultRequest extends FormRequest
             'period' => ['required', 'string', 'max:255'],
             'term' => ['required', 'string', 'max:255'],
             'session' => ['required', 'string', 'max:255'],
-            'abacus.name' => ['required']
         ];
     }
 
-    public function messages()
-    {
-        return [
-            'abacus.name' => "abacus field is required"
-        ];
-    }
+    // public function messages()
+    // {
+    //     return [
+    //         'abacus.name' => "abacus field is required"
+    //     ];
+    // }
 }
