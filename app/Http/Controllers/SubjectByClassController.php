@@ -78,7 +78,7 @@ class SubjectByClassController extends Controller
 
     private function get_subjects_for_subject_teacher($user)
     {
-        $class = ClassModel::where('class_assigned', $user->class_assigned)
+        $class = ClassModel::where('class_name', $user->class_assigned)
             ->firstOrFail();
 
         $subjects = SubjectTeacher::where([
@@ -96,7 +96,7 @@ class SubjectByClassController extends Controller
 
     private function get_subjects_for_other_teachers($user)
     {
-        $class = ClassModel::where('class_assigned', $user->class_assigned)
+        $class = ClassModel::where('class_name', $user->class_assigned)
             ->firstOrFail();
 
         $subjects = ClassModel::with('subjects')
