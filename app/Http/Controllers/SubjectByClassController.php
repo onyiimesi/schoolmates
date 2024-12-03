@@ -48,22 +48,61 @@ class SubjectByClassController extends Controller
     public function subjectbyCampus(){
         $user = Auth::user();
 
-        if ($user->teacher_type == "subject teacher") {
-            $sub = SubjectTeacher::where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->where('class_name', $user->class_assigned)
-                ->where('staff_id', $user->id)
-                ->get();
-            $subs = SubjectResource::collection($sub);
-        } else {
-            $subject = ClassModel::where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->where('class_name', $user->class_assigned)
-                ->get();
-            $subs = SubjectClassResultResource::collection($subject);
+        // if ($user->teacher_type == "subject teacher") {
+        //     $sub = SubjectTeacher::where('sch_id', $user->sch_id)
+        //         ->where('campus', $user->campus)
+        //         ->where('class_name', $user->class_assigned)
+        //         ->where('staff_id', $user->id)
+        //         ->get();
+
+        //     $subs = SubjectResource::collection($sub);
+
+        //     return $this->success($subs, "Subjects");
+        // } else {
+        //     $subject = ClassModel::where('sch_id', $user->sch_id)
+        //         ->where('campus', $user->campus)
+        //         ->where('class_name', $user->class_assigned)
+        //         ->get();
+
+        //     $subs = SubjectClassResultResource::collection($subject);
+
+        //     return $this->success($subs, "Subjects");
+        // }
+
+        if ($user->teacher_type === "subject teacher") {
+            return $this->get_subjects_for_subject_teacher($user);
         }
 
-        return $this->success($subs, "Subjects");
+        return $this->get_subjects_for_other_teachers($user);
+    }
+
+    private function get_subjects_for_subject_teacher($user)
+    {
+        $subjects = SubjectTeacher::where([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'class_name' => $user->class_assigned,
+            'staff_id' => $user->id
+        ])
+        ->get();
+
+        $subjectResources = SubjectResource::collection($subjects);
+
+        return $this->success($subjectResources, "Subjects retrieved successfully.");
+    }
+
+    private function get_subjects_for_other_teachers($user)
+    {
+        $subjects = ClassModel::where([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'class_name' => $user->class_assigned
+        ])
+        ->get();
+
+        $subjectResources = SubjectClassResultResource::collection($subjects);
+
+        return $this->success($subjectResources, "Subjects retrieved successfully.");
     }
 
     public function studentExcelImport(){
