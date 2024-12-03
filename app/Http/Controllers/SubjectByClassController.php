@@ -93,12 +93,13 @@ class SubjectByClassController extends Controller
 
     private function get_subjects_for_other_teachers($user)
     {
-        $subjects = ClassModel::where([
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'class_name' => $user->class_assigned
-        ])
-        ->get();
+        $subjects = ClassModel::with('subjects')
+            ->where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'class_name' => $user->class_assigned
+            ])
+            ->get();
 
         $subjectResources = SubjectClassResultResource::collection($subjects);
 
