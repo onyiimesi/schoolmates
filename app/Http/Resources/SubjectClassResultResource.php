@@ -14,15 +14,19 @@ class SubjectClassResultResource extends JsonResource
      */
     public function toArray($request)
     {
+        $mergedIds = $this->collection->pluck('id')->implode(',');
+
+        $mergedSubjects = $this->collection->flatMap(function ($item) {
+            return $item->subjects->map(function ($subject) {
+                return ['name' => $subject->subject];
+            });
+        })->unique('name')->values();
+
         return [
-            'id' => (string)$this->id,
+            'id' => $mergedIds,
             'attributes' => [
-                'subject' => $this->subjects->map(function($name) {
-                    return [
-                        "name" => $name->subject
-                    ];
-                })->toArray(),
-            ]
+                'subject' => $mergedSubjects
+            ],
         ];
     }
 }
