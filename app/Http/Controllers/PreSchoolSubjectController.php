@@ -8,99 +8,88 @@ use App\Http\Resources\PreSchoolSubjectClassResource;
 use App\Http\Resources\PreSchoolSubjectResource;
 use App\Models\PreSchoolSubject;
 use App\Models\PreSchoolSubjectClass;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PreSchoolSubjectController extends Controller
 {
-    public function addSubject(PreSchoolSubjectRequest $request){
+    use HttpResponses;
 
-        $request->validated($request->all());
-
+    public function addSubject(PreSchoolSubjectRequest $request)
+    {
         $user = Auth::user();
 
-        $subjects = PreSchoolSubject::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('subject', $request->subject)
-        ->first();
+        $subjects = PreSchoolSubject::where([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'period' => $request->period,
+            'session' => $request->session,
+            'class' => $request->class,
+            'subject' => $request->subject
+        ])->first();
 
-        if(empty($subjects)){
-
-            $presub = PreSchoolSubject::create([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'period' => $request->period,
-                'term' => $request->term,
-                'session' => $request->session,
-                'subject' => $request->subject,
-                'topic' => $request->topic,
-                'category' => $request->category,
-            ]);
-
-            return [
-                'status' => '',
-                'message' => 'Created Successfully',
-                'data' => $presub
-            ];
-
-        }elseif(!empty($subjects)){
+        if($subjects) {
 
             $subjects->update([
                 'topic' => $request->topic
             ]);
 
-            return [
-                'status' => '',
-                'message' => 'Created Successfully',
-                'data' => $subjects
-            ];
+            return $this->success(null, 'Updated Successfully');
         }
+
+        PreSchoolSubject::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'period' => $request->period,
+            'term' => $request->term,
+            'session' => $request->session,
+            'subject' => $request->subject,
+            'topic' => $request->topic,
+            'category' => $request->category,
+        ]);
+
+        return $this->success(null, 'Created Successfully', 201);
     }
 
-    public function getSubject(Request $request){
+    public function getSubject(Request $request)
+    {
+        $user = Auth::user();
 
+        $subjects = PreSchoolSubjectResource::collection(
+            PreSchoolSubject::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'period' => $request->period,
+                'term' => $request->term,
+                'session' => $request->session
+            ])->get()
+        );
+
+        return $this->success($subjects, 'Subject list');
+    }
+
+    public function getSubjectID(Request $request)
+    {
         $user = Auth::user();
 
         $subjects = PreSchoolSubjectResource::collection(PreSchoolSubject::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->get());
+            ->where('campus', $user->campus)
+            ->where('id', $request->id)
+            ->get());
 
         return [
             'status' => 'success',
             'message' => '',
             'data' => $subjects
         ];
-
     }
 
-    public function getSubjectID(Request $request){
-
-        $user = Auth::user();
-
-        $subjects = PreSchoolSubjectResource::collection(PreSchoolSubject::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('id', $request->id)
-        ->get());
-
-        return [
-            'status' => 'success',
-            'message' => '',
-            'data' => $subjects
-        ];
-
-    }
-
-    public function editSubject(Request $request){
-
+    public function editSubject(Request $request)
+    {
         $subject = PreSchoolSubject::where('id', $request->id)->first();
 
-        if(!$subject){
+        if (!$subject) {
             return response(null, 404);
         }
 
@@ -115,7 +104,6 @@ class PreSchoolSubjectController extends Controller
             'message' => 'Edited Successfully',
             'data' => $subject
         ];
-
     }
 
     public function deleteSubject(Request $request)
@@ -123,95 +111,79 @@ class PreSchoolSubjectController extends Controller
         $user = Auth::user();
 
         $subject = PreSchoolSubject::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('id', $request->id)->first();
+            ->where('campus', $user->campus)
+            ->where('id', $request->id)->first();
 
         $subject->delete();
 
         return response(null, 204);
     }
 
-    public function addSubjectClass(PreSchoolSubjectClassRequest $request){
-
-        $request->validated($request->all());
-
+    public function addSubjectClass(PreSchoolSubjectClassRequest $request)
+    {
         $user = Auth::user();
 
-        $pre = PreSchoolSubjectClass::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('class', $request->class)->first();
+        $existingSubjectClass = PreSchoolSubjectClass::where([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'period' => $request->period,
+            'session' => $request->session,
+            'class' => $request->class
+        ])->first();
 
-        if(empty($pre)){
-            $presub = PreSchoolSubjectClass::create([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'period' => $request->period,
-                'term' => $request->term,
-                'session' => $request->session,
-                'class_id' => $request->class_id,
-                'class' => $request->class,
-                'category' => $request->category,
+        if ($existingSubjectClass) {
+            $existingSubjectClass->update([
                 'subjects' => $request->subjects
             ]);
 
-            return [
-                'status' => '',
-                'message' => 'Assigned Successfully',
-                'data' => $presub
-            ];
-
-        }elseif(!empty($pre)){
-
-            $pre->update([
-                'subjects' => $request->subjects
-            ]);
-
-            return [
-                'status' => '',
-                'message' => 'Updated Successfully',
-                'data' => $pre
-            ];
+            return $this->success(null, 'Subjects updated successfully.');
         }
 
+        PreSchoolSubjectClass::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'period' => $request->period,
+            'term' => $request->term,
+            'session' => $request->session,
+            'class_id' => $request->class_id,
+            'class' => $request->class,
+            'category' => $request->category,
+            'subjects' => $request->subjects
+        ]);
+
+        return $this->success(null, 'Subjects assigned successfully.', 201);
     }
 
-    public function getSubjectClass(Request $request){
-
+    public function getSubjectClass(Request $request)
+    {
         $user = Auth::user();
 
         $subjects = PreSchoolSubjectClassResource::collection(PreSchoolSubjectClass::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->get());
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->get());
 
-        return [
-            'status' => 'success',
-            'message' => '',
-            'data' => $subjects
-        ];
-
+        return $this->success($subjects, 'Subject list');
     }
 
-    public function getSubjectByClass(Request $request){
-
+    public function getSubjectByClass(Request $request)
+    {
         $user = Auth::user();
 
         $presubjects = PreSchoolSubjectClassResource::collection(PreSchoolSubjectClass::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('class', $request->class)
-        ->get());
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->where('class', $request->class)
+            ->get());
 
         return [
             'status' => 'success',
             'message' => '',
             'data' => $presubjects
         ];
-
     }
 }
