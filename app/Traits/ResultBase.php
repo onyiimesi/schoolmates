@@ -79,6 +79,7 @@ trait ResultBase
 
     protected function saveStudentScores($result, $scores)
     {
+        $result->studentscore()->delete();
         foreach ($scores as $score) {
             $question = new StudentScore($score);
             $result->studentscore()->save($question);
@@ -146,6 +147,7 @@ trait ResultBase
                 'computed_endterm' => 'true',
                 'status' => 'not-released'
             ]);
+            $this->saveStudentScores($getsecondresult, $request->results);
             $this->saveClassTeacherData($getsecondresult, $request, $teacher);
         }
 
