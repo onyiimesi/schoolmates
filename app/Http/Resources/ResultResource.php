@@ -19,7 +19,7 @@ class ResultResource extends JsonResource
     public function toArray($request)
     {
         $signature = Staff::where('class_assigned', $this->class_name)->get();
-        $dos = Schools::first('dos');
+        $dos = Schools::where('sch_id', $this->sch_id)->first('dos');
         $student_image = Student::where('id', $this->student_id)->first();
         $class = ClassModel::where('class_name', $this->class_name)->first();
         $hod = null;

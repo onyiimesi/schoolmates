@@ -63,17 +63,17 @@ class EndTermResultController extends Controller
         ->where('class_name', $request->class_name)
         ->where('session', $request->session)
         ->get();
-            
+
         $allResults = Result::with(['studentscore'])
         ->where('class_name', $request->class_name)
         ->where('session', $request->session)
         ->get();
-    
+
         $totalStudentScores = 0;
         $totalStudentSubjectCount = 0;
         $totalScores = 0;
         $totalSubjectCount = 0;
-    
+
         // Calculate total scores and total number of subjects for student average for all students
         foreach ($allResults as $result) {
             foreach ($result->studentscore as $score) {
@@ -83,7 +83,7 @@ class EndTermResultController extends Controller
                 }
             }
         }
-        
+
         // Calculate total scores and total number of subjects for student average for a student
         foreach ($results as $result) {
             foreach ($result->studentscore as $score) {
@@ -93,7 +93,7 @@ class EndTermResultController extends Controller
                 }
             }
         }
-        
+
         // Calculate student average
         $studentAverage = 0;
         if ($totalSubjectCount > 0) {
@@ -105,7 +105,7 @@ class EndTermResultController extends Controller
         if ($totalScores > 0) {
             $classAverage = $totalStudentScores / $totalScores;
         }
-    
+
         $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
 
         return [
