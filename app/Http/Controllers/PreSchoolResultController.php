@@ -6,188 +6,109 @@ use App\Http\Requests\PreSchoolResultRequest;
 use App\Models\PreSchoolResultExtraCurricular;
 use App\Models\PreSchoolResult;
 use App\Models\Staff;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PreSchoolResultController extends Controller
 {
+    use HttpResponses;
+
     public function result(PreSchoolResultRequest $request)
     {
         $request->validated($request->all());
-
         $teacher = Auth::user();
 
-        if($request->period == 'First Half'){
+        $isFirstHalf = $request->period === 'First Half';
+        $period = $isFirstHalf ? 'First Half' : 'Second Half';
 
-            $getresult = PreSchoolResult::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where("student_id", $request->student_id)
-            ->where("period", 'First Half')
-            ->where("term", $request->term)
-            ->where("session", $request->session)->first();
+        $existingResult = $this->getExistingResult($teacher, $request, $period);
 
-            $hosId = Staff::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where('designation_id', 3)
-            ->where('status', 'Active')
-            ->first();
+        $hosId = $this->getHOS($teacher);
+        $teacherDetails = $this->getTeacherDetails($request->teacher_id);
 
-            if(empty($getresult)){
+        if (empty($existingResult)) {
+            $resultData = $this->prepareResultData($teacher, $request, $hosId, $teacherDetails);
+            $computedResult = PreSchoolResult::create($resultData);
 
-                $compute = PreSchoolResult::create([
-                    'sch_id' => $teacher->sch_id,
-                    'campus' => $teacher->campus,
-                    'student_id' => $request->student_id,
-                    'student_fullname' => $request->student_fullname,
-                    'admission_number' => $request->admission_number,
-                    'class_name' => $request->class_name,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'school_opened' => $request->school_opened,
-                    'times_present' => $request->times_present,
-                    'times_absent' => $request->times_absent,
-                    'evaluation_report' => $request->evaluation_report,
-                    'cognitive_development' => $request->cognitive_development,
-                    'teacher_comment' => $request->teacher_comment,
-                    'teacher_id' => $request->teacher_id,
-                    'hos_comment' => $request->hos_comment,
-                    'hos_id' => $hosId?->id,
-                    'hos_fullname' => $hosId?->surname . ' '. $hosId?->firstname,
-                    'hos_signature' => $hosId?->signature,
-                    'status' => 'active',
-                ]);
+            $this->handleExtraCurricularActivities($computedResult, $request->extra_curricular_activities);
 
-                return [
-                    "status" => 'true',
-                    "message" => 'Computed Successfully',
-                    "data" => $compute
-                ];
+            return $this->success(null, 'Computed Successfully', 201);
+        } else {
+            $updateData = $this->prepareResultData($teacher, $request, $hosId, $teacherDetails);
+            $existingResult->update($updateData);
 
-            }elseif(!empty($getresult)){
+            $existingResult->preschoolresultextracurricular()->delete();
+            $this->handleExtraCurricularActivities($existingResult, $request->extra_curricular_activities);
 
-                $getresult->update([
-                    'student_id' => $request->student_id,
-                    'student_fullname' => $request->student_fullname,
-                    'admission_number' => $request->admission_number,
-                    'class_name' => $request->class_name,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'school_opened' => $request->school_opened,
-                    'times_present' => $request->times_present,
-                    'times_absent' => $request->times_absent,
-                    'evaluation_report' => $request->evaluation_report,
-                    'cognitive_development' => $request->cognitive_development,
-                    'teacher_comment' => $request->teacher_comment,
-                    'teacher_id' => $request->teacher_id,
-                    'hos_comment' => $request->hos_comment,
-                    'hos_id' => $request->hos_id,
-                ]);
-
-                return [
-                    "status" => 'true',
-                    "message" => 'Result Updated Successfully',
-                    "data" => $getresult
-                ];
-
-            }
-
-        }elseif($request->period == 'Second Half'){
-
-            $getsecondresult = PreSchoolResult::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where("student_id", $request->student_id)
-            ->where("period", 'Second Half')
-            ->where("term", $request->term)
-            ->where("session", $request->session)->first();
-
-            $hosId = Staff::where('campus', $teacher->campus)
-            ->where('designation_id', 3)
-            ->where('status', 'Active')
-            ->first();
-            $teachId = Staff::find($request->teacher_id);
-
-            if(empty($getsecondresult)){
-
-                $compute = PreSchoolResult::create([
-                    'sch_id' => $teacher->sch_id,
-                    'campus' => $teacher->campus,
-                    'student_id' => $request->student_id,
-                    'student_fullname' => $request->student_fullname,
-                    'admission_number' => $request->admission_number,
-                    'class_name' => $request->class_name,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'evaluation_report' => $request->evaluation_report,
-                    'school_opened' => $request->school_opened,
-                    'times_present' => $request->times_present,
-                    'times_absent' => $request->times_absent,
-                    'cognitive_development' => $request->cognitive_development,
-                    'teacher_comment' => $request->teacher_comment,
-                    'teacher_id' => $request->teacher_id,
-                    'teacher_fullname' => $teachId->surname . ' '. $teachId->firstname,
-                    'teacher_signature' => $teachId->teacher_signature,
-                    'hos_comment' => $request->hos_comment,
-                    'hos_id' => $hosId->id,
-                    'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
-                    'hos_signature' => $hosId->signature,
-                    'status' => 'active',
-                ]);
-
-                foreach ($request->extra_curricular_activities as $extra) {
-                    $ext = new PreSchoolResultExtraCurricular($extra);
-                    $compute->preschoolresultextracurricular()->save($ext);
-                }
-
-                return [
-                    "status" => 'true',
-                    "message" => 'Computed Successfully',
-                    "data" => $compute
-                ];
-
-            }elseif(!empty($getsecondresult)){
-
-                $getsecondresult->update([
-                    'sch_id' => $teacher->sch_id,
-                    'campus' => $teacher->campus,
-                    'student_id' => $request->student_id,
-                    'student_fullname' => $request->student_fullname,
-                    'admission_number' => $request->admission_number,
-                    'class_name' => $request->class_name,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'evaluation_report' => $request->evaluation_report,
-                    'cognitive_development' => $request->cognitive_development,
-                    'school_opened' => $request->school_opened,
-                    'times_present' => $request->times_present,
-                    'times_absent' => $request->times_absent,
-                    'teacher_comment' => $request->teacher_comment,
-                    'teacher_id' => $request->teacher_id,
-                    'teacher_fullname' => $teachId->surname . ' '. $teachId->firstname,
-                    'teacher_signature' => $teachId->teacher_signature,
-                    'hos_comment' => $request->hos_comment,
-                    'hos_id' => $hosId->id,
-                    'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
-                    'hos_signature' => $hosId->signature,
-                    'status' => 'active',
-                ]);
-
-                $getsecondresult->preschoolresultextracurricular()->delete();
-                foreach ($request->extra_curricular_activities as $extra) {
-                    $ext = new PreSchoolResultExtraCurricular($extra);
-                    $getsecondresult->preschoolresultextracurricular()->save($ext);
-                }
-
-                return [
-                    "status" => 'true',
-                    "message" => 'Updated Successfully',
-                    "data" => $getsecondresult
-                ];
-
-            }
+            return $this->success(null, 'Result Updated Successfully');
         }
     }
+
+    private function getExistingResult($teacher, $request, $period)
+    {
+        return PreSchoolResult::where('sch_id', $teacher->sch_id)
+            ->where('campus', $teacher->campus)
+            ->where('student_id', $request->student_id)
+            ->where('period', $period)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->first();
+    }
+
+    private function getHOS($teacher)
+    {
+        return Staff::where('sch_id', $teacher->sch_id)
+            ->where('campus', $teacher->campus)
+            ->where('designation_id', 3)
+            ->where('status', 'Active')
+            ->first();
+    }
+
+    private function getTeacherDetails($teacherId)
+    {
+        $teacher = Staff::find($teacherId);
+        return [
+            'fullname' => $teacher->surname . ' ' . $teacher->firstname,
+            'signature' => $teacher->teacher_signature,
+        ];
+    }
+
+    private function prepareResultData($teacher, $request, $hosId, $teacherDetails)
+    {
+        return [
+            'sch_id' => $teacher->sch_id,
+            'campus' => $teacher->campus,
+            'student_id' => $request->student_id,
+            'student_fullname' => $request->student_fullname,
+            'admission_number' => $request->admission_number,
+            'class_name' => $request->class_name,
+            'period' => $request->period,
+            'term' => $request->term,
+            'session' => $request->session,
+            'school_opened' => $request->school_opened,
+            'times_present' => $request->times_present,
+            'times_absent' => $request->times_absent,
+            'evaluation_report' => $request->evaluation_report,
+            'cognitive_development' => $request->cognitive_development,
+            'teacher_comment' => $request->teacher_comment,
+            'teacher_id' => $request->teacher_id,
+            'teacher_fullname' => $teacherDetails['fullname'],
+            'teacher_signature' => $teacherDetails['signature'],
+            'hos_comment' => $request->hos_comment,
+            'hos_id' => $hosId->id ?? null,
+            'hos_fullname' => $hosId ? $hosId->surname . ' ' . $hosId->firstname : null,
+            'hos_signature' => $hosId->signature ?? null,
+            'status' => 'active',
+        ];
+    }
+
+    private function handleExtraCurricularActivities($result, $activities)
+    {
+        foreach ($activities as $extra) {
+            $ext = new PreSchoolResultExtraCurricular($extra);
+            $result->preschoolresultextracurricular()->save($ext);
+        }
+    }
+
 }
