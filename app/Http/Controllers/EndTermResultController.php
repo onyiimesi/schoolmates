@@ -155,7 +155,7 @@ class EndTermResultController extends Controller
         }
         $totalSubjects = count(array_unique($uniqueSubject));
         $studentAverages = $totalSubjects > 0 ? $totalScores / $totalSubjects : 0;
-        $classAverage = $studentAverages / $count;
+        $classAverage = $count > 0 ? $studentAverages / $count : 0;
 
         $totalScore = 0;
         $uniqueSubjects = [];
