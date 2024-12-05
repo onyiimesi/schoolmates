@@ -25,8 +25,7 @@ class PreSchoolSubjectController extends Controller
             'campus' => $user->campus,
             'period' => $request->period,
             'session' => $request->session,
-            'subject' => $request->subject,
-            'category' => $request->category
+            'subject' => $request->subject
         ])->first();
 
         if($subjects) {
