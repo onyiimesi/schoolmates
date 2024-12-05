@@ -54,7 +54,6 @@ class PrincipalCommentController extends Controller
             $user_fullname = $user->surname . ' '. $user->firstname;
 
         }else {
-
             return $this->error('', "Can't perform this action", 401);
         }
 

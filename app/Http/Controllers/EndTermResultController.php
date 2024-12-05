@@ -8,33 +8,38 @@ use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Student;
 use App\Traits\CummulativeResult;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EndTermResultController extends Controller
 {
-    use CummulativeResult;
+    use CummulativeResult, HttpResponses;
 
     public function endterm(Request $request)
     {
-
         $user = Auth::user();
 
-        $search = Result::where('sch_id', $user->sch_id)
+        $search = Result::with([
+            'studentscore',
+            'affectivedisposition',
+            'psychomotorskill',
+            'resultextracurricular',
+            'abacus',
+            'psychomotorperformance',
+            'pupilreport',
+        ])
+        ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where("student_id", $request->student_id)
             ->where("period", 'Second Half')
             ->where("term", $request->term)
             ->where("session", $request->session)->get();
 
-        $s = ResultResource::collection($search);
+        $data = ResultResource::collection($search);
 
-        return [
-            'status' => 'true',
-            'message' => '',
-            'data' => $s
-        ];
+        return $this->success($data, 'End term result');
     }
 
     public function cummulative(Request $request)
