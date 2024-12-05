@@ -18,16 +18,46 @@ class ResultResource extends JsonResource
      */
     public function toArray($request)
     {
-        $signature = Staff::where('class_assigned', $this->class_name)->get();
+        $signature = Staff::where([
+            'sch_id' => $this->sch_id,
+            'campus' => $this->campus,
+            'class_assigned' => $this->class_name
+        ])->get();
+
         $dos = Schools::where('sch_id', $this->sch_id)->first('dos');
-        $student_image = Student::where('id', $this->student_id)->first();
-        $class = ClassModel::where('class_name', $this->class_name)->first();
+
+        $student_image = Student::where([
+            'sch_id' => $this->sch_id,
+            'campus' => $this->campus,
+            'id' => $this->student_id
+        ])->firstOrFail();
+
+        $class = ClassModel::where([
+            'sch_id' => $this->sch_id,
+            'campus' => $this->campus,
+            'class_name' => $this->class_name
+        ])->firstOrFail();
+
         $hod = null;
+
         if($class->class_type === "upper"){
-            $hod = Staff::where('class_type', 'upper')->get();
+
+            $hod = Staff::where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'class_type' => 'upper'
+            ])->get();
+
         }elseif($class->class_type === "lower"){
-            $hod = Staff::where('class_type', 'lower')->get();
+
+            $hod = Staff::where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'class_type' => 'lower'
+            ])->get();
+            
         }
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -35,7 +65,7 @@ class ResultResource extends JsonResource
                 'campus_type' => (string)$this->campus_type,
                 'student_id' => (string)$this->student_id,
                 'student_fullname' => (string)$this->student_fullname,
-                'student_image' => (string)$student_image->image,
+                'student_image' => (string)$student_image?->image,
                 'admission_number' => (string)$this->admission_number,
                 'class_name' => (string)$this->class_name,
                 'period' => (string)$this->period,
