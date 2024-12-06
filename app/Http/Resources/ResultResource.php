@@ -38,24 +38,24 @@ class ResultResource extends JsonResource
             'class_name' => $this->class_name
         ])->firstOrFail();
 
-        $hod = null;
-
         if($class->class_type === "upper"){
-
             $hod = Staff::where([
                 'sch_id' => $this->sch_id,
                 'campus' => $this->campus,
                 'class_type' => 'upper'
             ])->get();
-
         }elseif($class->class_type === "lower"){
-
             $hod = Staff::where([
                 'sch_id' => $this->sch_id,
                 'campus' => $this->campus,
                 'class_type' => 'lower'
             ])->get();
-            
+        } else {
+            $hod = Staff::where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'designation_id' => 3
+            ])->get();
         }
 
         return [
