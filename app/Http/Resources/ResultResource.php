@@ -42,13 +42,15 @@ class ResultResource extends JsonResource
             $hod = Staff::where([
                 'sch_id' => $this->sch_id,
                 'campus' => $this->campus,
-                'class_type' => 'upper'
+                'class_type' => 'upper',
+                'designation_id' => 3
             ])->get();
         }elseif($class->class_type === "lower"){
             $hod = Staff::where([
                 'sch_id' => $this->sch_id,
                 'campus' => $this->campus,
-                'class_type' => 'lower'
+                'class_type' => 'lower',
+                'designation_id' => 3
             ])->get();
         } else {
             $hod = Staff::where([
