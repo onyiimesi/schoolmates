@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enum\StaffStatus;
 use App\Models\ClassModel;
 use App\Models\Schools;
 use App\Models\Staff;
@@ -21,7 +22,8 @@ class ResultResource extends JsonResource
         $signature = Staff::where([
             'sch_id' => $this->sch_id,
             'campus' => $this->campus,
-            'class_assigned' => $this->class_name
+            'class_assigned' => $this->class_name,
+            'status' => StaffStatus::ACTIVE,
         ])->get();
 
         $dos = Schools::where('sch_id', $this->sch_id)->first('dos');
