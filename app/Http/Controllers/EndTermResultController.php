@@ -125,6 +125,7 @@ class EndTermResultController extends Controller
     {
         $user = Auth::user();
 
+        // Fetch results for the specific student
         $results = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
@@ -134,6 +135,7 @@ class EndTermResultController extends Controller
             ->with('studentscore')
             ->get();
 
+        // Fetch results for the entire class
         $classResults = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class_name)
@@ -147,23 +149,18 @@ class EndTermResultController extends Controller
 
         // Calculate total scores for the class
         $totalClassScores = 0;
-        $totalSubjects = 0;
+        $allSubjects = [];
 
         foreach ($classResults as $result) {
             foreach ($result->studentscore as $score) {
                 if ($score->score != 0) {
                     $totalClassScores += $score->score;
+                    $allSubjects[] = $score->subject;
                 }
             }
         }
 
         // Calculate the total number of subjects in the class (unique subjects)
-        $allSubjects = [];
-        foreach ($classResults as $result) {
-            foreach ($result->studentscore as $score) {
-                $allSubjects[] = $score->subject;
-            }
-        }
         $totalSubjects = count(array_unique($allSubjects)) * $studentCount;
 
         // Calculate the class average
