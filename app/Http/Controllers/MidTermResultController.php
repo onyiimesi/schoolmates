@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\ResultStatus;
 use App\Http\Resources\MidTermResultResource;
 use App\Models\Result;
 use App\Traits\HttpResponses;
@@ -16,14 +17,17 @@ class MidTermResultController extends Controller
 
         $user = Auth::user();
 
-        $search = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where("student_id", $request->student_id)
-        ->where("period", 'First Half')
-        ->where("term", $request->term)
-        ->where("session", $request->session)
-        ->where("result_type", 'midterm')
-        ->get();
+        $search = Result::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'period' => 'First Half',
+                'term' => $request->term,
+                'session' => $request->session,
+                'result_type' => 'midterm',
+                'status' => ResultStatus::RELEASED,
+            ])
+            ->get();
 
         $data = MidTermResultResource::collection($search);
 
@@ -34,14 +38,17 @@ class MidTermResultController extends Controller
 
         $user = Auth::user();
 
-        $search = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where("student_id", $request->student_id)
-        ->where("period", 'First Half')
-        ->where("term", $request->term)
-        ->where("session", $request->session)
-        ->where("result_type", 'first_assesment')
-        ->get();
+        $search = Result::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'period' => 'First Half',
+                'term' => $request->term,
+                'session' => $request->session,
+                'result_type' => 'first_assesment',
+                'status' => ResultStatus::RELEASED,
+            ])
+            ->get();
 
         $data = MidTermResultResource::collection($search);
 
@@ -53,14 +60,17 @@ class MidTermResultController extends Controller
 
         $user = Auth::user();
 
-        $search = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where("student_id", $request->student_id)
-        ->where("period", 'First Half')
-        ->where("term", $request->term)
-        ->where("session", $request->session)
-        ->where("result_type", 'second_assesment')
-        ->get();
+        $search = Result::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'period' => 'First Half',
+                'term' => $request->term,
+                'session' => $request->session,
+                'result_type' => 'second_assesment',
+                'status' => ResultStatus::RELEASED,
+            ])
+            ->get();
 
         $data = MidTermResultResource::collection($search);
 
