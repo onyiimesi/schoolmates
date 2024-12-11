@@ -126,21 +126,27 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         // Fetch results for the specific student
-        $results = Result::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('student_id', $request->student_id)
-            ->where('class_name', $request->class_name)
-            ->where('term', $request->term)
-            ->where('session', $request->session)
+        $results = Result::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'class_name' => $request->class_name,
+                'term' => $request->term,
+                'session' => $request->session,
+                'status' => 'released',
+            ])
             ->with('studentscore')
             ->get();
 
         // Fetch results for the entire class
-        $classResults = Result::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('class_name', $request->class_name)
-            ->where('term', $request->term)
-            ->where('session', $request->session)
+        $classResults = Result::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'class_name' => $request->class_name,
+                'term' => $request->term,
+                'session' => $request->session,
+                'status' => 'released',
+            ])
             ->with('studentscore')
             ->get();
 
