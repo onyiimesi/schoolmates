@@ -125,7 +125,6 @@ class EndTermResultController extends Controller
     {
         $user = Auth::user();
 
-        // Fetch results for the specific student
         $results = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
@@ -135,7 +134,6 @@ class EndTermResultController extends Controller
             ->with('studentscore')
             ->get();
 
-        // Fetch results for the entire class
         $classResults = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class_name)
@@ -147,23 +145,29 @@ class EndTermResultController extends Controller
         // Count the number of students in the class
         $studentCount = Student::where('present_class', $request->class_name)->count();
 
-        // Calculate total scores and total subjects for the class
+        // Calculate total scores for the class
         $totalClassScores = 0;
-        $totalSubjectsTaken = 0;
+        $totalSubjects = 0;
 
         foreach ($classResults as $result) {
             foreach ($result->studentscore as $score) {
                 if ($score->score != 0) {
                     $totalClassScores += $score->score;
-                    $totalSubjectsTaken++;
                 }
             }
         }
 
+        // Calculate the total number of subjects in the class (unique subjects)
+        $allSubjects = [];
+        foreach ($classResults as $result) {
+            foreach ($result->studentscore as $score) {
+                $allSubjects[] = $score->subject;
+            }
+        }
+        $totalSubjects = count(array_unique($allSubjects)) * $studentCount;
+
         // Calculate the class average
-        $classAverage = ($studentCount > 0 && $totalSubjectsTaken > 0)
-            ? $totalClassScores / ($studentCount * ($totalSubjectsTaken / $studentCount))
-            : 0;
+        $classAverage = ($totalSubjects > 0) ? $totalClassScores / $totalSubjects : 0;
 
         // Calculate total scores and unique subjects for the specific student
         $totalStudentScores = 0;
