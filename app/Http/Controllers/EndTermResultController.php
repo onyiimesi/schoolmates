@@ -38,7 +38,6 @@ class EndTermResultController extends Controller
                 'period' => 'First Half',
                 'term' => $request->term,
                 'session' => $request->session,
-                'status' => ResultStatus::RELEASED,
             ])
             ->get();
 
