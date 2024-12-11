@@ -25,7 +25,6 @@ class MidTermResultController extends Controller
                 'term' => $request->term,
                 'session' => $request->session,
                 'result_type' => 'midterm',
-                'status' => ResultStatus::RELEASED,
             ])
             ->get();
 
@@ -46,7 +45,6 @@ class MidTermResultController extends Controller
                 'term' => $request->term,
                 'session' => $request->session,
                 'result_type' => 'first_assesment',
-                'status' => ResultStatus::RELEASED,
             ])
             ->get();
 
@@ -68,7 +66,6 @@ class MidTermResultController extends Controller
                 'term' => $request->term,
                 'session' => $request->session,
                 'result_type' => 'second_assesment',
-                'status' => ResultStatus::RELEASED,
             ])
             ->get();
 
