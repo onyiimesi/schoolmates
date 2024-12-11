@@ -125,6 +125,7 @@ class EndTermResultController extends Controller
     {
         $user = Auth::user();
 
+        // Fetch results for the specific student
         $results = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
@@ -134,50 +135,59 @@ class EndTermResultController extends Controller
             ->with('studentscore')
             ->get();
 
-        $res = Result::where('sch_id', $user->sch_id)
+        // Fetch results for the entire class
+        $classResults = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class_name)
             ->where('term', $request->term)
             ->where('session', $request->session)
             ->with('studentscore')
             ->get();
-        $count = Student::where('present_class', $request->class_name)->count();
 
-        $totalScores = 0;
-        $uniqueSubject = [];
-        foreach ($res as $result) {
+        // Count the number of students in the class
+        $studentCount = Student::where('present_class', $request->class_name)->count();
+
+        // Calculate total scores and total subjects for the class
+        $totalClassScores = 0;
+        $totalSubjectsTaken = 0;
+
+        foreach ($classResults as $result) {
             foreach ($result->studentscore as $score) {
                 if ($score->score != 0) {
-                    $totalScores += $score->score;
-                    $uniqueSubject[] = $score->subject;
+                    $totalClassScores += $score->score;
+                    $totalSubjectsTaken++;
                 }
             }
         }
-        $totalSubjects = count(array_unique($uniqueSubject));
-        $studentAverages = $totalSubjects > 0 ? $totalScores / $totalSubjects : 0;
-        $classAverage = $count > 0 ? $studentAverages / $count : 0;
 
-        $totalScore = 0;
-        $uniqueSubjects = [];
+        // Calculate the class average
+        $classAverage = ($studentCount > 0 && $totalSubjectsTaken > 0)
+            ? $totalClassScores / ($studentCount * ($totalSubjectsTaken / $studentCount))
+            : 0;
+
+        // Calculate total scores and unique subjects for the specific student
+        $totalStudentScores = 0;
+        $uniqueStudentSubjects = [];
+
         foreach ($results as $result) {
             foreach ($result->studentscore as $score) {
                 if ($score->score != 0) {
-                    $totalScore += $score->score;
-                    $uniqueSubjects[] = $score->subject;
+                    $totalStudentScores += $score->score;
+                    $uniqueStudentSubjects[] = $score->subject;
                 }
             }
         }
 
-        $totalSubject = count(array_unique($uniqueSubjects));
-        $studentAverage = $totalSubject > 0 ? $totalScore / $totalSubject : 0;
+        $totalStudentSubjects = count(array_unique($uniqueStudentSubjects));
+        $studentAverage = $totalStudentSubjects > 0 ? $totalStudentScores / $totalStudentSubjects : 0;
+
+        // Determine the grade for the student
         $grade = GradingSystem::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('score_to', '>=', $studentAverage)->first();
-        if ($studentAverage > 90) {
-            $grades = "EXCELLENT";
-        } else {
-            $grades = $grade->remark ?? "";
-        }
+            ->where('score_to', '>=', $studentAverage)
+            ->first();
+
+        $grades = $studentAverage > 90 ? "EXCELLENT" : ($grade->remark ?? "");
 
         return [
             "status" => "true",
@@ -186,4 +196,5 @@ class EndTermResultController extends Controller
             "Grade" => $grades,
         ];
     }
+
 }
