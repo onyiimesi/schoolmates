@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\ResultStatus;
 use App\Http\Resources\CummulativeScoreResource;
 use App\Http\Resources\ResultResource;
 use App\Models\GradingSystem;
@@ -22,20 +23,24 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         $search = Result::with([
-            'studentscore',
-            'affectivedisposition',
-            'psychomotorskill',
-            'resultextracurricular',
-            'abacus',
-            'psychomotorperformance',
-            'pupilreport',
-        ])
-        ->where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where("student_id", $request->student_id)
-            ->where("period", 'Second Half')
-            ->where("term", $request->term)
-            ->where("session", $request->session)->get();
+                'studentscore',
+                'affectivedisposition',
+                'psychomotorskill',
+                'resultextracurricular',
+                'abacus',
+                'psychomotorperformance',
+                'pupilreport',
+            ])
+            ->where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'period' => 'First Half',
+                'term' => $request->term,
+                'session' => $request->session,
+                'status' => ResultStatus::RELEASED,
+            ])
+            ->get();
 
         $data = ResultResource::collection($search);
 
@@ -133,7 +138,7 @@ class EndTermResultController extends Controller
                 'class_name' => $request->class_name,
                 'term' => $request->term,
                 'session' => $request->session,
-                'status' => 'released',
+                'status' => ResultStatus::RELEASED,
             ])
             ->with('studentscore')
             ->get();
@@ -145,7 +150,7 @@ class EndTermResultController extends Controller
                 'class_name' => $request->class_name,
                 'term' => $request->term,
                 'session' => $request->session,
-                'status' => 'released',
+                'status' => ResultStatus::RELEASED,
             ])
             ->with('studentscore')
             ->get();
