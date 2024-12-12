@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\PeriodicName;
+use App\Enum\ResultStatus;
 use App\Http\Requests\ReleaseResultRequest;
 use App\Http\Requests\ResultRequest;
 use App\Models\Result;
@@ -30,7 +32,7 @@ class ResultTwoController extends Controller
 
         $teacher = Auth::user();
 
-        if ($request->period === "First Half") {
+        if ($request->period === PeriodicName::FIRSTHALF) {
             $getResult = $this->getResult($teacher, $request);
 
             if (empty($getResult)) {
@@ -49,7 +51,7 @@ class ResultTwoController extends Controller
 
         $teacher = Auth::user();
 
-        if ($request->period === "Second Half") {
+        if ($request->period === PeriodicName::SECONDHALF) {
 
             $getsecondresult = $this->getSecondResult($request, $teacher);
 
@@ -82,7 +84,7 @@ class ResultTwoController extends Controller
                     'term' => $request->term,
                     'session' => $request->session,
                     'student_id' => $student['student_id']
-                ])->update(['status' => 'released']);
+                ])->update(['status' => ResultStatus::RELEASED]);
             }
 
             return $this->success(null, "Result released");

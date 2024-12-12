@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
 use App\Http\Resources\CummulativeScoreResource;
 use App\Http\Resources\ResultResource;
@@ -35,7 +36,7 @@ class EndTermResultController extends Controller
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
                 'student_id' => $request->student_id,
-                'period' => 'First Half',
+                'period' => PeriodicName::SECONDHALF,
                 'term' => $request->term,
                 'session' => $request->session,
             ])
