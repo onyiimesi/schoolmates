@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Resources;
+
+use App\Enum\StaffStatus;
 use App\Models\Staff;
 use App\Models\Student;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -19,7 +21,15 @@ class PreSchoolResultResource extends JsonResource
         $jsonString = json_encode($this->results);
         $jsonStrings = json_encode($this->evaluation_report);
         $jsonStringss = json_encode($this->cognitive_development);
-        $signature = Staff::where('class_assigned', $this->class_name)->get();
+
+        $signature = Staff::where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'class_assigned' => $this->class_name,
+                'status' => StaffStatus::ACTIVE,
+            ])
+            ->get();
+
         $student_image = Student::where('id', $this->student_id)->first();
         $teacher = Auth::user();
         $hosId = Staff::where('campus', $teacher->campus)
