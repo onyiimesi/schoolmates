@@ -165,11 +165,17 @@ class EndTermResultController extends Controller
         $allSubjects = [];
 
         foreach ($classResults as $result) {
+            $subjectScores = [];
+
             foreach ($result->studentscore as $score) {
-                if ($score->score != 0) {
-                    $totalClassScores += $score->score;
-                    $allSubjects[] = $score->subject;
+                if (!array_key_exists($score->subject, $subjectScores)) {
+                    $subjectScores[$score->subject] = $score->score;
                 }
+            }
+
+            foreach ($subjectScores as $subject => $subjectScore) {
+                $totalClassScores += $subjectScore;
+                $allSubjects[] = $subject;
             }
         }
 
@@ -205,5 +211,4 @@ class EndTermResultController extends Controller
             "Grade" => $grades,
         ];
     }
-
 }
