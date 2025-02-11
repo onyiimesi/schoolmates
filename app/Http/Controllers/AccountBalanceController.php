@@ -15,7 +15,7 @@ class AccountBalanceController extends Controller
         $payment = Payment::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->sum('amount_paid');
-        
+
         $expenses = Expenses::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
         ->sum('amount');

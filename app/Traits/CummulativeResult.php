@@ -91,14 +91,19 @@ trait CummulativeResult
 
     public function finalizeSubjectData(&$subjects, $classAverage, $user)
     {
-        $totalScores = array_column($subjects, null, 'subject');
-        arsort($totalScores);
+        uasort($subjects, function ($a, $b) {
+            return $b['Total Score'] <=> $a['Total Score'];
+        });
+
         $rank = 1;
 
-        foreach ($totalScores as &$subject) {
+        foreach ($subjects as &$subject) {
             $subject['Average Score'] = ($subject['Total Score'] > 0) ? $subject['Total Score'] / 3 : 0;
+
             $subject['Rank'] = $rank++;
+
             $subject['Remark'] = $this->getRemark($subject, $user);
+
             $subject['Class Average'] = $classAverage;
         }
     }
