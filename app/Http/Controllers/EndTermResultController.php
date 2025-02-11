@@ -84,7 +84,6 @@ class EndTermResultController extends Controller
         $totalScores = 0;
         $totalSubjectCount = 0;
 
-        // Calculate total scores and total number of subjects for student average for all students
         foreach ($allResults as $result) {
             foreach ($result->studentscore as $score) {
                 $totalStudentScores += $score->score;

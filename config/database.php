@@ -61,6 +61,22 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+
+            // 'read' => [
+            //     'host' => env('DB_READ_HOST', '127.0.0.2'),
+            //     'database' => env('DB_READ_DATABASE', 'forge'),
+            //     'username' => env('DB_READ_USERNAME', 'forge_read'),
+            //     'password' => env('DB_READ_PASSWORD', ''),
+            // ],
+
+            // 'write' => [
+            //     'host' => env('DB_HOST', '127.0.0.1'),
+            //     'database' => env('DB_DATABASE', 'forge'),
+            //     'username' => env('DB_USERNAME', 'forge'),
+            //     'password' => env('DB_PASSWORD', ''),
+            // ],
+
+            // 'sticky' => false,
         ],
 
         'pgsql' => [
