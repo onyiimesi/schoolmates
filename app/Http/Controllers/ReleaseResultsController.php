@@ -23,9 +23,6 @@ class ReleaseResultsController extends Controller
             'status' => $request->status,
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully',
-        ];
+        return $this->success(null, "Updated Successfully");
     }
 }

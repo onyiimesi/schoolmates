@@ -36,8 +36,9 @@ class AuthController extends Controller
             if($auth->status === "inactive"){
                 return $this->error('', 'Account is inactive, contact support', 400);
             }
-            
-            $user = Staff::where('sch_id', $auth->sch_id)
+
+            $user = Staff::with(['school', 'subjectteacher'])
+                ->where('sch_id', $auth->sch_id)
                 ->where('username', $auth->username)
                 ->first();
 

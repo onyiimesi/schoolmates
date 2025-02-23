@@ -25,6 +25,7 @@ class MidTermResultController extends Controller
                 'term' => $request->term,
                 'session' => $request->session,
                 'result_type' => 'midterm',
+                'status' => ResultStatus::RELEASED
             ])
             ->get();
 

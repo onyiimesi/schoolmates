@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class SchoolsController extends Controller
 {
-
     use HttpResponses;
 
     public function schools(){
@@ -26,7 +25,6 @@ class SchoolsController extends Controller
             'message' => 'School Details',
             'data' => $school
         ];
-
     }
 
     public function dos(Request $request)
