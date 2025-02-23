@@ -12,6 +12,8 @@ use App\Traits\HttpResponses;
 use App\Traits\ResultBase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ResultTwoController extends Controller
 {
@@ -73,48 +75,51 @@ class ResultTwoController extends Controller
     public function release(ReleaseResultRequest $request)
     {
         $auth = Auth::user();
+        $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
+        DB::beginTransaction();
         try {
+            Result::where('sch_id', $auth->sch_id)
+                ->where('campus', $auth->campus)
+                ->where('period', $request->period)
+                ->where('term', $request->term)
+                ->where('session', $request->session)
+                ->whereIn('student_id', $studentIds)
+                ->update(['status' => ResultStatus::RELEASED]);
 
-            foreach ($request->students as $student) {
-                Result::where([
-                    'sch_id' => $auth->sch_id,
-                    'campus' => $auth->campus,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'student_id' => $student['student_id']
-                ])->update(['status' => ResultStatus::RELEASED]);
-            }
-
+            DB::commit();
             return $this->success(null, "Result released");
         } catch (\Exception $e) {
-            return $this->error(null, $e->getMessage(), 500);
+            DB::rollBack();
+            Log::error('Error releasing results', ['error' => $e->getMessage()]);
+            return $this->error(null, "An error occurred while releasing results", 500);
         }
     }
 
     public function hold(ReleaseResultRequest $request)
     {
         $auth = Auth::user();
+        $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
+        DB::beginTransaction();
         try {
+            Result::where('sch_id', $auth->sch_id)
+                ->where('campus', $auth->campus)
+                ->where('period', $request->period)
+                ->where('term', $request->term)
+                ->where('session', $request->session)
+                ->whereIn('student_id', $studentIds)
+                ->update(['status' => ResultStatus::WITHELD]);
 
-            foreach ($request->students as $student) {
-                Result::where([
-                    'sch_id' => $auth->sch_id,
-                    'campus' => $auth->campus,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'student_id' => $student['student_id']
-                ])->update(['status' => 'withheld']);
-            }
-
+            DB::commit();
             return $this->success(null, "Result withheld");
         } catch (\Exception $e) {
-            return $this->error(null, $e->getMessage(), 500);
+            DB::rollBack();
+            Log::error('Error withholding results', ['error' => $e->getMessage()]);
+            return $this->error(null, "An error occurred while withholding results", 500);
         }
     }
+
 }
 
 

@@ -13,7 +13,6 @@ use App\Traits\CummulativeResult;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class EndTermResultController extends Controller
 {
@@ -39,6 +38,7 @@ class EndTermResultController extends Controller
                 'period' => PeriodicName::SECONDHALF,
                 'term' => $request->term,
                 'session' => $request->session,
+                'status' => ResultStatus::RELEASED
             ])
             ->get();
 

@@ -40,23 +40,28 @@ class Staff extends Authenticatable implements Auditable
         'sig_id'
     ];
 
-    public function staff(){
-        return $this->belongsTo(Staff::class);
+    public function school()
+    {
+        return $this->belongsTo(Schools::class, 'sch_id');
     }
 
-    public function designation(){
+    public function designation()
+    {
         return $this->belongsTo(Designation::class, 'designation_id');
     }
 
-    public function result(){
+    public function result()
+    {
         return $this->hasMany(Result::class, 'teacher_id');
     }
 
-    public function subjectteacher(){
+    public function subjectteacher()
+    {
         return $this->hasMany(SubjectTeacher::class, 'staff_id');
     }
 
-    public function lessonnotes(){
+    public function lessonnotes()
+    {
         return $this->hasMany(LessonNote::class, 'staff_id');
     }
 

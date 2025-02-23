@@ -56,7 +56,16 @@ class LoginResource extends JsonResource
             'subjects' => $this->subjectteacher?->flatMap(function($item){
                 return $item->subject;
             }),
-            'plan' => (string)$getplan->plan
+            'plan' => (string)$getplan->plan,
+            'school' => (object) [
+                'schname' => (string)$this->schname,
+                'schaddr' => (string)$this->schaddr,
+                'schphone' => (string)$this->schphone,
+                'schemail' => (string)$this->schemail,
+                'schmotto' => (string)$this->schmotto,
+                'schwebsite' => (string)$this->schwebsite,
+                'schlogo' => (string)$this->schlogo,
+            ]
         ];
     }
 }
