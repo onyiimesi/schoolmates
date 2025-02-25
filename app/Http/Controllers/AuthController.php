@@ -43,6 +43,8 @@ class AuthController extends Controller
                 ->first();
 
             $users = new LoginResource($user);
+
+            $user->tokens()->delete();
             $token = $user->createToken('API Token of '. $user->username);
 
             return $this->success([
@@ -63,6 +65,8 @@ class AuthController extends Controller
                 ->first();
 
             $studs = new StudentLoginResource($stud);
+
+            $stud->tokens()->delete();
             $token = $stud->createToken('API Token of '. $stud->username);
 
             return $this->success([

@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 class ResultTwoController extends Controller
 {
@@ -22,7 +23,7 @@ class ResultTwoController extends Controller
     public function mid(Request $request)
     {
         $request->validate([
-            'student_id' => ['required', 'string'],
+            'student_id' => ['required', 'exists:students,id'],
             'student_fullname' => ['required', 'string'],
             'admission_number' => ['required', 'string', 'max:255'],
             'class_name' => ['required', 'string', 'max:255'],
@@ -87,6 +88,7 @@ class ResultTwoController extends Controller
                 ->whereIn('student_id', $studentIds)
                 ->update(['status' => ResultStatus::RELEASED]);
 
+            ResponseCache::clear();
             DB::commit();
             return $this->success(null, "Result released");
         } catch (\Exception $e) {
@@ -110,6 +112,8 @@ class ResultTwoController extends Controller
                 ->where('session', $request->session)
                 ->whereIn('student_id', $studentIds)
                 ->update(['status' => ResultStatus::WITHELD]);
+
+            ResponseCache::clear();
 
             DB::commit();
             return $this->success(null, "Result withheld");
