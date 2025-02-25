@@ -34,6 +34,26 @@ class MidTermResultController extends Controller
         return $this->success($data, 'Mid term result');
     }
 
+    public function staffMidTerm(Request $request){
+
+        $user = Auth::user();
+
+        $search = Result::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'period' => 'First Half',
+                'term' => $request->term,
+                'session' => $request->session,
+                'result_type' => 'midterm'
+            ])
+            ->get();
+
+        $data = MidTermResultResource::collection($search);
+
+        return $this->success($data, 'Mid term result');
+    }
+
     public function first(Request $request){
 
         $user = Auth::user();
