@@ -84,6 +84,7 @@ class Result extends Model implements Auditable
         $create->hos_fullname = !empty($hos) ? $hos->surname . ' ' . $hos->firstname : '';
         $create->computed_endterm = 'true';
         $create->result_type = 'endterm';
+        $create->status = 'not-released';
         $create->save();
 
         return $create;

@@ -42,7 +42,7 @@ class Staff extends Authenticatable implements Auditable
 
     public function school()
     {
-        return $this->belongsTo(Schools::class, 'sch_id');
+        return $this->belongsTo(Schools::class, 'sch_id', 'sch_id');
     }
 
     public function designation()
