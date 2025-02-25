@@ -47,6 +47,34 @@ class EndTermResultController extends Controller
         return $this->success($data, 'End term result');
     }
 
+    public function staffEndTerm(Request $request)
+    {
+        $user = Auth::user();
+
+        $search = Result::with([
+                'studentscore',
+                'affectivedisposition',
+                'psychomotorskill',
+                'resultextracurricular',
+                'abacus',
+                'psychomotorperformance',
+                'pupilreport',
+            ])
+            ->where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'period' => PeriodicName::SECONDHALF,
+                'term' => $request->term,
+                'session' => $request->session
+            ])
+            ->get();
+
+        $data = ResultResource::collection($search);
+
+        return $this->success($data, 'End term result');
+    }
+
     public function cummulative(Request $request)
     {
         $user = Auth::user();
