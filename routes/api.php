@@ -92,6 +92,7 @@ use App\Http\Controllers\AdmissionNumSearchController;
 use App\Http\Controllers\GetPreschoolResultController;
 use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\AssignmentPerformanceController;
+use App\Http\Controllers\GpaController;
 use App\Http\Controllers\StudentAttendanceDateController;
 use App\Http\Controllers\StudentBySessionTermClassController;
 
@@ -180,6 +181,7 @@ Route::middleware('check.allowed.url')
             Route::resource('/profile', ProfileController::class);
             Route::resource('/department', DepartmentController::class);
             Route::resource('/grading', GradingSystemController::class);
+            Route::resource('/gpa', GpaController::class);
             Route::resource('/result', ResultController::class);
             Route::resource('/subjects', SubjectController::class);
             Route::resource('/studentsubjects', RegisterSubjectController::class);

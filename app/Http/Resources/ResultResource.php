@@ -4,9 +4,12 @@ namespace App\Http\Resources;
 
 use App\Enum\StaffStatus;
 use App\Models\ClassModel;
+use App\Models\GradingSystem;
+use App\Models\Result;
 use App\Models\Schools;
 use App\Models\Staff;
 use App\Models\Student;
+use App\Models\StudentScore;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ResultResource extends JsonResource
@@ -40,6 +43,12 @@ class ResultResource extends JsonResource
             'class_name' => $this->class_name
         ])->firstOrFail();
 
+        $classCount = ClassModel::where([
+            'sch_id' => $this->sch_id,
+            'campus' => $this->campus,
+            'class_name' => $this->class_name
+        ])->count();
+
         if($class->class_type === "upper"){
             $hod = Staff::where([
                 'sch_id' => $this->sch_id,
@@ -62,6 +71,39 @@ class ResultResource extends JsonResource
             ])->get();
         }
 
+        $classTotalScore = StudentScore::whereHas('result', function ($query) {
+            $query->where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'class_name' => $this->class_name,
+                'term' => $this->term,
+                'session' => $this->session
+            ]);
+        })->sum('score');
+
+        $totalStudentsInClass = Result::where([
+            'sch_id' => $this->sch_id,
+            'campus' => $this->campus,
+            'class_name' => $this->class_name,
+            'term' => $this->term,
+            'session' => $this->session
+        ])->count();
+
+        $totalSubjects = $this->studentscore->filter(function($score) {
+            return $score->score != 0;
+        })->count();
+
+        $classAverage = ($totalStudentsInClass > 0 && $totalSubjects > 0)
+        ? round($classTotalScore / ($totalStudentsInClass * $totalSubjects), 2)
+        : 0;
+
+        $classGrade = GradingSystem::where('sch_id', $this->sch_id)
+            ->where('campus', $this->campus)
+            ->where('score_to', '>=', $classAverage)
+            ->first();
+
+        $grade = $classAverage > 90 ? "EXCELLENT" : ($classGrade->remark ?? "");
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -71,6 +113,7 @@ class ResultResource extends JsonResource
                 'student_fullname' => (string)$this->student_fullname,
                 'student_image' => (string)$student_image?->image,
                 'admission_number' => (string)$this->admission_number,
+                'gender' => (string)$this->student?->gender,
                 'class_name' => (string)$this->class_name,
                 'period' => (string)$this->period,
                 'term' => (string)$this->term,
@@ -78,14 +121,22 @@ class ResultResource extends JsonResource
                 'school_opened' => (string)$this->school_opened,
                 'times_present' => (string)$this->times_present,
                 'times_absent' => (string)$this->times_absent,
-                'results' => $this->studentscore->filter(function($score) {
+                'number_in_class' => $classCount,
+                'results' => $this->studentscore ? $this->studentscore->filter(function($score) {
                     return $score->score != 0;
                 })->map(function($score) {
                     return [
                         "subject" => $score->subject,
                         "score" => $score->score
                     ];
-                })->toArray(),
+                })->toArray() : [],
+                'total_subjects' => $totalSubjects,
+                'total_score' => $totalScore = $this->studentscore->filter(function($score) {
+                    return $score->score != 0;
+                })->sum('score'),
+                'student_average' => $totalSubjects > 0 ? round($totalScore / $totalSubjects, 2) : 0,
+                'class_average' => $classAverage,
+                'class_grade' => $grade,
                 'affective_disposition' => $this->affectivedisposition->map(function($score) {
                     return [
                         "name" => $score->name,

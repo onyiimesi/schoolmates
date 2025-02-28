@@ -23,6 +23,7 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         $search = Result::with([
+                'student',
                 'studentscore',
                 'affectivedisposition',
                 'psychomotorskill',

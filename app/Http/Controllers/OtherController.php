@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\File;
 
 class OtherController extends Controller
 {
-
     use HttpResponses;
 
     public function extra(Request $request): JsonResponse
@@ -37,10 +36,7 @@ class OtherController extends Controller
             'name' => $request->name
         ]);
 
-        return response()->json([
-            'status' => 'true',
-            'message' => 'Created Successfully',
-        ]);
+        return $this->success(null, "Created Successfully", 201);
 
     }
 
