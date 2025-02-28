@@ -2,12 +2,16 @@
 
 namespace App\Exceptions;
 
+use App\Traits\HttpResponses;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    use HttpResponses;
+
     /**
      * A list of exception types with their corresponding custom log levels.
      *
@@ -46,6 +50,13 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (NotFoundHttpException $e, $request) {
+            if ($request->json()) {
+                return $this->success(null, "Not Found", 404);
+            }
+            throw $e;
         });
     }
 

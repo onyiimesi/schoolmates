@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\GradingSystemRequest;
 use App\Http\Resources\GradingSystemResource;
 use App\Models\GradingSystem;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class GradingSystemController extends Controller
 {
+    use HttpResponses;
     /**
      * Display a listing of the resource.
      *
@@ -25,11 +27,7 @@ class GradingSystemController extends Controller
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Grade List',
-            'data' => $grading
-        ];
+        return $this->success($grading, "Grading System");
     }
 
     /**
@@ -54,11 +52,7 @@ class GradingSystemController extends Controller
             'created_by' => $user->surname .' '. $user->firstname .' '. $user->middlename,
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Created Successfully',
-            "data" => $grading
-        ];
+        return $this->success($grading, "Created successfully", 201);
     }
 
     /**
@@ -71,11 +65,7 @@ class GradingSystemController extends Controller
     {
         $grades = new GradingSystemResource($grading);
 
-        return [
-            'status' => 'true',
-            'message' => 'Grade Details',
-            'data' => $grades
-        ];
+        return $this->success($grades, "Grading details");
     }
 
     /**
@@ -87,16 +77,10 @@ class GradingSystemController extends Controller
      */
     public function update(Request $request, GradingSystem $grading)
     {
-
         $grading->update($request->all());
-
         $grades = new GradingSystemResource($grading);
 
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully',
-            "data" => $grades
-        ];
+        return $this->success($grades, "Updated successfully");
     }
 
     /**
