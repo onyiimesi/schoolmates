@@ -118,7 +118,6 @@ Route::get('/optimize', function () {
     return response()->json(['error' => 'Unauthorized action.'], 403);
 });
 
-
 // Route::middleware(['throttle:apis'])->group(function () {
 // });
 
