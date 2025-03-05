@@ -104,6 +104,15 @@ class ResultResource extends JsonResource
 
         $grade = $classAverage > 90 ? "EXCELLENT" : ($classGrade->remark ?? "");
 
+        $totalScore = $this->studentscore->filter(function($score) {
+            return $score->score != 0;
+        })->sum('score');
+
+        $maxScorePerSubject = 100;
+        // Calculate the total obtainable marks
+        $totalObtainableMarks = $totalSubjects * $maxScorePerSubject;
+        $gpa = ($totalObtainableMarks > 0) ? round(($totalScore / $totalObtainableMarks) * 5, 2) : 0;
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -131,12 +140,11 @@ class ResultResource extends JsonResource
                     ];
                 })->toArray() : [],
                 'total_subjects' => $totalSubjects,
-                'total_score' => $totalScore = $this->studentscore->filter(function($score) {
-                    return $score->score != 0;
-                })->sum('score'),
+                'total_score' => $totalScore,
                 'student_average' => $totalSubjects > 0 ? round($totalScore / $totalSubjects, 2) : 0,
                 'class_average' => $classAverage,
                 'class_grade' => $grade,
+                'gpa' => $gpa,
                 'affective_disposition' => $this->affectivedisposition->map(function($score) {
                     return [
                         "name" => $score->name,
