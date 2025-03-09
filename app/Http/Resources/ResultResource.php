@@ -110,9 +110,12 @@ class ResultResource extends JsonResource
 
         $studentResults = Result::with(['studentscore'])
             ->where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'student_id' => $this->student_id,
                 'class_name' => $this->class_name,
+                'term' => $this->term,
                 'session' => $this->session,
-                'student_id' => $this->student_id
             ])->get();
 
         $totalScore = 0;
