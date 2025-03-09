@@ -199,7 +199,9 @@ class ResultResource extends JsonResource
 
     private function getGpa()
     {
-        $studentResults = Result::with(['studentscore'])
+        $studentResults = Result::with(['studentscore' => function ($query) {
+                $query->where('score', '>', 0);
+            }])
             ->where([
                 'sch_id' => $this->sch_id,
                 'campus' => $this->campus,
@@ -209,17 +211,8 @@ class ResultResource extends JsonResource
                 'session' => $this->session,
             ])->get();
 
-        $totalScore = 0;
-        $totalSubjects = 0;
-
-        foreach ($studentResults as $result) {
-            foreach ($result->studentscore as $score) {
-                $totalScore += $score->score;
-                if ($result->period === "Second Half" && $score->score > 0) {
-                    $totalSubjects++;
-                }
-            }
-        }
+        $totalScore = $studentResults->pluck('studentscore')->flatten()->sum('score');
+        $totalSubjects = $studentResults->pluck('studentscore')->flatten()->count();
 
         $totalObtainableMarks = $totalSubjects * 100;
         $gpa = ($totalObtainableMarks > 0) ? round(($totalScore / $totalObtainableMarks) * $totalSubjects, 2) : 0;
