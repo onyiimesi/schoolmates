@@ -130,9 +130,8 @@ class ResultResource extends JsonResource
             }
         }
 
-        $maxScorePerSubject = 100;
-        $totalObtainableMarks = $totalScore / $maxScorePerSubject;
-        $gpa = ($totalObtainableMarks > 0) ? $totalObtainableMarks * $totalSubjects : 0;
+        $totalObtainableMarks = $totalSubjects * 100;
+        $gpa = ($totalObtainableMarks > 0) ? round(($totalScore / $totalObtainableMarks) * $totalSubjects, 2) : 0;
 
         return [
             'id' => (string)$this->id,
