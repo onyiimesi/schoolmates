@@ -108,28 +108,36 @@ class ResultResource extends JsonResource
         //     return $score->score != 0;
         // })->sum('score');
 
-        $studentResult = Result::with(['studentscore'])
+        $studentResults = Result::with(['studentscore'])
             ->where([
-                'sch_id' => $this->sch_id,
-                'campus' => $this->campus,
                 'class_name' => $this->class_name,
                 'session' => $this->session,
                 'student_id' => $this->student_id
-            ])->first();
+            ])->get();
 
         $totalScore = 0;
         $totalSubjects = 0;
 
-        if ($studentResult) {
-            $allScores = $studentResult->studentscore;
-
-            $filteredScores = $allScores->filter(function ($score) {
-                return $score->score != 0;
-            });
-
-            $totalScore = $filteredScores->sum('score');
-            $totalSubjects = $filteredScores->count();
+        foreach ($studentResults as $result) {
+            foreach ($result->studentscore as $score) {
+                $totalScore += $score->score;
+                if ($result->period === "Second Half" && $score->score > 0) {
+                    $totalSubjects++;
+                }
+            }
         }
+
+
+        // if ($studentResult) {
+        //     $allScores = $studentResult->studentscore;
+
+        //     $filteredScores = $allScores->filter(function ($score) {
+        //         return $score->score != 0;
+        //     });
+
+        //     $totalScore = $totalScore->sum('score');
+        //     $totalSubjects = $filteredScores->count();
+        // }
 
         $maxScorePerSubject = 100;
         $totalObtainableMarks = $totalSubjects * $maxScorePerSubject;
@@ -153,7 +161,7 @@ class ResultResource extends JsonResource
                 'times_present' => (string)$this->times_present,
                 'times_absent' => (string)$this->times_absent,
                 'number_in_class' => $classCount,
-                'score' => $studentResult?->studentscore,
+                'score' => $studentResults,
                 'results' => $this->studentscore ? $this->studentscore->filter(function($score) {
                     return $score->score != 0;
                 })->map(function($score) {
