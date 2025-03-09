@@ -108,19 +108,20 @@ class ResultResource extends JsonResource
         //     return $score->score != 0;
         // })->sum('score');
 
-        $studentResult = Result::where([
-            'sch_id' => $this->sch_id,
-            'campus' => $this->campus,
-            'class_name' => $this->class_name,
-            'session' => $this->session,
-            'student_id' => $this->student_id
-        ])->first();
+        $studentResult = Result::with(['studentscore'])
+            ->where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'class_name' => $this->class_name,
+                'session' => $this->session,
+                'student_id' => $this->student_id
+            ])->first();
 
         $totalScore = 0;
         $totalSubjects = 0;
 
         if ($studentResult) {
-            $allScores = StudentScore::where('result_id', $studentResult->id)->get();
+            $allScores = $studentResult->studentscore;
 
             $filteredScores = $allScores->filter(function ($score) {
                 return $score->score != 0;
