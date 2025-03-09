@@ -104,34 +104,10 @@ class ResultResource extends JsonResource
 
         $grade = $classAverage > 90 ? "EXCELLENT" : ($classGrade->remark ?? "");
 
-        // $totalScore = $this->studentscore->filter(function($score) {
-        //     return $score->score != 0;
-        // })->sum('score');
-
-        $studentResults = Result::with(['studentscore'])
-            ->where([
-                'sch_id' => $this->sch_id,
-                'campus' => $this->campus,
-                'student_id' => $this->student_id,
-                'class_name' => $this->class_name,
-                'term' => $this->term,
-                'session' => $this->session,
-            ])->get();
-
-        $totalScore = 0;
-        $totalSubjects = 0;
-
-        foreach ($studentResults as $result) {
-            foreach ($result->studentscore as $score) {
-                $totalScore += $score->score;
-                if ($result->period === "Second Half" && $score->score > 0) {
-                    $totalSubjects++;
-                }
-            }
-        }
-
-        $totalObtainableMarks = $totalSubjects * 100;
-        $gpa = ($totalObtainableMarks > 0) ? round(($totalScore / $totalObtainableMarks) * $totalSubjects, 2) : 0;
+        $data = $this->getGpa();
+        $totalScore = $data['total_score'];
+        $totalSubjects = $data['total_subjects'];
+        $gpa = $data['gpa'];
 
         return [
             'id' => (string)$this->id,
@@ -218,6 +194,40 @@ class ResultResource extends JsonResource
                 'dos' => $dos->dos,
                 'status' => (string)$this->status
             ]
+        ];
+    }
+
+    private function getGpa()
+    {
+        $studentResults = Result::with(['studentscore'])
+            ->where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'student_id' => $this->student_id,
+                'class_name' => $this->class_name,
+                'term' => $this->term,
+                'session' => $this->session,
+            ])->get();
+
+        $totalScore = 0;
+        $totalSubjects = 0;
+
+        foreach ($studentResults as $result) {
+            foreach ($result->studentscore as $score) {
+                $totalScore += $score->score;
+                if ($result->period === "Second Half" && $score->score > 0) {
+                    $totalSubjects++;
+                }
+            }
+        }
+
+        $totalObtainableMarks = $totalSubjects * 100;
+        $gpa = ($totalObtainableMarks > 0) ? round(($totalScore / $totalObtainableMarks) * $totalSubjects, 2) : 0;
+
+        return [
+            'total_score' => $totalScore,
+            'total_subjects' => $totalSubjects,
+            'gpa' => $gpa
         ];
     }
 }
