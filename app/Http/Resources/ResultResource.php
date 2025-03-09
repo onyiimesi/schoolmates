@@ -112,7 +112,6 @@ class ResultResource extends JsonResource
             'sch_id' => $this->sch_id,
             'campus' => $this->campus,
             'class_name' => $this->class_name,
-            'term' => $this->term,
             'session' => $this->session,
             'student_id' => $this->student_id
         ])->first();
