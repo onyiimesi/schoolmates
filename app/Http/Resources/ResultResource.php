@@ -130,21 +130,9 @@ class ResultResource extends JsonResource
             }
         }
 
-
-        // if ($studentResult) {
-        //     $allScores = $studentResult->studentscore;
-
-        //     $filteredScores = $allScores->filter(function ($score) {
-        //         return $score->score != 0;
-        //     });
-
-        //     $totalScore = $totalScore->sum('score');
-        //     $totalSubjects = $filteredScores->count();
-        // }
-
         $maxScorePerSubject = 100;
-        $totalObtainableMarks = $totalSubjects * $maxScorePerSubject;
-        $gpa = ($totalObtainableMarks > 0) ? round(($totalScore / $totalObtainableMarks) * 5, 2) : 0;
+        $totalObtainableMarks = $totalScore / $maxScorePerSubject;
+        $gpa = ($totalObtainableMarks > 0) ? $totalObtainableMarks * $totalSubjects : 0;
 
         return [
             'id' => (string)$this->id,
@@ -164,7 +152,6 @@ class ResultResource extends JsonResource
                 'times_present' => (string)$this->times_present,
                 'times_absent' => (string)$this->times_absent,
                 'number_in_class' => $classCount,
-                'score' => $studentResults,
                 'results' => $this->studentscore ? $this->studentscore->filter(function($score) {
                     return $score->score != 0;
                 })->map(function($score) {
