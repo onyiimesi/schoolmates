@@ -153,6 +153,7 @@ class ResultResource extends JsonResource
                 'times_present' => (string)$this->times_present,
                 'times_absent' => (string)$this->times_absent,
                 'number_in_class' => $classCount,
+                'score' => $studentResult?->studentscore,
                 'results' => $this->studentscore ? $this->studentscore->filter(function($score) {
                     return $score->score != 0;
                 })->map(function($score) {
