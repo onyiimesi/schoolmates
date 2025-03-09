@@ -108,22 +108,28 @@ class ResultResource extends JsonResource
         //     return $score->score != 0;
         // })->sum('score');
 
-        $allScores = StudentScore::whereHas('result', function ($query) {
-            $query->where([
-                'sch_id' => $this->sch_id,
-                'campus' => $this->campus,
-                'class_name' => $this->class_name,
-                'term' => $this->term,
-                'session' => $this->session
-            ]);
-        })->where('student_id', $this->student_id)->get();
+        $studentResult = Result::where([
+            'sch_id' => $this->sch_id,
+            'campus' => $this->campus,
+            'class_name' => $this->class_name,
+            'term' => $this->term,
+            'session' => $this->session,
+            'student_id' => $this->student_id
+        ])->first();
 
-        $filteredScores = $allScores->filter(function ($score) {
-            return $score->score != 0;
-        });
+        $totalScore = 0;
+        $totalSubjects = 0;
 
-        $totalScore = $filteredScores->sum('score');
-        $totalSubjects = $filteredScores->count();
+        if ($studentResult) {
+            $allScores = StudentScore::where('result_id', $studentResult->id)->get();
+
+            $filteredScores = $allScores->filter(function ($score) {
+                return $score->score != 0;
+            });
+
+            $totalScore = $filteredScores->sum('score');
+            $totalSubjects = $filteredScores->count();
+        }
 
         $maxScorePerSubject = 100;
         $totalObtainableMarks = $totalSubjects * $maxScorePerSubject;
