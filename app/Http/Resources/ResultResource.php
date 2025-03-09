@@ -104,12 +104,28 @@ class ResultResource extends JsonResource
 
         $grade = $classAverage > 90 ? "EXCELLENT" : ($classGrade->remark ?? "");
 
-        $totalScore = $this->studentscore->filter(function($score) {
+        // $totalScore = $this->studentscore->filter(function($score) {
+        //     return $score->score != 0;
+        // })->sum('score');
+
+        $allScores = StudentScore::whereHas('result', function ($query) {
+            $query->where([
+                'sch_id' => $this->sch_id,
+                'campus' => $this->campus,
+                'class_name' => $this->class_name,
+                'term' => $this->term,
+                'session' => $this->session
+            ]);
+        })->where('student_id', $this->student_id)->get();
+
+        $filteredScores = $allScores->filter(function ($score) {
             return $score->score != 0;
-        })->sum('score');
+        });
+
+        $totalScore = $filteredScores->sum('score');
+        $totalSubjects = $filteredScores->count();
 
         $maxScorePerSubject = 100;
-        // Calculate the total obtainable marks
         $totalObtainableMarks = $totalSubjects * $maxScorePerSubject;
         $gpa = ($totalObtainableMarks > 0) ? round(($totalScore / $totalObtainableMarks) * 5, 2) : 0;
 
