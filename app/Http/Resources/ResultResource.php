@@ -214,8 +214,8 @@ class ResultResource extends JsonResource
         $totalScore = $studentResults->pluck('studentscore')->flatten()->sum('score');
         $totalSubjects = $studentResults->pluck('studentscore')->flatten()->count();
 
-        $totalObtainableMarks = $totalSubjects * 100;
-        $gpa = ($totalObtainableMarks > 0) ? round(($totalScore / $totalObtainableMarks) * $totalSubjects, 2) : 0;
+        $expectedScore = $totalSubjects * 100;
+        $gpa = ($expectedScore > 0) ? round(($totalScore / $expectedScore) * 5, 2) : 0;
 
         return [
             'total_score' => $totalScore,
