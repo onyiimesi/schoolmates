@@ -212,7 +212,7 @@ class ResultResource extends JsonResource
             ])->get();
 
         $totalScore = $studentResults->pluck('studentscore')->flatten()->sum('score');
-        $totalSubjects = $studentResults->pluck('studentscore')->flatten()->count();
+        $totalSubjects = $studentResults->pluck('studentscore')->flatten()->unique('subject')->count();
 
         $expectedScore = $totalSubjects * 100;
         $gpa = ($expectedScore > 0) ? round(($totalScore / $expectedScore) * 5, 2) : 0;
