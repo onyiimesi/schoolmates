@@ -71,7 +71,8 @@ class ResultResource extends JsonResource
             ])->get();
         }
 
-        $classTotalScore = StudentScore::whereHas('result', function ($query) {
+        $classTotalScore = StudentScore::where('score', '>', 0)
+        ->whereHas('result', function ($query) {
             $query->where([
                 'sch_id' => $this->sch_id,
                 'campus' => $this->campus,
@@ -81,20 +82,12 @@ class ResultResource extends JsonResource
             ]);
         })->sum('score');
 
-        $totalStudentsInClass = Result::where([
-            'sch_id' => $this->sch_id,
-            'campus' => $this->campus,
-            'class_name' => $this->class_name,
-            'term' => $this->term,
-            'session' => $this->session
-        ])->count();
-
         $totalSubjects = $this->studentscore->filter(function($score) {
             return $score->score != 0;
         })->count();
 
-        $classAverage = ($totalStudentsInClass > 0 && $totalSubjects > 0)
-        ? round($classTotalScore / ($totalStudentsInClass * $totalSubjects), 2)
+        $classAverage = ($classCount > 0 && $totalSubjects > 0)
+        ? round($classTotalScore / ($classCount * $totalSubjects), 2)
         : 0;
 
         $classGrade = GradingSystem::where('sch_id', $this->sch_id)
@@ -127,6 +120,7 @@ class ResultResource extends JsonResource
                 'times_present' => (string)$this->times_present,
                 'times_absent' => (string)$this->times_absent,
                 'number_in_class' => $classCount,
+                'class_total' => $classTotalScore,
                 'results' => $this->studentscore ? $this->studentscore->filter(function($score) {
                     return $score->score != 0;
                 })->map(function($score) {
