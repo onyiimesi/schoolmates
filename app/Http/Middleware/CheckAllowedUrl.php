@@ -16,25 +16,25 @@ class CheckAllowedUrl
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (app()->environment('production')) {
-            $allowedUrls = config('security.allowed_frontend_urls', []);
-            $allowedApiKeys = config('security.allowed_api_keys', []);
+        // if (app()->environment('production')) {
+        //     $allowedUrls = config('security.allowed_frontend_urls', []);
+        //     $allowedApiKeys = config('security.allowed_api_keys', []);
 
-            $origin = $request->headers->get('origin') ?? $request->headers->get('referer');
-            $apiKey = $request->header('X-API-KEY');
+        //     $origin = $request->headers->get('origin') ?? $request->headers->get('referer');
+        //     $apiKey = $request->header('X-API-KEY');
 
-            if ($origin && !in_array($origin, $allowedUrls)) {
-                return response()->json(['error' => 'Unauthorized access.'], 401);
-            }
+        //     if ($origin && !in_array($origin, $allowedUrls)) {
+        //         return response()->json(['error' => 'Unauthorized access.'], 401);
+        //     }
 
-            if (!$origin && $apiKey && !in_array($apiKey, $allowedApiKeys)) {
-                return response()->json(['error' => 'Unauthorized access.'], 401);
-            }
+        //     if (!$origin && $apiKey && !in_array($apiKey, $allowedApiKeys)) {
+        //         return response()->json(['error' => 'Unauthorized access.'], 401);
+        //     }
 
-            if (!$origin && !$apiKey) {
-                return response()->json(['error' => 'Unauthorized access.'], 401);
-            }
-        }
+        //     if (!$origin && !$apiKey) {
+        //         return response()->json(['error' => 'Unauthorized access.'], 401);
+        //     }
+        // }
 
         return $next($request);
     }
