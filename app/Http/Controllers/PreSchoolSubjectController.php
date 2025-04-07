@@ -127,6 +127,7 @@ class PreSchoolSubjectController extends Controller
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
             'period' => $request->period,
+            'term' => $request->term,
             'session' => $request->session,
             'class' => $request->class
         ])->first();
@@ -174,18 +175,17 @@ class PreSchoolSubjectController extends Controller
     {
         $user = Auth::user();
 
-        $presubjects = PreSchoolSubjectClassResource::collection(PreSchoolSubjectClass::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('period', $request->period)
-            ->where('term', $request->term)
-            ->where('session', $request->session)
-            ->where('class', $request->class)
-            ->get());
+        $subjects = PreSchoolSubjectClass::where([
+            ['sch_id', $user->sch_id],
+            ['campus', $user->campus],
+            ['period', $request->period],
+            ['term', $request->term],
+            ['session', $request->session],
+            ['class', $request->class],
+        ])->get();
 
-        return [
-            'status' => 'success',
-            'message' => '',
-            'data' => $presubjects
-        ];
+        $presubjects = PreSchoolSubjectClassResource::collection($subjects);
+
+        return $this->success($presubjects, 'Subject list');
     }
 }
