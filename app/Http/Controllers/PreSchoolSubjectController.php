@@ -11,6 +11,7 @@ use App\Models\PreSchoolSubjectClass;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 class PreSchoolSubjectController extends Controller
 {
@@ -129,6 +130,8 @@ class PreSchoolSubjectController extends Controller
             'session' => $request->session,
             'class' => $request->class
         ])->first();
+
+        ResponseCache::clear();
 
         if ($existingSubjectClass) {
             $existingSubjectClass->update([
