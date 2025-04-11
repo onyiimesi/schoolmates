@@ -42,6 +42,6 @@ class PreSchoolResult extends Model implements Auditable
 
     public function preschoolresultextracurricular()
     {
-        return $this->hasMany(PreSchoolResultExtraCurricular::class);
+        return $this->hasMany(PreSchoolResultExtraCurricular::class, 'pre_school_result_id', 'id');
     }
 }

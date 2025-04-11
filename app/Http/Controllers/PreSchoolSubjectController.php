@@ -25,9 +25,12 @@ class PreSchoolSubjectController extends Controller
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
             'period' => $request->period,
+            'term' => $request->term,
             'session' => $request->session,
             'subject' => $request->subject
         ])->first();
+
+        ResponseCache::clear();
 
         if($subjects) {
 
