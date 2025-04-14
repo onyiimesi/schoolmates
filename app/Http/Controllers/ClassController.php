@@ -6,6 +6,7 @@ use App\Http\Requests\ClassRequest;
 use App\Http\Resources\ClassResource;
 use App\Models\Campus;
 use App\Models\ClassModel;
+use App\Models\SubjectClass;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -106,6 +107,10 @@ class ClassController extends Controller
     public function destroy(ClassModel $class)
     {
         $class->delete();
+        // Delete the subject_class records associated with the class
+        if (SubjectClass::where('class_id', $class->id)->exists()) {
+            SubjectClass::where('class_id', $class->id)->delete();
+        }
 
         return response(null, 204);
     }
