@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ClosingResumptionResource;
 use App\Models\AcademicPeriod;
 use App\Models\ClosingResumption;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ClosingResumptionController extends Controller
 {
+    use HttpResponses;
     /**
      * Display a listing of the resource.
      *
@@ -19,26 +21,22 @@ class ClosingResumptionController extends Controller
     {
         $user = Auth::user();
         $academic = AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->first();
+            ->where('campus', $user->campus)
+            ->first();
+
+        if(!$academic) {
+            return $this->error(null, 'Academic period not found', 404);
+        }
 
         $closingResumption = ClosingResumption::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('term', $academic->term)
             ->where('session', $academic->session)
-            ->first();
+            ->firstOrFail();
 
-        if($closingResumption){
-            $clos = new ClosingResumptionResource($closingResumption);
-        }else{
-            $clos = [];
-        }
+        $clos = new ClosingResumptionResource($closingResumption);
 
-        return [
-            'status' => 'true',
-            'message' => 'GET',
-            'data' => $clos
-        ];
+        return $this->success($clos, 'Closing resumption fetched successfully');
     }
 
     /**
@@ -49,43 +47,31 @@ class ClosingResumptionController extends Controller
      */
     public function store(Request $request)
     {
-
         $user = Auth::user();
         $academic = AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->first();
-        
-        $clos = ClosingResumption::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('term', $academic->term)
-            ->where('session', $academic->session)
             ->first();
 
-        if(empty($clos)){
-            $clos = ClosingResumption::create([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'term' => $academic->term,
-                'session' => $academic->session,
-                'session_ends' => $request->session_ends,
-                'session_resumes' => $request->session_resumes
-            ]);
-        } else{
-            $clos->update([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'term' => $academic->term,
-                'session' => $academic->session,
-                'session_ends' => $request->session_ends,
-                'session_resumes' => $request->session_resumes
-            ]);
+        if(!$academic) {
+            return $this->error(null, 'Academic period not found', 404);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Inserted Successfully',
-            "data" => $clos
-        ];
+        $clos = ClosingResumption::updateOrCreate(
+            [
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'term' => $academic->term,
+                'session' => $academic->session,
+            ],
+            [
+                'session_ends' => $request->session_ends,
+                'session_resumes' => $request->session_resumes,
+            ]
+        );
+
+        $msg = $clos->wasRecentlyCreated ? 'Created Successfully' : 'Updated Successfully';
+
+        return $this->success($clos, $msg);
     }
 
     /**
