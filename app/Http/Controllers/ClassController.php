@@ -6,6 +6,7 @@ use App\Http\Requests\ClassRequest;
 use App\Http\Resources\ClassResource;
 use App\Models\Campus;
 use App\Models\ClassModel;
+use App\Models\Result;
 use App\Models\SubjectClass;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
@@ -86,8 +87,14 @@ class ClassController extends Controller
      */
     public function update(Request $request, ClassModel $class)
     {
-
+        $user = Auth::user();
         $class->update($request->all());
+
+        Result::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->update([
+                'class_name' => $request->class_name
+            ]);
 
         $classs = new ClassResource($class);
 
