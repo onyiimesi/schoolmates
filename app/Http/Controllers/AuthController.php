@@ -33,7 +33,7 @@ class AuthController extends Controller
         if ($staffGuard->attempt($request->only(['username', 'password']))) {
             $auth = Auth::guard('staffs')->user();
 
-            if($auth->status === "inactive"){
+            if(!in_array($auth->status, haystack: ['disabled', 'inactive'])) {
                 return $this->error('', 'Account is inactive, contact support', 400);
             }
 
@@ -45,7 +45,7 @@ class AuthController extends Controller
             $users = new LoginResource($user);
 
             $user->tokens()->delete();
-            $token = $user->createToken('API Token of '. $user->username);
+            $token = $user->createToken("API Token of {$user->username}");
 
             return $this->success([
                 'user' => $users,
@@ -56,7 +56,7 @@ class AuthController extends Controller
         } elseif ($studGuard->attempt($request->only(['username', 'password']))) {
             $auth = Auth::guard('studs')->user();
 
-            if($auth->status === "inactive"){
+            if(!in_array($auth->status, haystack: ['disabled', 'inactive'])) {
                 return $this->error('', 'Account is inactive, contact support', 400);
             }
 
@@ -67,7 +67,7 @@ class AuthController extends Controller
             $studs = new StudentLoginResource($stud);
 
             $stud->tokens()->delete();
-            $token = $stud->createToken('API Token of '. $stud->username);
+            $token = $stud->createToken("API Token of {$stud->username}");
 
             return $this->success([
                 'user' => $studs,
