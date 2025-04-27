@@ -33,7 +33,7 @@ class AuthController extends Controller
         if ($staffGuard->attempt($request->only(['username', 'password']))) {
             $auth = Auth::guard('staffs')->user();
 
-            if(!in_array($auth->status, haystack: ['disabled', 'inactive'])) {
+            if(!in_array($auth->status, haystack: ['active'])) {
                 return $this->error('', 'Account is inactive, contact support', 400);
             }
 
@@ -56,7 +56,7 @@ class AuthController extends Controller
         } elseif ($studGuard->attempt($request->only(['username', 'password']))) {
             $auth = Auth::guard('studs')->user();
 
-            if(!in_array($auth->status, haystack: ['disabled', 'inactive'])) {
+            if(!in_array($auth->status, haystack: ['active'])) {
                 return $this->error('', 'Account is inactive, contact support', 400);
             }
 
