@@ -8,6 +8,7 @@ use App\Http\Requests\ReleaseResultRequest;
 use App\Http\Requests\ResultRequest;
 use App\Models\Result;
 use App\Models\Staff;
+use App\Services\ResultService;
 use App\Traits\HttpResponses;
 use App\Traits\ResultBase;
 use Illuminate\Http\Request;
@@ -19,6 +20,11 @@ use Spatie\ResponseCache\Facades\ResponseCache;
 class ResultTwoController extends Controller
 {
     use HttpResponses, ResultBase;
+
+    public function __construct(
+        protected ResultService $resultService
+    )
+    {}
 
     public function mid(Request $request)
     {
@@ -122,6 +128,26 @@ class ResultTwoController extends Controller
             Log::error('Error withholding results', ['error' => $e->getMessage()]);
             return $this->error(null, "An error occurred while withholding results", 500);
         }
+    }
+
+    public function getSettings()
+    {
+        return $this->resultService->getSettings();
+    }
+
+    public function storeSettings(Request $request)
+    {
+        $request->validate([
+            'campus' => ['required', 'string', 'max:255'],
+            'score_option_id' => ['required', 'integer', 'exists:score_options,id']
+        ]);
+
+        return $this->resultService->storeSettings($request);
+    }
+
+    public function getSchoolScoreSettings()
+    {
+        return $this->resultService->getSchoolScoreSettings();
     }
 
 }
