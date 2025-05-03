@@ -25,23 +25,16 @@ class ClassController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->designation_id == 6) {
-            $data = ClassResource::collection(
-                ClassModel::where('sch_id', $user->sch_id)
-                ->get()
-            );
+        $query = ClassModel::where('sch_id', $user->sch_id);
 
-        }else {
-            $data = ClassResource::collection(
-                ClassModel::where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->get()
-            );
+        if ($user->designation_id != 6) {
+            $query->where('campus', $user->campus);
         }
 
-        return $this->success($data, 'Class List');
-    }
+        $classes = ClassResource::collection($query->get());
 
+        return $this->success($classes, 'Class List');
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -87,22 +80,25 @@ class ClassController extends Controller
      */
     public function update(Request $request, ClassModel $class)
     {
+        $validated = $request->validate([
+            'class_name' => 'required|string|max:255',
+        ]);
+
         $user = Auth::user();
-        $class->update($request->all());
 
-        Result::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->update([
-                'class_name' => $request->class_name
-            ]);
+        if ($class->class_name !== $validated['class_name']) {
+            Result::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('class_name', $class->class_name)
+                ->update([
+                    'class_name' => $validated['class_name']
+                ]);
+        }
 
+        $class->update($validated);
         $classs = new ClassResource($class);
 
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully',
-            "data" => $classs
-        ];
+        return $this->success($classs, 'Class Updated Successfully');
     }
 
     /**
@@ -113,11 +109,8 @@ class ClassController extends Controller
      */
     public function destroy(ClassModel $class)
     {
+        SubjectClass::where('class_id', $class->id)->delete();
         $class->delete();
-        // Delete the subject_class records associated with the class
-        if (SubjectClass::where('class_id', $class->id)->exists()) {
-            SubjectClass::where('class_id', $class->id)->delete();
-        }
 
         return response(null, 204);
     }

@@ -10,11 +10,11 @@
         "guzzlehttp/guzzle": "^7.9.2",
         "imagekit/imagekit": "^4.0",
         "jenssegers/agent": "^2.6",
-        "laravel/framework": "^11.43",
-        "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.9",
+        "laravel/framework": "^12.12",
+        "laravel/sanctum": "^4.1",
+        "laravel/tinker": "^2.10",
         "maatwebsite/excel": "^3.1",
-        "owen-it/laravel-auditing": "^13.6.8",
+        "owen-it/laravel-auditing": "^14.0",
         "spatie/laravel-responsecache": "^7.6"
     },
     "require-dev": {

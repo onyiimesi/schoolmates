@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ResultTwoController;
 use App\Http\Controllers\v2\CbtController;
 use App\Http\Controllers\v2\CommunicationBookController;
 use App\Http\Controllers\v2\FlipClassController;
@@ -121,6 +122,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
                 Route::get('/performance', 'performanceChart');
             });
         });
+
+        // Result
+        Route::prefix('result')
+            ->controller(ResultTwoController::class)
+            ->group(function () {
+                Route::get('/settings', 'getSettings');
+                Route::post('/settings/store', 'storeSettings');
+                Route::get('/score/schol-settings', 'getSchoolScoreSettings');
+            });
 
     });
 
