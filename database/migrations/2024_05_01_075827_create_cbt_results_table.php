@@ -11,52 +11,56 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cbt_results', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('period');
-            $table->string('term');
-            $table->string('session');
-            $table->unsignedBigInteger('cbt_answer_id');
-            $table->string('student_id');
-            $table->string('subject_id');
-            $table->string('question_type');
-            $table->longText('answer_score');
-            $table->string('correct_answer');
-            $table->string('incorrect_answer');
-            $table->string('total_answer');
-            $table->string('student_total_mark');
-            $table->string('test_total_mark');
-            $table->string('student_duration');
-            $table->string('test_duration');
+        if (!Schema::hasTable('cbt_results')) {
+            Schema::create('cbt_results', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('period');
+                $table->string('term');
+                $table->string('session');
+                $table->unsignedBigInteger('cbt_answer_id');
+                $table->string('student_id');
+                $table->string('subject_id');
+                $table->string('question_type');
+                $table->longText('answer_score');
+                $table->string('correct_answer');
+                $table->string('incorrect_answer');
+                $table->string('total_answer');
+                $table->string('student_total_mark');
+                $table->string('test_total_mark');
+                $table->string('student_duration');
+                $table->string('test_duration');
 
-            $table->foreign('cbt_answer_id')->references('id')->on('cbt_answers')->onDelete('cascade');
-            $table->timestamps();
-        });
+                $table->foreign('cbt_answer_id')->references('id')->on('cbt_answers')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('cbt_performances', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('period');
-            $table->string('term');
-            $table->string('session');
-            $table->unsignedBigInteger('cbt_result_id');
-            $table->string('student_id');
-            $table->string('subject_id');
-            $table->string('question_type');
-            $table->string('correct_answer');
-            $table->string('incorrect_answer');
-            $table->string('total_answer');
-            $table->string('student_total_mark');
-            $table->string('test_total_mark');
-            $table->string('student_duration');
-            $table->string('test_duration');
+        if (!Schema::hasTable('cbt_performances')) {
+            Schema::create('cbt_performances', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('period');
+                $table->string('term');
+                $table->string('session');
+                $table->unsignedBigInteger('cbt_result_id');
+                $table->string('student_id');
+                $table->string('subject_id');
+                $table->string('question_type');
+                $table->string('correct_answer');
+                $table->string('incorrect_answer');
+                $table->string('total_answer');
+                $table->string('student_total_mark');
+                $table->string('test_total_mark');
+                $table->string('student_duration');
+                $table->string('test_duration');
 
-            $table->foreign('cbt_result_id')->references('id')->on('cbt_results')->onDelete('cascade');
-            $table->timestamps();
-        });
+                $table->foreign('cbt_result_id')->references('id')->on('cbt_results')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

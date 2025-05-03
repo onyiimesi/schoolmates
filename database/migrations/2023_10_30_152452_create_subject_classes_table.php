@@ -13,16 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('subject_classes', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('term');
-            $table->string('session');
-            $table->unsignedBigInteger('class_id');
-            $table->string('subject');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('subject_classes')) {
+            Schema::create('subject_classes', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('term');
+                $table->string('session');
+                $table->unsignedBigInteger('class_id');
+                $table->string('subject');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

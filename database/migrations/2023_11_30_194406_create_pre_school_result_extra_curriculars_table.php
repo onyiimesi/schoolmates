@@ -13,15 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pre_school_result_extra_curriculars', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('pre_school_result_id');
-            $table->string('name');
-            $table->string('value');
+        if (!Schema::hasTable('pre_school_result_extra_curriculars')) {
+            Schema::create('pre_school_result_extra_curriculars', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('pre_school_result_id');
+                $table->string('name');
+                $table->string('value');
 
-            $table->foreign('pre_school_result_id')->references('id')->on('pre_school_results')->onDelete('cascade');
-            $table->timestamps();
-        });
+                $table->foreign('pre_school_result_id')->references('id')->on('pre_school_results')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

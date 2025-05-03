@@ -11,20 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cbt_settings', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('period');
-            $table->string('term');
-            $table->string('session');
-            $table->string('subject_id');
-            $table->string('question_type');
-            $table->longText('instruction');
-            $table->string('duration');
-            $table->string('mark');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('cbt_settings')) {
+            Schema::create('cbt_settings', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('period');
+                $table->string('term');
+                $table->string('session');
+                $table->string('subject_id');
+                $table->string('question_type');
+                $table->longText('instruction');
+                $table->string('duration');
+                $table->string('mark');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

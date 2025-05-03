@@ -13,15 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('student_scores', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('result_id');
-            $table->string('subject');
-            $table->string('score');
+        if (!Schema::hasTable('student_scores')) {
+            Schema::create('student_scores', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('result_id');
+                $table->string('subject');
+                $table->string('score');
 
-            $table->foreign('result_id')->references('id')->on('results')->onDelete('cascade');
-            $table->timestamps();
-        });
+                $table->foreign('result_id')->references('id')->on('results')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

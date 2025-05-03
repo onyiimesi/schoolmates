@@ -11,24 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assignment_performances', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('period');
-            $table->string('term');
-            $table->string('session');
-            $table->unsignedBigInteger('assignment_id');
-            $table->string('student_id');
-            $table->string('subject_id');
-            $table->string('question_type');
-            $table->string('total_mark');
-            $table->string('percentage_score');
-            $table->string('week');
+        if (!Schema::hasTable('assignment_performances')) {
+            Schema::create('assignment_performances', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('period');
+                $table->string('term');
+                $table->string('session');
+                $table->unsignedBigInteger('assignment_id');
+                $table->string('student_id');
+                $table->string('subject_id');
+                $table->string('question_type');
+                $table->string('total_mark');
+                $table->string('percentage_score');
+                $table->string('week');
 
-            $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade');
-            $table->timestamps();
-        });
+                $table->foreign('assignment_id')->references('id')->on('assignments')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

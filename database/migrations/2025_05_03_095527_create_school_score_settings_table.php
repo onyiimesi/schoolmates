@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('school_score_settings', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->unsignedBigInteger('score_option_id');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('school_score_settings')) {
+            Schema::create('school_score_settings', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->unsignedBigInteger('score_option_id');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

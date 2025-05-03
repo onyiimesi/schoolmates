@@ -11,26 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('flip_classes', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('term');
-            $table->string('session');
-            $table->unsignedBigInteger('staff_id');
-            $table->string('week');
-            $table->integer('subject_id');
-            $table->integer('class_id');
-            $table->string('topic');
-            $table->longText('description')->nullable();
-            $table->string('video_url')->nullable();
-            $table->string('file');
-            $table->string('file_id')->nullable();
-            $table->string('file_name')->nullable();
-            $table->string('submitted_by')->nullable();
-            $table->enum('status', ['active', 'inactive']);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('flip_classes')) {
+            Schema::create('flip_classes', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('term');
+                $table->string('session');
+                $table->unsignedBigInteger('staff_id');
+                $table->string('week');
+                $table->integer('subject_id');
+                $table->integer('class_id');
+                $table->string('topic');
+                $table->longText('description')->nullable();
+                $table->string('video_url')->nullable();
+                $table->string('file');
+                $table->string('file_id')->nullable();
+                $table->string('file_name')->nullable();
+                $table->string('submitted_by')->nullable();
+                $table->enum('status', ['active', 'inactive']);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

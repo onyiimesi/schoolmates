@@ -13,12 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('closing_resumptions', function (Blueprint $table) {
-            $table->id();
-            $table->string('session_ends');
-            $table->string('session_resumes');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('closing_resumptions')) {
+            Schema::create('closing_resumptions', function (Blueprint $table) {
+                $table->id();
+                $table->string('session_ends');
+                $table->string('session_resumes');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

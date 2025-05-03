@@ -13,13 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('student_excel_imports', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('file');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('student_excel_imports')) {
+            Schema::create('student_excel_imports', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('file');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

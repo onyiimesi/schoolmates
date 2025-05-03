@@ -13,17 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('academic_calenders', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('period');
-            $table->string('term');
-            $table->string('session');
-            $table->string('title');
-            $table->string('description');
-            $table->string('file');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('academic_calenders')) {
+            Schema::create('academic_calenders', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('period');
+                $table->string('term');
+                $table->string('session');
+                $table->string('title');
+                $table->string('description');
+                $table->string('file');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -13,14 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('abacuses', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('result_id');
-            $table->string('name');
+        if (!Schema::hasTable('abacuses')) {
+            Schema::create('abacuses', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('result_id');
+                $table->string('name');
 
-            $table->foreign('result_id')->references('id')->on('results')->onDelete('cascade');
-            $table->timestamps();
-        });
+                $table->foreign('result_id')->references('id')->on('results')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

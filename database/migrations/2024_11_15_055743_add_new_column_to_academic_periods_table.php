@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('academic_periods', function (Blueprint $table) {
-            $table->boolean('is_current_period')->after('session')->default(0);
-        });
+        if (!Schema::hasColumn('academic_periods', 'is_current_period')) {
+            Schema::table('academic_periods', function (Blueprint $table) {
+                $table->boolean('is_current_period')->after('session')->default(0);
+            });
+        }
     }
 
     /**
