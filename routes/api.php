@@ -118,8 +118,7 @@ Route::get('/optimize', function () {
     return response()->json(['error' => 'Unauthorized action.'], 403);
 });
 
-// Route::middleware(['throttle:apis'])->group(function () {
-// });
+Route::post('/run-migration', [OtherController::class, 'migrate']);
 
 Route::middleware('check.allowed.url')
     ->group(function () {
