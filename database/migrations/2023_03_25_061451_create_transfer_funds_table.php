@@ -13,17 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('transfer_funds', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('from');
-            $table->string('to');
-            $table->string('amount');
-            $table->string('memo');
-            $table->string('transfer_date');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('transfer_funds')) {
+            Schema::create('transfer_funds', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('from');
+                $table->string('to');
+                $table->string('amount');
+                $table->string('memo');
+                $table->string('transfer_date');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

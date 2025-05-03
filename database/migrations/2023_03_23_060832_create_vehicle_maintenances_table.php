@@ -13,22 +13,24 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('vehicle_maintenances', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('staff_id');
-            $table->string('vehicle_type');
-            $table->string('vehicle_make');
-            $table->string('vehicle_number');
-            $table->string('driver_name');
-            $table->string('detected_fault');
-            $table->string('mechanic_name');
-            $table->string('mechanic_phone');
-            $table->string('cost_of_maintenance');
-            $table->string('initial_payment');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('vehicle_maintenances')) {
+            Schema::create('vehicle_maintenances', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('staff_id');
+                $table->string('vehicle_type');
+                $table->string('vehicle_make');
+                $table->string('vehicle_number');
+                $table->string('driver_name');
+                $table->string('detected_fault');
+                $table->string('mechanic_name');
+                $table->string('mechanic_phone');
+                $table->string('cost_of_maintenance');
+                $table->string('initial_payment');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

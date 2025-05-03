@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('schools', function (Blueprint $table) {
-            $table->boolean('auto_generate')->after('pricing_id')->default(0);
-        });
+        if (!Schema::hasColumn('schools', 'auto_generate')) {
+            Schema::table('schools', function (Blueprint $table) {
+                $table->boolean('auto_generate')->after('pricing_id')->default(0);
+            });
+        }
     }
 
     /**

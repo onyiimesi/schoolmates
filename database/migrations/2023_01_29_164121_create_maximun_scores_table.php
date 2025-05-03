@@ -13,16 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('maximun_scores', function (Blueprint $table) {
-            $table->id();
-            $table->string('midterm')->nullable();
-            $table->string('first_assesment')->nullable();
-            $table->string('second_assesment')->nullable();
-            $table->string('has_two_assesment')->nullable();
-            $table->string('exam');
-            $table->string('total');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('maximun_scores')) {
+            Schema::create('maximun_scores', function (Blueprint $table) {
+                $table->id();
+                $table->string('midterm')->nullable();
+                $table->string('first_assesment')->nullable();
+                $table->string('second_assesment')->nullable();
+                $table->string('has_two_assesment')->nullable();
+                $table->string('exam');
+                $table->string('total');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

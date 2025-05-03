@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('academic_sessions', function (Blueprint $table) {
-            $table->id();
-            $table->string('academic_session');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('academic_sessions')) {
+            Schema::create('academic_sessions', function (Blueprint $table) {
+                $table->id();
+                $table->string('academic_session');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

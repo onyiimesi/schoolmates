@@ -13,13 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pre_schools', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('name');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('pre_schools')) {
+            Schema::create('pre_schools', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('name');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

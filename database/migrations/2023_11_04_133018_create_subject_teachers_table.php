@@ -13,18 +13,20 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('subject_teachers', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('term');
-            $table->string('session');
-            $table->unsignedBigInteger('class_id');
-            $table->unsignedBigInteger('staff_id');
-            $table->string('class_name');
-            $table->json('subject');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('subject_teachers')) {
+            Schema::create('subject_teachers', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('term');
+                $table->string('session');
+                $table->unsignedBigInteger('class_id');
+                $table->unsignedBigInteger('staff_id');
+                $table->string('class_name');
+                $table->json('subject');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

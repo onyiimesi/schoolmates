@@ -13,23 +13,25 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('communication_books', function (Blueprint $table) {
-            $table->id();
-            $table->string('sch_id');
-            $table->string('campus');
-            $table->string('period');
-            $table->string('term');
-            $table->string('session');
-            $table->string('title');
-            $table->string('urgency');
-            $table->string('student_id');
-            $table->string('admission_number');
-            $table->string('message');
-            $table->string('sender');
-            $table->string('status');
-            $table->string('parents_reply')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('communication_books')) {
+            Schema::create('communication_books', function (Blueprint $table) {
+                $table->id();
+                $table->string('sch_id');
+                $table->string('campus');
+                $table->string('period');
+                $table->string('term');
+                $table->string('session');
+                $table->string('title');
+                $table->string('urgency');
+                $table->string('student_id');
+                $table->string('admission_number');
+                $table->string('message');
+                $table->string('sender');
+                $table->string('status');
+                $table->string('parents_reply')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

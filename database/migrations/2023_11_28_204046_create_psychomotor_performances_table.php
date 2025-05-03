@@ -13,15 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('psychomotor_performances', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('result_id');
-            $table->string('name');
-            $table->string('score');
+        if (!Schema::hasTable('psychomotor_performances')) {
+            Schema::create('psychomotor_performances', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('result_id');
+                $table->string('name');
+                $table->string('score');
 
-            $table->foreign('result_id')->references('id')->on('results')->onDelete('cascade');
-            $table->timestamps();
-        });
+                $table->foreign('result_id')->references('id')->on('results')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -13,15 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('result_extra_curriculars', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('result_id');
-            $table->string('name');
-            $table->string('value');
+        if (!Schema::hasTable('result_extra_curriculars')) {
+            Schema::create('result_extra_curriculars', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('result_id');
+                $table->string('name');
+                $table->string('value');
 
-            $table->foreign('result_id')->references('id')->on('results')->onDelete('cascade');
-            $table->timestamps();
-        });
+                $table->foreign('result_id')->references('id')->on('results')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

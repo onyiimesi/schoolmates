@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('cbt_questions', function (Blueprint $table) {
-            $table->string('class_id')->after('session');
-        });
+        if (!Schema::hasColumn('cbt_questions', 'class_id')) {
+            Schema::table('cbt_questions', function (Blueprint $table) {
+                $table->string('class_id')->after('session');
+            });
+        }
     }
 
     /**
