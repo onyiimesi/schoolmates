@@ -15,12 +15,25 @@ use App\Traits\HttpResponses;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
 class OtherController extends Controller
 {
     use HttpResponses;
+
+    public function migrate(): JsonResponse
+    {
+        Artisan::call('migrate', [
+            '--force' => true
+        ]);
+
+        return response()->json([
+            'message' => 'Migration completed successfully.',
+            'output' => Artisan::output(),
+        ]);
+    }
 
     public function extra(Request $request): JsonResponse
     {
