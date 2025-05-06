@@ -150,6 +150,21 @@ class ResultTwoController extends Controller
         return $this->resultService->getSchoolScoreSettings();
     }
 
+    public function getSheetSections()
+    {
+        return $this->resultService->getSheetSections();
+    }
+
+    public function saveSheetSections(Request $request)
+    {
+        return $this->resultService->saveSheetSections($request);
+    }
+
+    public function getSchoolSheetSettings()
+    {
+        return $this->resultService->getSchoolSheetSettings();
+    }
+
 }
 
 

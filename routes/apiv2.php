@@ -129,7 +129,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
             ->group(function () {
                 Route::get('/settings', 'getSettings');
                 Route::post('/settings/store', 'storeSettings');
-                Route::get('/score/schol-settings', 'getSchoolScoreSettings');
+                Route::get('/score/school-settings', 'getSchoolScoreSettings');
+
+                //Sheet
+                Route::get('/settings/sheet-sections', 'getSheetSections');
+                Route::post('/settings/save-sheet-sections', 'saveSheetSections');
+                Route::get('/sheet/school-settings', 'getSchoolSheetSettings');
             });
 
     });
