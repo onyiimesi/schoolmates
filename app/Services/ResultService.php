@@ -100,10 +100,14 @@ class ResultService
     {
         $sch_id = request()->query('sch_id');
         $campus = request()->query('campus');
+        $period = request()->query('period');
+        $term = request()->query('term');
 
-        $setting = SchoolSheetSetting::when($sch_id && $campus, function ($query) use ($sch_id, $campus) {
+        $setting = SchoolSheetSetting::when($sch_id && $campus, function ($query) use ($sch_id, $campus, $period, $term) {
                 $query->where('sch_id', $sch_id)
-                    ->where('campus', $campus);
+                    ->where('campus', $campus)
+                    ->where('period', $period)
+                    ->where('term', $term);
             })
             ->first();
 
