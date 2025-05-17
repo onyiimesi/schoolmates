@@ -9,6 +9,7 @@ use App\Http\Resources\ResultResource;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Student;
+use App\Services\GeneralResultService;
 use App\Traits\CummulativeResult;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
@@ -23,15 +24,15 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         $search = Result::with([
-                'student',
-                'studentscore',
-                'affectivedisposition',
-                'psychomotorskill',
-                'resultextracurricular',
-                'abacus',
-                'psychomotorperformance',
-                'pupilreport',
-            ])
+            'student',
+            'studentscore',
+            'affectivedisposition',
+            'psychomotorskill',
+            'resultextracurricular',
+            'abacus',
+            'psychomotorperformance',
+            'pupilreport',
+        ])
             ->where([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -53,14 +54,14 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         $search = Result::with([
-                'studentscore',
-                'affectivedisposition',
-                'psychomotorskill',
-                'resultextracurricular',
-                'abacus',
-                'psychomotorperformance',
-                'pupilreport',
-            ])
+            'studentscore',
+            'affectivedisposition',
+            'psychomotorskill',
+            'resultextracurricular',
+            'abacus',
+            'psychomotorperformance',
+            'pupilreport',
+        ])
             ->where([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -75,7 +76,6 @@ class EndTermResultController extends Controller
 
         return $this->success($data, 'End term result');
     }
-
     public function cummulative(Request $request)
     {
         $user = Auth::user();
@@ -98,15 +98,15 @@ class EndTermResultController extends Controller
     public function endaverage(Request $request)
     {
         $results = Result::with(['studentscore'])
-        ->where('student_id', $request->student_id)
-        ->where('class_name', $request->class_name)
-        ->where('session', $request->session)
-        ->get();
+            ->where('student_id', $request->student_id)
+            ->where('class_name', $request->class_name)
+            ->where('session', $request->session)
+            ->get();
 
         $allResults = Result::with(['studentscore'])
-        ->where('class_name', $request->class_name)
-        ->where('session', $request->session)
-        ->get();
+            ->where('class_name', $request->class_name)
+            ->where('session', $request->session)
+            ->get();
 
         $totalStudentScores = 0;
         $totalStudentSubjectCount = 0;
@@ -159,23 +159,23 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         $results = Result::where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'student_id' => $request->student_id,
-                'class_name' => $request->class_name,
-                'term' => $request->term,
-                'session' => $request->session,
-            ])
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'student_id' => $request->student_id,
+            'class_name' => $request->class_name,
+            'term' => $request->term,
+            'session' => $request->session,
+        ])
             ->with('studentscore')
             ->get();
 
         $classResults = Result::with('student')->where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'class_name' => $request->class_name,
-                'term' => $request->term,
-                'session' => $request->session,
-            ])
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'class_name' => $request->class_name,
+            'term' => $request->term,
+            'session' => $request->session,
+        ])
             ->whereHas('student', function ($query) {
                 $query->where('status', 'active');
             })
@@ -183,10 +183,10 @@ class EndTermResultController extends Controller
             ->get();
 
         $studentCount = Student::where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'present_class' => $request->class_name,
-            ])
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'present_class' => $request->class_name,
+        ])
             ->count();
 
         $totalClassScores = 0;
@@ -239,4 +239,34 @@ class EndTermResultController extends Controller
             "Grade" => $grades,
         ];
     }
+
+    public function getResult()
+    {
+        $user = userAuth();
+
+        $validated = request()->validate([
+            'student_id' => 'required|integer',
+            'period' => 'required|string',
+            'term' => 'required|string',
+            'session' => 'required|string',
+            'class' => 'required|string',
+            'result_type' => 'required|in:midterm,endterm,first_assessment,second_assessment,third_assessment',
+            'status' => 'required|in:released,withheld',
+        ], [
+            'result_type.in' => 'result type must be either midterm, endterm, first_assessment, second_assessment or third_assessment',
+            'status.in' => 'status must be either released or withheld',
+        ]);
+
+        return $this->getStudentResults($user, $validated);
+    }
+
+    private function getStudentResults($user, array $params)
+    {
+        return match ($params['period']) {
+            PeriodicName::FIRSTHALF => (new GeneralResultService())->firstHalf($user, $params),
+            PeriodicName::SECONDHALF => (new GeneralResultService())->secondHalf($user, $params),
+            default => $this->error(null, 'Invalid result type', 400),
+        };
+    }
+
 }

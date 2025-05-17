@@ -6,7 +6,7 @@ use Exception;
 
 class LessonNoteException extends Exception
 {
-    public function __construct($message = "Lesson Note error", $code = 500, Exception $previous = null)
+    public function __construct($message = "Lesson Note error", $code = 500, ?Exception $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }

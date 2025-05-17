@@ -100,16 +100,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Route::get('/db-check', function () {
-//     DB::enableQueryLog();
-//     $campuses = Campus::all();
-//     $log = DB::getQueryLog();
-//     dd([
-//         'query_log' => $log,
-//         'db_host' => DB::connection()->getConfig('host'),
-//     ]);
-// });
-
 Route::get('/optimize', function () {
     if (App::environment(['staging', 'production'])) {
         Artisan::call('optimize:clear');
@@ -155,7 +145,6 @@ Route::middleware('check.allowed.url')
                 Route::post('/current/academicperiod', 'setCurrentAcademicPeriod');
                 Route::get('/current/academicperiod', 'getCurrentAcademicPeriod');
             });
-
 
             // Route::post('/communicationbook', [CommunicationBookController::class, 'communicate']);
             // Route::get('/communicationbook', [CommunicationBookController::class, 'getmessage']);
@@ -211,20 +200,23 @@ Route::middleware('check.allowed.url')
 
                 Route::middleware('cacheResponse:600')->group(function () {
                     Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
-                    ->where('session', '.+');
+                        ->where('session', '.+');
                     Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
-                    ->where('session', '.+');
+                        ->where('session', '.+');
                     Route::get("/result/firstassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'first'])
-                    ->where('session', '.+');
+                        ->where('session', '.+');
                     Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
-                    ->where('session', '.+');
+                        ->where('session', '.+');
                     Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
-                    ->where('session', '.+');
+                        ->where('session', '.+');
                     Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
-                    ->where('session', '.+');
+                        ->where('session', '.+');
                     Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
-                    ->where('session', '.+');
+                        ->where('session', '.+');
                 });
+
+                // New Result API
+                Route::get("/get-result", [EndTermResultController::class, 'getResult']);
             });
 
             //PreSchool Subject

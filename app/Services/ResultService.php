@@ -62,7 +62,6 @@ class ResultService
 
         return $this->success($scoreOption, 'Settings');
     }
-
     public function getSheetSections()
     {
         $sheets = Sheet::select('id', 'section')->get();
@@ -126,6 +125,5 @@ class ResultService
 
         return $this->success($data, 'Settings');
     }
-
 }
 

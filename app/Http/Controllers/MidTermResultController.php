@@ -72,7 +72,6 @@ class MidTermResultController extends Controller
         $data = MidTermResultResource::collection($search);
 
         return $this->success($data, 'Result');
-
     }
 
     public function second(Request $request){
@@ -93,6 +92,5 @@ class MidTermResultController extends Controller
         $data = MidTermResultResource::collection($search);
 
         return $this->success($data, 'Result');
-
     }
 }
