@@ -35,22 +35,19 @@ class MidTermResultResource extends JsonResource
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
                 'result_type' => (string)$this->result_type,
-                'results' => $this->studentscore->filter(function($score) {
-                    return $score->score != 0;
-                })->map(function($score) {
-                    return [
-                        "subject" => $score->subject,
-                        "score" => $score->score
-                    ];
-                })->toArray(),
+                'results' => $this->studentscore
+                ->filter(fn($score) => $score->score != 0)
+                ->map(fn($score) => [
+                    "subject" => $score->subject,
+                    "score" => $score->score
+                ])
+                ->toArray(),
                 'computed_midterm' => (string)$this->computed_midterm,
                 'teacher_comment' => (string)$this->teacher_comment,
-                'teachers' => $signature->map(function($teacher) {
-                    return [
-                        "name" => $teacher->surname .' '. $teacher->firstname,
-                        "signature" => $teacher->signature
-                    ];
-                })->toArray(),
+                'teachers' => $signature->map(fn($teacher) => [
+                    "name" => "{$teacher->surname} {$teacher->firstname}",
+                    "signature" => $teacher->signature
+                ])->toArray(),
                 'status' => (string)$this->status
             ]
         ];

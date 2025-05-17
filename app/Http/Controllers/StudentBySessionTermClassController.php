@@ -37,8 +37,8 @@ class StudentBySessionTermClassController extends Controller
     }
 
     // Student By Class (Principal)
-    public function studentbyclass(Request $request){
-
+    public function studentbyclass(Request $request)
+    {
         $user = Auth::user();
 
         $searchStud = Student::where('sch_id', $user->sch_id)
