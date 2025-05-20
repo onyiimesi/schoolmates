@@ -7,6 +7,7 @@ use App\Http\Resources\StudentResource;
 use App\Mail\StudentWelcomeMail;
 use App\Models\Campus;
 use App\Models\Pricing;
+use App\Models\Result;
 use App\Models\SchoolPayment;
 use App\Models\Schools;
 use App\Models\Student;
@@ -14,7 +15,6 @@ use App\Services\AdmissionNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\HttpResponses;
-use ImageKit\ImageKit;
 
 class StudentController extends Controller
 {
@@ -29,29 +29,13 @@ class StudentController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->designation_id == 6) {
-            $students = Student::where('sch_id', $user->sch_id)
-                ->paginate(25);
-        } else {
-            $students = Student::where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->paginate(25);
-        }
+        $students = Student::where('sch_id', $user->sch_id)
+            ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
+            ->paginate(25);
 
         $studentCollection = StudentResource::collection($students);
 
-        return [
-            'status' => 'true',
-            'message' => 'Students List',
-            'data' => $studentCollection,
-            'pagination' => [
-                'current_page' => $students->currentPage(),
-                'last_page' => $students->lastPage(),
-                'per_page' => $students->perPage(),
-                'prev_page_url' => $students->previousPageUrl(),
-                'next_page_url' => $students->nextPageUrl()
-            ],
-        ];
+        return $this->withPagination($studentCollection, 'Students List');
     }
 
     /**
@@ -63,12 +47,12 @@ class StudentController extends Controller
     public function store(StudentRequest $request, AdmissionNumberService $admissionNumberService)
     {
         $user = Auth::user();
-        
+
         $sch = Schools::where('sch_id', $user->sch_id)
             ->first();
 
         if (!$sch) {
-            throw new \Exception('School not found.');
+            return $this->error(null, 'School not found', 404);
         }
 
         if(!$sch->auto_generate) {
@@ -77,11 +61,7 @@ class StudentController extends Controller
             ]);
         }
 
-        $imageKit = new ImageKit(
-            env('IMAGEKIT_PUBLIC_KEY'),
-            env('IMAGEKIT_PRIVATE_KEY'),
-            env('IMAGEKIT_URL_ENDPOINT')
-        );
+        $imageKit = getImageKit();
 
         $getstudents = Student::where('sch_id', $user->sch_id)
         ->where('status', 'active')
@@ -89,6 +69,7 @@ class StudentController extends Controller
         $count = $getstudents->count();
 
         $plan = SchoolPayment::where('sch_id', $user->sch_id)->first();
+
         if($plan){
             $getplan = Pricing::where('id', $plan->pricing_id)->first();
         } else {
@@ -180,13 +161,9 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        $students = new StudentResource($student);
+        $studentDetail = new StudentResource($student);
 
-        return [
-            'status' => 'true',
-            'message' => 'Student Details',
-            'data' => $students
-        ];
+        return $this->success($studentDetail, 'Student Details');
     }
 
     /**
@@ -199,11 +176,8 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $user = Auth::user();
-        $imageKit = new ImageKit(
-            env('IMAGEKIT_PUBLIC_KEY'),
-            env('IMAGEKIT_PRIVATE_KEY'),
-            env('IMAGEKIT_URL_ENDPOINT')
-        );
+
+        $imageKit = getImageKit();
 
         $campus = Campus::where('sch_id', $user->sch_id)
         ->where('name', $request->campus)
@@ -264,13 +238,14 @@ class StudentController extends Controller
             'file_id' => $fileId,
         ]);
 
-        $students = new StudentResource($student);
+        $studentFullname = trim("{$student->surname} {$student->firstname} {$student->middlename}");
 
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully',
-            "data" => $students
-        ];
+        Result::where('student_id', $student->id)
+            ->update(['student_fullname' => $studentFullname]);
+
+        $studentDetail = new StudentResource($student);
+
+        return $this->success($studentDetail, 'Student Updated Successfully');
     }
 
     /**
@@ -279,9 +254,11 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Student $student)
     {
-        //
+        $student->delete();
+
+        return $this->success(null, 'Student Deleted Successfully');
     }
 
     private function handleCount($count, $getplan)

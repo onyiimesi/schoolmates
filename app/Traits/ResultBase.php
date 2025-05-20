@@ -12,15 +12,17 @@ use App\Models\StudentScore;
 
 trait ResultBase
 {
+    use HttpResponses;
     protected function getResult($teacher, $request)
     {
-        return Result::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where("student_id", $request->student_id)
-            ->where("period", 'First Half')
-            ->where("result_type", $request->result_type)
-            ->where("term", $request->term)
-            ->where("session", $request->session)
+        return Result::where([
+                'sch_id' => $teacher->sch_id,
+                'campus' => $teacher->campus,
+                'student_id' => $request->student_id,
+                'period' => 'First Half',
+                'term' => $request->term,
+                'session' => $request->session,
+            ])
             ->first();
     }
 
@@ -46,10 +48,7 @@ trait ResultBase
 
         $this->saveStudentScores($compute, $request->results);
 
-        return [
-            "status" => 'true',
-            "message" => 'Computed Successfully',
-        ];
+        return $this->success(null, 'Computed Successfully', 201);
     }
 
     protected function updateResult($getResult, $request)
@@ -71,10 +70,7 @@ trait ResultBase
         $getResult->studentscore()->delete();
         $this->saveStudentScores($getResult, $request->results);
 
-        return [
-            "status" => 'true',
-            "message" => 'Result Updated Successfully'
-        ];
+        return $this->success(null, 'Updated Successfully');
     }
 
     protected function saveStudentScores($result, $scores)
@@ -93,12 +89,15 @@ trait ResultBase
 
     protected function getSecondResult($request, $teacher)
     {
-        return Result::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where("student_id", $request->student_id)
-            ->where("period", 'Second Half')
-            ->where("term", $request->term)
-            ->where("session", $request->session)->first();
+        return Result::where([
+                'sch_id' => $teacher->sch_id,
+                'campus' => $teacher->campus,
+                'student_id' => $request->student_id,
+                'period' => 'Second Half',
+                'term' => $request->term,
+                'session' => $request->session
+            ])
+            ->first();
     }
 
     protected function handleNewResult($request, $teacher, $hosId)
@@ -113,10 +112,7 @@ trait ResultBase
             $this->saveClassTeacherData($compute, $request, $teacher);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Computed Successfully',
-        ];
+        return $this->success(null, 'Computed Successfully', 201);
     }
 
     protected function handleExistingResult($request, $teacher, $hosId, $getsecondresult)
@@ -127,11 +123,7 @@ trait ResultBase
         }
 
         if ($teacher->teacher_type === "class teacher") {
-            if ($hosId) {
-                $hosFullName = $hosId->surname . ' ' . $hosId->firstname;
-            } else {
-                $hosFullName = null;
-            }
+            $hosFullName = $hosId ? "{$hosId->surname} {$hosId->firstname}" : null;
 
             $this->updateEndTermResult($getsecondresult, $request, [
                 'school_opened' => $request->school_opened,
@@ -140,7 +132,7 @@ trait ResultBase
                 'teacher_comment' => $request->teacher_comment,
                 'performance_remark' => $request->performance_remark,
                 'teacher_id' => $request->teacher_id,
-                'teacher_fullname' => $teacher->surname . ' ' . $teacher->firstname,
+                'teacher_fullname' => "{$teacher->surname} {$teacher->firstname}",
                 'hos_comment' => $request->hos_comment,
                 'hos_id' => $request->hos_id,
                 'hos_fullname' => $hosFullName,
@@ -151,10 +143,7 @@ trait ResultBase
             $this->saveClassTeacherData($getsecondresult, $request, $teacher);
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully'
-        ];
+        return $this->success(null, 'Updated Successfully');
     }
 
     protected function updateEndTermResult($result, $request, $additionalFields = [])
@@ -217,7 +206,6 @@ trait ResultBase
             $compute->psychomotorskill()->save($psy);
         }
     }
-
     protected function saveExtraCurricularActivities($compute, $extraCurricularActivities)
     {
         $compute->resultextracurricular()->delete();
@@ -226,7 +214,6 @@ trait ResultBase
             $compute->resultextracurricular()->save($ext);
         }
     }
-
     protected function saveAbacus($compute, $abacus)
     {
         $compute->abacus()->delete();
@@ -234,7 +221,6 @@ trait ResultBase
             'name' => $abacus['name']
         ]);
     }
-
     protected function savePsychomotorPerformances($compute, $psychomotorPerformances)
     {
         $compute->psychomotorperformance()->delete();
@@ -243,7 +229,6 @@ trait ResultBase
             $compute->psychomotorperformance()->save($psycho);
         }
     }
-
     protected function savePupilReports($compute, $pupilReports)
     {
         $compute->pupilreport()->delete();
