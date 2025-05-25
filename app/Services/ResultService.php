@@ -70,22 +70,17 @@ class ResultService
 
     public function saveSheetSections($request)
     {
-        $request->validate([
-            'campus' => 'required|string',
-            'period' => 'required|string',
-            'term' => 'required|string',
-            'sheet_ids' => 'required|array',
-            'sheet_ids.*' => 'required|integer|exists:sheets,id',
-        ]);
-
         $user = userAuth();
+
+        $period = strtolower(str_replace(' ', '-', $request->period));
+        $term = strtolower(str_replace(' ', '-', $request->term));
 
         SchoolSheetSetting::updateOrCreate(
             [
                 'sch_id' => $user->sch_id,
                 'campus' => $request->campus,
-                'period' => $request->period,
-                'term' => $request->term,
+                'period' => $period,
+                'term' => $term,
             ],
             [
                 'sheet_ids' => $request->sheet_ids,
