@@ -99,8 +99,8 @@ class ResultService
     {
         $sch_id = request()->query('sch_id');
         $campus = request()->query('campus');
-        $period = request()->query('period');
-        $term = request()->query('term');
+        $period = ucwords(str_replace('-', ' ', request()->query('period')));
+        $term = ucwords(str_replace('-', ' ', request()->query('term')));
 
         $setting = SchoolSheetSetting::when($sch_id && $campus, function ($query) use ($sch_id, $campus, $period, $term) {
                 $query->where('sch_id', $sch_id)
