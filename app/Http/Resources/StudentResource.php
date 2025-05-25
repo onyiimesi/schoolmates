@@ -22,7 +22,7 @@ class StudentResource extends JsonResource
         }
 
         return [
-            'id' => (string)$this->id,
+            'id' => (int)$this->id,
             'attributes' => [
                 'campus' => (string)$this->campus,
                 'campus_type' => (string)$this->campus_type,

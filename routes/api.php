@@ -1,8 +1,6 @@
 <?php
 
-use App\Models\Campus;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FeeController;

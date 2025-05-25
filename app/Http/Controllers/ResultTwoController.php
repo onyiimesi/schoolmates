@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
+use App\Http\Requests\MidtermRequest;
 use App\Http\Requests\ReleaseResultRequest;
 use App\Http\Requests\ResultRequest;
 use App\Models\Result;
@@ -26,32 +27,47 @@ class ResultTwoController extends Controller
     )
     {}
 
-    public function mid(Request $request)
+    public function mid(MidtermRequest $request)
     {
-        $request->validate([
-            'student_id' => ['required', 'exists:students,id'],
-            'student_fullname' => ['required', 'string'],
-            'admission_number' => ['required', 'string', 'max:255'],
-            'class_name' => ['required', 'string', 'max:255'],
-            'period' => ['required', 'string', 'max:255'],
-            'term' => ['required', 'string', 'max:255'],
-            'session' => ['required', 'string', 'max:255'],
-            'result_type' => 'required|in:first_assesment,second_assesment,midterm'
-        ]);
-
         $teacher = Auth::user();
 
-        if ($request->period === PeriodicName::FIRSTHALF) {
-            $getResult = $this->getResult($teacher, $request);
-
-            if (empty($getResult)) {
-                return $this->createResult($teacher, $request);
-            } else {
-                return $this->updateResult($getResult, $request);
-            }
+        if ($request->period !== PeriodicName::FIRSTHALF) {
+            return $this->error(null, "Unsupported period value: {$request->period}", 400);
         }
 
-        return $this->error('', 'Bad Request', 400);
+        return DB::transaction(function () use ($teacher, $request) {
+            $match = [
+                'sch_id' => $teacher->sch_id,
+                'campus' => $teacher->campus,
+                'student_id' => $request->student_id,
+                'period' => $request->period,
+                'term' => $request->term,
+                'session' => $request->session,
+            ];
+
+            $data = [
+                'campus_type' => $teacher->campus_type,
+                'teacher_id' => $teacher->id,
+                'student_fullname' => $request->student_fullname,
+                'admission_number' => $request->admission_number,
+                'class_name' => $request->class_name,
+                'computed_midterm' => true,
+                'result_type' => $request->result_type,
+                'teacher_comment' => $request->teacher_comment,
+                'status' => ResultStatus::NOTRELEASED->value,
+            ];
+
+            $result = Result::updateOrCreate($match, $data);
+
+            if (!$result->wasRecentlyCreated) {
+                $result->studentscore()->delete();
+            }
+
+            $this->saveStudentScores($result, $request->results);
+
+            $message = $result->wasRecentlyCreated ? 'Computed Successfully' : 'Updated Successfully';
+            return $this->success(null, $message, $result->wasRecentlyCreated ? 201 : 200);
+        });
     }
 
     public function endTerm(ResultRequest $request)
@@ -92,7 +108,7 @@ class ResultTwoController extends Controller
                 ->where('term', $request->term)
                 ->where('session', $request->session)
                 ->whereIn('student_id', $studentIds)
-                ->update(['status' => ResultStatus::RELEASED]);
+                ->update(['status' => ResultStatus::RELEASED->value]);
 
             ResponseCache::clear();
             DB::commit();
@@ -117,7 +133,7 @@ class ResultTwoController extends Controller
                 ->where('term', $request->term)
                 ->where('session', $request->session)
                 ->whereIn('student_id', $studentIds)
-                ->update(['status' => ResultStatus::WITHELD]);
+                ->update(['status' => ResultStatus::WITHELD->value]);
 
             ResponseCache::clear();
 

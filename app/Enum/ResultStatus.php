@@ -4,7 +4,7 @@ namespace App\Enum;
 
 enum ResultStatus: string
 {
-    const RELEASED = 'released';
-    const NOTRELEASED = 'not-released';
-    const WITHELD = 'witheld';
+    case RELEASED = 'released';
+    case NOTRELEASED = 'not-released';
+    case WITHELD = 'witheld';
 }
