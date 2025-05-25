@@ -173,6 +173,14 @@ class ResultTwoController extends Controller
 
     public function saveSheetSections(Request $request)
     {
+        $request->validate([
+            'campus' => 'required|string',
+            'period' => 'required|string',
+            'term' => 'required|string',
+            'sheet_ids' => 'required|array',
+            'sheet_ids.*' => 'required|integer|exists:sheets,id',
+        ]);
+
         return $this->resultService->saveSheetSections($request);
     }
 
