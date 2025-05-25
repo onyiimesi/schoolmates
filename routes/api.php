@@ -188,6 +188,9 @@ Route::middleware('check.allowed.url')
                 Route::patch('release/result', [ResultTwoController::class, 'release']);
                 Route::patch('withhold/result', [ResultTwoController::class, 'hold']);
 
+                // New Result API
+                Route::get("/get-result", [EndTermResultController::class, 'getResult']);
+
                 Route::prefix('staff')
                     ->group(function () {
                         Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'staffMidTerm'])
@@ -212,9 +215,6 @@ Route::middleware('check.allowed.url')
                     Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
                         ->where('session', '.+');
                 });
-
-                // New Result API
-                Route::get("/get-result", [EndTermResultController::class, 'getResult']);
             });
 
             //PreSchool Subject
