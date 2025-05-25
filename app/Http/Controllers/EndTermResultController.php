@@ -250,11 +250,11 @@ class EndTermResultController extends Controller
             'term' => 'required|string',
             'session' => 'required|string',
             'class' => 'required|string',
-            'result_type' => 'required|in:midterm,endterm,first_assessment,second_assessment,third_assessment',
-            'status' => 'required|in:released,withheld',
+            'result_type' => 'required|string',
+            'status' => 'required|in:released,withheld,not-released',
         ], [
             'result_type.in' => 'result type must be either midterm, endterm, first_assessment, second_assessment or third_assessment',
-            'status.in' => 'status must be either released or withheld',
+            'status.in' => 'status must be either released, withheld or not-released',
         ]);
 
         return $this->getStudentResults($user, $validated);

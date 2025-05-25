@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Enum\PeriodicName;
 use App\Models\AffectiveDisposition;
 use App\Models\PsychomotorPerformance;
 use App\Models\PsychomotorSkill;
@@ -19,7 +20,7 @@ trait ResultBase
                 'sch_id' => $teacher->sch_id,
                 'campus' => $teacher->campus,
                 'student_id' => $request->student_id,
-                'period' => 'First Half',
+                'period' => PeriodicName::FIRSTHALF,
                 'term' => $request->term,
                 'session' => $request->session,
             ])
