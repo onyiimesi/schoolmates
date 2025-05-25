@@ -28,8 +28,10 @@ class GeneralResultService
                 'term' => $params['term'],
                 'session' => $params['session'],
                 'result_type' => $params['result_type'],
-                'status' => $params['status'],
             ])
+            ->when(!empty($params['status']), function ($query) use ($params) {
+                $query->where('status', $params['status']);
+            })
             ->get();
 
         $getMidtermResults = MidTermResultResource::collection($results);
@@ -67,8 +69,10 @@ class GeneralResultService
                 'term' => $params['term'],
                 'session' => $params['session'],
                 'result_type' => $params['result_type'],
-                'status' => $params['status'],
             ])
+            ->when(!empty($params['status']), function ($query) use ($params) {
+                $query->where('status', $params['status']);
+            })
             ->get();
 
         $getEndTermResults = ResultResource::collection($results);
