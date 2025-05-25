@@ -99,8 +99,11 @@ class ResultService
     {
         $sch_id = request()->query('sch_id');
         $campus = request()->query('campus');
-        $period = ucwords(str_replace('-', ' ', request()->query('period')));
-        $term = ucwords(str_replace('-', ' ', request()->query('term')));
+        $period = request()->query('period');
+        $term = request()->query('term');
+
+        $period = $period ? strtolower(str_replace(' ', '-', $period)) : null;
+        $term = $term ? strtolower(str_replace(' ', '-', $term)) : null;
 
         $setting = SchoolSheetSetting::when($sch_id && $campus, function ($query) use ($sch_id, $campus, $period, $term) {
                 $query->where('sch_id', $sch_id)
@@ -125,5 +128,6 @@ class ResultService
 
         return $this->success($data, 'Settings');
     }
+
 }
 
