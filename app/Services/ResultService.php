@@ -14,7 +14,7 @@ class ResultService
 
     public function getSettings()
     {
-        $settings = ScoreOption::select('id', 'label', 'is_default')->get();
+        $settings = ScoreOption::select('id', 'label', 'is_default', 'assessment_type')->get();
         return $this->success($settings, 'Settings');
     }
 
@@ -22,13 +22,38 @@ class ResultService
     {
         $user = userAuth();
 
+        $scoreOption = ScoreOption::findOrFail($request->score_option_id);
+
+        $segments = array_map('trim', explode('-', $request->value));
+
+        $allNumeric = collect($segments)->every(fn($part) => is_numeric($part));
+
+        if (!$allNumeric) {
+            return $this->error(null, 'All score segments must be numeric', 422);
+        }
+
+        $assessmentSegments = array_slice($segments, 0, -1);
+
+        if (count($assessmentSegments) != $scoreOption->assessment_type) {
+            return $this->error(
+                null,
+                "Invalid score breakdown. Expected {$scoreOption->assessment_type} continuous assessment segments before the exam score.",
+                422
+            );
+        }
+
+        if (array_sum($assessmentSegments) !== 40) {
+            return $this->error(null, 'Assessment segments must sum up to 40', 422);
+        }
+
         $data = SchoolScoreSetting::updateOrCreate(
             [
                 'sch_id' => $user->sch_id,
                 'campus' => $request->campus
             ],
             [
-                'score_option_id' => $request->score_option_id
+                'score_option_id' => $request->score_option_id,
+                'value_score' => $request->value
             ]
         );
 
@@ -42,11 +67,13 @@ class ResultService
         $sch_id = request()->query('sch_id');
         $campus = request()->query('campus');
 
+        if (!$sch_id || !$campus) {
+            return $this->error(null, 'school id and campus are required', 422);
+        }
+
         $setting = SchoolScoreSetting::with('scoreOption')
-            ->when($sch_id && $campus, function ($query) use ($sch_id, $campus) {
-                $query->where('sch_id', $sch_id)
-                    ->where('campus', $campus);
-            })
+            ->where('sch_id', $sch_id)
+            ->where('campus', $campus)
             ->first();
 
         if (!$setting || !$setting->scoreOption) {
@@ -57,11 +84,18 @@ class ResultService
             'id' => $setting->scoreOption->id,
             'label' => $setting->scoreOption->label,
             'segments' => $setting->scoreOption->segments,
+            'assessment_type' => (int)$setting->scoreOption->assessment_type,
             'is_default' => $setting->scoreOption->is_default,
         ];
 
-        return $this->success($scoreOption, 'Settings');
+        $data = [
+            'score_option' => $scoreOption,
+            'value' => $setting->value_score,
+        ];
+
+        return $this->success($data, 'Settings');
     }
+
     public function getSheetSections()
     {
         $sheets = Sheet::select('id', 'section')->get();
