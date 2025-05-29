@@ -97,53 +97,48 @@ class ResultTwoController extends Controller
 
     public function release(ReleaseResultRequest $request)
     {
-        $auth = Auth::user();
+        $auth = userAuth();
         $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
-        DB::beginTransaction();
-        try {
-            Result::where('sch_id', $auth->sch_id)
-                ->where('campus', $auth->campus)
-                ->where('period', $request->period)
-                ->where('term', $request->term)
-                ->where('session', $request->session)
-                ->whereIn('student_id', $studentIds)
-                ->update(['status' => ResultStatus::RELEASED->value]);
-
-            ResponseCache::clear();
-            DB::commit();
-            return $this->success(null, "Result released");
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error releasing results', ['error' => $e->getMessage()]);
-            return $this->error(null, "An error occurred while releasing results", 500);
+        if (empty($studentIds)) {
+            return $this->error("No students selected.", 422);
         }
+
+        Result::where([
+            'sch_id' => $auth->sch_id,
+            'campus' => $auth->campus,
+            'period' => $request->period,
+            'term' => $request->term,
+            'session' => $request->session,
+            'result_type' => $request->result_type,
+        ])
+        ->whereIn('student_id', $studentIds)
+        ->update(['status' => ResultStatus::RELEASED->value]);
+
+        return $this->success(null, "Result released");
     }
 
     public function hold(ReleaseResultRequest $request)
     {
-        $auth = Auth::user();
+        $auth = userAuth();
         $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
-        DB::beginTransaction();
-        try {
-            Result::where('sch_id', $auth->sch_id)
-                ->where('campus', $auth->campus)
-                ->where('period', $request->period)
-                ->where('term', $request->term)
-                ->where('session', $request->session)
-                ->whereIn('student_id', $studentIds)
-                ->update(['status' => ResultStatus::WITHELD->value]);
-
-            ResponseCache::clear();
-
-            DB::commit();
-            return $this->success(null, "Result withheld");
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error withholding results', ['error' => $e->getMessage()]);
-            return $this->error(null, "An error occurred while withholding results", 500);
+        if (empty($studentIds)) {
+            return $this->error("No students selected.", 422);
         }
+
+        Result::where([
+            'sch_id' => $auth->sch_id,
+            'campus' => $auth->campus,
+            'period' => $request->period,
+            'term' => $request->term,
+            'session' => $request->session,
+            'result_type' => $request->result_type,
+        ])
+        ->whereIn('student_id', $studentIds)
+        ->update(['status' => ResultStatus::WITHELD->value]);
+
+        return $this->success(null, "Result withheld");
     }
 
     public function getSettings()

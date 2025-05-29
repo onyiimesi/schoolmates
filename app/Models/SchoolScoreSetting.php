@@ -10,7 +10,8 @@ class SchoolScoreSetting extends Model
     protected $fillable = [
         'sch_id',
         'campus',
-        'score_option_id'
+        'score_option_id',
+        'value_score',
     ];
 
     public function scoreOption()
