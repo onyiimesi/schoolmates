@@ -43,6 +43,7 @@ class ResultTwoController extends Controller
                 'period' => $request->period,
                 'term' => $request->term,
                 'session' => $request->session,
+                'result_type' => $request->result_type,
             ];
 
             $data = [
