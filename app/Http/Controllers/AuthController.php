@@ -18,11 +18,6 @@ class AuthController extends Controller
 {
     use HttpResponses;
 
-    public function __construct()
-    {
-        // $this->middleware('throttle:3,5')->only(['token', 'verify', 'loginVerify']);
-    }
-
     public function login(LoginUserRequest $request) {
 
         $request->validated($request->all());
