@@ -79,7 +79,6 @@ trait ResultTrait
                 ->get()
         );
     }
-
 }
 
 
