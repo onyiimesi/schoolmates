@@ -1,0 +1,172 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Result;
+use App\Models\StudentScore;
+use App\Models\GradingSystem;
+use App\Models\ClassModel;
+use App\Models\Schools;
+use App\Models\Staff;
+
+class ResultPresenter
+{
+    public function getGpa(Result $result): array
+    {
+        $studentResults = Result::with(['studentscore' => function ($query) {
+            $query->where('score', '>', 0);
+        }])
+        ->where([
+            'sch_id' => $result->sch_id,
+            'campus' => $result->campus,
+            'student_id' => $result->student_id,
+            'class_name' => $result->class_name,
+            'term' => $result->term,
+            'session' => $result->session,
+        ])->get();
+
+        $scores = $studentResults->pluck('studentscore')->flatten();
+        $totalScore = $scores->sum('score');
+        $totalSubjects = $scores->unique('subject')->count();
+
+        $expectedScore = $totalSubjects * 100;
+        $gpa = ($expectedScore > 0) ? round(($totalScore / $expectedScore) * 5, 2) : 0;
+
+        return [
+            'total_score' => $totalScore,
+            'total_subjects' => $totalSubjects,
+            'student_average' => $totalSubjects > 0 ? round($totalScore / $totalSubjects, 2) : 0,
+            'gpa' => $gpa
+        ];
+    }
+
+    public function getClassStats(Result $result): array
+    {
+        $classResults = Result::with('studentscore')
+            ->where([
+                'sch_id' => $result->sch_id,
+                'campus' => $result->campus,
+                'class_name' => $result->class_name,
+                'term' => $result->term,
+                'session' => $result->session,
+            ])
+            ->get();
+
+        $studentAverages = $classResults->map(function ($r) {
+            $scores = $r->studentscore?->pluck('score') ?? collect();
+            $totalSubjects = $scores->count();
+            return [
+                'student_id' => $r->student_id,
+                'average' => $totalSubjects > 0 ? $scores->sum() / $totalSubjects : 0,
+            ];
+        })->sortByDesc('average')->values();
+
+        $position = $studentAverages->search(fn($r) => $r['student_id'] === $result->student_id) + 1;
+
+        $classTotalScore = $classResults->flatMap->studentscore->pluck('score')->sum();
+        $classCount = $classResults->count();
+        $subjectCount = $result->studentscore?->count() ?? 1;
+        $classAverage = ($classCount * $subjectCount) > 0 ? round($classTotalScore / ($classCount * $subjectCount), 2) : 0;
+
+        $classGrade = GradingSystem::where('sch_id', $result->sch_id)
+            ->where('campus', $result->campus)
+            ->where('score_to', '>=', $classAverage)
+            ->first();
+
+        $grade = $classAverage > 90 ? 'EXCELLENT' : ($classGrade->remark ?? '');
+
+        return [
+            'class_total_score' => $classTotalScore,
+            'class_count' => $classCount,
+            'class_average' => $classAverage,
+            'class_grade' => $grade,
+            'position' => $position,
+        ];
+    }
+
+    public function getMetadata(Result $result, string $className): array
+    {
+        $class = ClassModel::where([
+            'sch_id' => $result->sch_id,
+            'campus' => $result->campus,
+            'class_name' => $className
+        ])->first();
+
+        $staff = Staff::where([
+            'sch_id' => $result->sch_id,
+            'campus' => $result->campus,
+            'class_assigned' => $className,
+            'status' => \App\Enum\StaffStatus::ACTIVE,
+        ])->get();
+
+        $hodQuery = Staff::where([
+            'id' => $result->hos_id,
+            'sch_id' => $result->sch_id,
+            'campus' => $result->campus,
+        ]);
+
+        if ($class && $class->class_type) {
+            $hodQuery->where('class_type', $class->class_type);
+        }
+
+        $hods = $hodQuery->get();
+
+        $dos = Schools::where('sch_id', $result->sch_id)->value('dos');
+
+        return [
+            'staff' => $staff,
+            'hods' => $hods,
+            'dos' => $dos
+        ];
+    }
+
+    public function getSubjectAverages(Result $result): array
+    {
+        $scores = StudentScore::with('result')
+            ->whereHas('result', function ($query) use ($result) {
+                $query->where([
+                    'sch_id' => $result->sch_id,
+                    'campus' => $result->campus,
+                    'class_name' => $result->class_name,
+                    'term' => $result->term,
+                    'session' => $result->session
+                ]);
+            })
+            ->get()
+            ->groupBy('subject');
+
+        return $scores->mapWithKeys(function ($items, $subject) {
+            $avg = round($items->avg('score'), 2);
+            return [$subject => $avg];
+        })->toArray();
+    }
+
+    public function getSubjectPositions(Result $result): array
+    {
+        $studentScores = $result->studentscore ?? collect();
+
+        $positions = [];
+
+        foreach ($studentScores as $score) {
+            $subject = $score->subject;
+            $allScores = StudentScore::with('result')
+                ->where('subject', $subject)
+                ->whereHas('result', function ($query) use ($result) {
+                    $query->where([
+                        'sch_id' => $result->sch_id,
+                        'campus' => $result->campus,
+                        'class_name' => $result->class_name,
+                        'term' => $result->term,
+                        'session' => $result->session
+                    ]);
+                })
+                ->orderByDesc('score')
+                ->get();
+
+            $position = $allScores->search(fn($s) => $s->student_id == $result->student_id) + 1;
+            $positions[$subject] = $position;
+        }
+
+        return $positions;
+    }
+}
