@@ -79,6 +79,45 @@ trait ResultTrait
                 ->get()
         );
     }
+
+    protected function getResultsForStudent($request)
+    {
+        return Result::with('studentscore')
+            ->where('student_id', $request->student_id)
+            ->where('class_name', $request->class_name)
+            ->where('session', $request->session)
+            ->get();
+    }
+
+    protected function getAllResultsForClass($request)
+    {
+        return Result::with('studentscore')
+            ->where('class_name', $request->class_name)
+            ->where('session', $request->session)
+            ->get();
+    }
+
+    protected function calculateTotalScore($results, $studentSubjectCount = false)
+    {
+        $total = 0;
+        $count = 0;
+
+        foreach ($results as $result) {
+            foreach ($result->studentscore as $score) {
+                $total += $score->score;
+                if ($studentSubjectCount && $result->period === "Second Half" && $score->score > 0) {
+                    $count++;
+                }
+            }
+        }
+
+        return ['total' => $total, 'count' => $count];
+    }
+
+    protected function calculateAverage($total, $count)
+    {
+        return $count > 0 ? $total / $count : 0;
+    }
 }
 
 

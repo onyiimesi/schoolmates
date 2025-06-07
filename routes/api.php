@@ -200,6 +200,12 @@ Route::middleware('check.allowed.url')
                     });
 
                 Route::middleware('cacheResponse:600')->group(function () {
+                    Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
+                        ->where('session', '.+');
+                    Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
+                        ->where('session', '.+');
+
+                    // Deprecating soon
                     Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
                         ->where('session', '.+');
                     Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
@@ -208,10 +214,7 @@ Route::middleware('check.allowed.url')
                         ->where('session', '.+');
                     Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
                         ->where('session', '.+');
-                    Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
-                        ->where('session', '.+');
-                    Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
-                        ->where('session', '.+');
+
                     Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
                         ->where('session', '.+');
                 });
