@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enum\PeriodicName;
 use App\Models\Result;
 use App\Models\StudentScore;
 use App\Models\GradingSystem;
@@ -144,11 +145,11 @@ class ResultPresenter
     public function getSubjectPositions(Result $result): array
     {
         $studentScores = $result->studentscore ?? collect();
-
         $positions = [];
 
         foreach ($studentScores as $score) {
             $subject = $score->subject;
+
             $allScores = StudentScore::with('result')
                 ->where('subject', $subject)
                 ->whereHas('result', function ($query) use ($result) {
@@ -156,15 +157,36 @@ class ResultPresenter
                         'sch_id' => $result->sch_id,
                         'campus' => $result->campus,
                         'class_name' => $result->class_name,
+                        'period' => PeriodicName::SECONDHALF,
                         'term' => $result->term,
-                        'session' => $result->session
+                        'session' => $result->session,
                     ]);
                 })
                 ->orderByDesc('score')
                 ->get();
 
-            $position = $allScores->search(fn($s) => $s->student_id == $result->student_id) + 1;
-            $positions[$subject] = $position;
+            // Compute rankings with tie handling
+            $rank = 1;
+            $positionMap = [];
+            $prevScore = null;
+            $tieCount = 0;
+
+            foreach ($allScores as $index => $entry) {
+                $entryStudentId = $entry->result?->student_id;
+
+                if ($entry->score !== $prevScore) {
+                    $rank += $tieCount;
+                    $tieCount = 1;
+                    $positionMap[$entryStudentId] = $rank;
+                } else {
+                    $tieCount++;
+                    $positionMap[$entryStudentId] = $rank;
+                }
+
+                $prevScore = $entry->score;
+            }
+
+            $positions[$subject] = $positionMap[$result->student_id] ?? null;
         }
 
         return $positions;

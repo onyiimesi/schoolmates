@@ -12,12 +12,13 @@ use App\Models\Student;
 use App\Services\GeneralResultService;
 use App\Traits\CummulativeResult;
 use App\Traits\HttpResponses;
+use App\Traits\ResultTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class EndTermResultController extends Controller
 {
-    use CummulativeResult, HttpResponses;
+    use CummulativeResult, HttpResponses, ResultTrait;
 
     public function endterm(Request $request)
     {
@@ -97,52 +98,16 @@ class EndTermResultController extends Controller
 
     public function endaverage(Request $request)
     {
-        $results = Result::with(['studentscore'])
-            ->where('student_id', $request->student_id)
-            ->where('class_name', $request->class_name)
-            ->where('session', $request->session)
-            ->get();
+        $studentResults = $this->getResultsForStudent($request);
+        $classResults = $this->getAllResultsForClass($request);
 
-        $allResults = Result::with(['studentscore'])
-            ->where('class_name', $request->class_name)
-            ->where('session', $request->session)
-            ->get();
+        $classTotals = $this->calculateTotalScore($classResults, true);
+        $studentTotals = $this->calculateTotalScore($studentResults, true);
 
-        $totalStudentScores = 0;
-        $totalStudentSubjectCount = 0;
-        $totalScores = 0;
-        $totalSubjectCount = 0;
-
-        foreach ($allResults as $result) {
-            foreach ($result->studentscore as $score) {
-                $totalStudentScores += $score->score;
-                if ($result->period === "Second Half" && $score->score > 0) {
-                    $totalStudentSubjectCount++;
-                }
-            }
-        }
-
-        // Calculate total scores and total number of subjects for student average for a student
-        foreach ($results as $result) {
-            foreach ($result->studentscore as $score) {
-                $totalScores += $score->score;
-                if ($result->period === "Second Half" && $score->score > 0) {
-                    $totalSubjectCount++;
-                }
-            }
-        }
-
-        // Calculate student average
-        $studentAverage = 0;
-        if ($totalSubjectCount > 0) {
-            $studentAverage = $totalScores / $totalSubjectCount;
-        }
-
-        // Calculate class average
-        $classAverage = 0;
-        if ($totalScores > 0) {
-            $classAverage = $totalStudentScores / $totalScores;
-        }
+        $studentAverage = $this->calculateAverage($studentTotals['total'], $studentTotals['count']);
+        $classAverage = $studentTotals['total'] > 0
+            ? $classTotals['total'] / $studentTotals['total']
+            : 0;
 
         $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
 
@@ -150,7 +115,7 @@ class EndTermResultController extends Controller
             "status" => "true",
             "Class Average" => $classAverage,
             "Student Average" => $studentAverage,
-            "Grade" => $grade ? $grade->remark : 'No grade'
+            "Grade" => $grade ? $grade->remark : 'No grade',
         ];
     }
 
