@@ -47,29 +47,33 @@ class PreSchoolResultController extends Controller
 
     private function getExistingResult($teacher, $request, $period)
     {
-        return PreSchoolResult::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where('student_id', $request->student_id)
-            ->where('period', $period)
-            ->where('term', $request->term)
-            ->where('session', $request->session)
-            ->first();
+        return PreSchoolResult::where([
+            'sch_id' => $teacher->sch_id,
+            'campus' => $teacher->campus,
+            'student_id' => $request->student_id,
+            'period' => $period,
+            'term' => $request->term,
+            'session' => $request->session
+        ])
+        ->first();
     }
 
     private function getHOS($teacher)
     {
-        return Staff::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where('designation_id', 3)
-            ->where('status', 'Active')
-            ->first();
+        return Staff::where([
+            'sch_id' => $teacher->sch_id,
+            'campus' => $teacher->campus,
+            'designation_id' => 3,
+            'status' => 'Active'
+        ])
+        ->first();
     }
 
     private function getTeacherDetails($teacherId)
     {
         $teacher = Staff::find($teacherId);
         return [
-            'fullname' => $teacher->surname . ' ' . $teacher->firstname,
+            'fullname' => "{$teacher->surname} {$teacher->firstname}",
             'signature' => $teacher->teacher_signature,
         ];
     }

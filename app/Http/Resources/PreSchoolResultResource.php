@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Enum\StaffStatus;
+use App\Models\PreSchoolResult;
 use App\Models\Staff;
 use App\Models\Student;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,30 +19,36 @@ class PreSchoolResultResource extends JsonResource
      */
     public function toArray($request)
     {
-        $jsonString = json_encode($this->results);
-        $jsonStrings = json_encode($this->evaluation_report);
-        $jsonStringss = json_encode($this->cognitive_development);
-
-        $signature = Staff::where([
-                'sch_id' => $this->sch_id,
-                'campus' => $this->campus,
-                'class_assigned' => $this->class_name,
-                'status' => StaffStatus::ACTIVE,
-            ])
-            ->get();
-
-        $student_image = Student::where('id', $this->student_id)->first();
+        $student = Student::find($this->student_id);
         $teacher = Auth::user();
-        $hosId = Staff::where('campus', $teacher->campus)
-            ->where('designation_id', 3)
-            ->where('status', 'Active')
-            ->first();
+
+        $classTeachers = Staff::where([
+            'sch_id' => $this->sch_id,
+            'campus' => $this->campus,
+            'class_assigned' => $this->class_name,
+            'status' => StaffStatus::ACTIVE,
+        ])->get();
+
+        $headOfSchool = Staff::where([
+            'campus' => $teacher->campus,
+            'designation_id' => 3,
+            'status' => StaffStatus::ACTIVE,
+        ])->first();
+
+        $totalStudentsInClass = PreSchoolResult::where([
+            'sch_id' => $this->sch_id,
+            'campus' => $this->campus,
+            'class_name' => $this->class_name,
+            'term' => $this->term,
+            'session' => $this->session,
+        ])->count();
+
         return [
             'id' => (string)$this->id,
             'attributes' => [
                 'student_id' => (string)$this->student_id,
                 'student_fullname' => (string)$this->student_fullname,
-                'student_image' => (string)$student_image->image,
+                'student_image' => (string)$student->image,
                 'admission_number' => (string)$this->admission_number,
                 'class_name' => (string)$this->class_name,
                 'period' => (string)$this->period,
@@ -50,27 +57,23 @@ class PreSchoolResultResource extends JsonResource
                 'school_opened' => (string)$this->school_opened,
                 'times_present' => (string)$this->times_present,
                 'times_absent' => (string)$this->times_absent,
-                'results' => json_decode($jsonString, JSON_UNESCAPED_SLASHES),
-                'evaluation_report' => json_decode($jsonStrings, JSON_UNESCAPED_SLASHES),
-                'cognitive_development' => json_decode($jsonStringss, JSON_UNESCAPED_SLASHES),
-                'extra_curricular_activities' => $this->preschoolresultextracurricular->map(function($value) {
-                    return [
-                        "name" => $value->name,
-                        "value" => $value->value
-                    ];
-                })->toArray(),
+                'total_no_in_class' => $totalStudentsInClass,
+                'evaluation_report' => $this->evaluation_report,
+                'cognitive_development' => $this->cognitive_development,
+                'extra_curricular_activities' => $this->preschoolresultextracurricular->map(fn($value) => [
+                    "name" => $value->name,
+                    "value" => $value->value
+                ])->toArray(),
                 'teacher_comment' => (string)$this->teacher_comment,
                 'teacher_id' => (string)$this->teacher_id,
-                'teachers' => $signature->map(function($teacher) {
-                    return [
-                        "name" => $teacher->surname .' '. $teacher->firstname,
-                        "signature" => $teacher->signature
-                    ];
-                })->toArray(),
+                'teachers' => $classTeachers->map(fn($teacher) => [
+                    "name" => "{$teacher->surname} {$teacher->firstname}",
+                    "signature" => $teacher->signature
+                ])->toArray(),
                 'hos_comment' => (string)$this->hos_comment,
                 'hos_id' => (string)$this->hos_id,
                 'hos_fullname' => (string)$this->hos_fullname,
-                'hos_signature' => $hosId?->signature,
+                'hos_signature' => $headOfSchool?->signature,
                 'status' => (string)$this->status,
             ]
         ];
