@@ -62,20 +62,4 @@ return [
         'check_interval_minutes' => 2,
         'inactivity_days_to_fix' => 2,
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | AI-Powered Suggestions (Optional)
-    |--------------------------------------------------------------------------
-    | Users can enable AI-generated suggestions for fixing errors. To use this,
-    | they must provide a proxy endpoint or their own OpenAI credentials.
-    */
-    'ai' => [
-        'enabled' => env('FIXIT_AI_ENABLED', false),
-        'provider' => env('FIXIT_AI_PROVIDER', 'openai'),
-        'api_url' => env('FIXIT_AI_API_URL', null),
-        'api_key' => env('FIXIT_AI_API_KEY', null),
-        'timeout' => env('FIXIT_AI_TIMEOUT', 10),
-    ],
-
 ];
