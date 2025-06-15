@@ -1,5 +1,6 @@
 <?php
 
+use Fixit\FixitServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -195,7 +196,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         OwenIt\Auditing\AuditingServiceProvider::class,
-
+        FixitServiceProvider::class,
     ],
 
     /*

@@ -326,8 +326,7 @@ Route::middleware('check.allowed.url')
             // PreSchool Result
             Route::post('/preschoolresult', [PreSchoolResultController::class, 'result']);
             Route::get('/preschoolresult/{student_id}/{period}/{term}/{session}', [GetPreschoolResultController::class, 'getResult'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+            ->where('session', '.+');
 
             Route::get('/computedresult/{period}/{term}/{session}', [GetPreschoolResultController::class, 'getComputeResult'])
                 ->where('session', '.+')
