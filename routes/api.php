@@ -199,47 +199,41 @@ Route::middleware('check.allowed.url')
                             ->where('session', '.+');
                     });
 
-                Route::middleware('cacheResponse:600')->group(function () {
-                    Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
-                        ->where('session', '.+');
-                    Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
-                        ->where('session', '.+');
+                Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
+                    ->where('session', '.+');
+                Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
+                    ->where('session', '.+');
 
-                    // Deprecating soon
-                    Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
-                        ->where('session', '.+');
-                    Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
-                        ->where('session', '.+');
-                    Route::get("/result/firstassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'first'])
-                        ->where('session', '.+');
-                    Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
-                        ->where('session', '.+');
+                // Deprecating soon
+                Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
+                    ->where('session', '.+');
+                Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
+                    ->where('session', '.+');
+                Route::get("/result/firstassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'first'])
+                    ->where('session', '.+');
+                Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
+                    ->where('session', '.+');
 
-                    Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
-                        ->where('session', '.+');
-                });
+                Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
+                    ->where('session', '.+');
             });
 
             //PreSchool Subject
             Route::post('/preschoolsubject', [PreSchoolSubjectController::class, 'addSubject']);
             Route::get('/preschoolsubject/{period}/{term}/{session}', [PreSchoolSubjectController::class, 'getSubject'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+                ->where('session', '.+');
 
-            Route::get('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'getSubjectID'])
-                ->middleware('cacheResponse:600');
+            Route::get('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'getSubjectID']);
 
             Route::patch('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'editSubject']);
             Route::delete('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'deleteSubject']);
 
             Route::post('/preschoolsubjectclass', [PreSchoolSubjectController::class, 'addSubjectClass']);
             Route::get('/preschoolsubjectclass/{period}/{term}/{session}', [PreSchoolSubjectController::class, 'getSubjectClass'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+                ->where('session', '.+');
 
             Route::get('/preschoolsubjects/{period}/{term}/{session}/{class}', [PreSchoolSubjectController::class, 'getSubjectByClass'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+                ->where('session', '.+');
 
             //Search Routes
             Route::get("/studentsessionsearch/{session}", [SessionSearchController::class, 'sessionsearch'])
@@ -268,33 +262,31 @@ Route::middleware('check.allowed.url')
             Route::patch('/promotestudent/{id}', [PromoteStudentController::class, 'promote']);
             Route::patch('/promote-students', [PromoteStudentController::class, 'promotestudents']);
 
-            Route::middleware('cacheResponse:600')->group(function () {
-                Route::get("/expectedincome", [ExpectedIncomecontroller::class, 'expected']);
-                Route::get("/receivedincome", [ReceivedIncomeController::class, 'received']);
-                Route::get("/outstanding", [OutstandingController::class, 'outstanding']);
-                Route::get("/discount", [DiscountController::class, 'discount']);
-                Route::get("/totalexpense", [TotalExpenseController::class, 'totalexpense']);
-                Route::get("/accountbalance", [AccountBalanceController::class, 'account']);
-                Route::get("/studentfeehistory", [StudentFeeHistoryController::class, 'feehistory']);
-                Route::get("/studentinvoice", [StudentInvoiceController::class, 'studentinvoices']);
-                Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
-                Route::get("/school", [SchoolsController::class, 'schools']);
-                Route::get("/subject/{class}", [SubjectByClassController::class, 'subjectbyclass']);
-                Route::get("/subjectby/{id}", [SubjectByClassController::class, 'subjectbyId']);
-                Route::get("/subject", [SubjectByClassController::class, 'subjectbyCampus']);
-                Route::get("/teacher-subject", [SubjectByClassController::class, 'subjectbyteacher']);
-                Route::get("/student-subject", [SubjectByClassController::class, 'subjectbystudent']);
-                Route::get("/student/{session}/{class}", [StudentBySessionTermClassController::class, 'studentsessionclassterm'])
-                ->where('session', '.+');
+            Route::get("/expectedincome", [ExpectedIncomecontroller::class, 'expected']);
+            Route::get("/receivedincome", [ReceivedIncomeController::class, 'received']);
+            Route::get("/outstanding", [OutstandingController::class, 'outstanding']);
+            Route::get("/discount", [DiscountController::class, 'discount']);
+            Route::get("/totalexpense", [TotalExpenseController::class, 'totalexpense']);
+            Route::get("/accountbalance", [AccountBalanceController::class, 'account']);
+            Route::get("/studentfeehistory", [StudentFeeHistoryController::class, 'feehistory']);
+            Route::get("/studentinvoice", [StudentInvoiceController::class, 'studentinvoices']);
+            Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
+            Route::get("/school", [SchoolsController::class, 'schools']);
+            Route::get("/subject/{class}", [SubjectByClassController::class, 'subjectbyclass']);
+            Route::get("/subjectby/{id}", [SubjectByClassController::class, 'subjectbyId']);
+            Route::get("/subject", [SubjectByClassController::class, 'subjectbyCampus']);
+            Route::get("/teacher-subject", [SubjectByClassController::class, 'subjectbyteacher']);
+            Route::get("/student-subject", [SubjectByClassController::class, 'subjectbystudent']);
+            Route::get("/student/{session}/{class}", [StudentBySessionTermClassController::class, 'studentsessionclassterm'])
+            ->where('session', '.+');
 
-                Route::get("/studentlogindetails", [LoginDetailsController::class, 'loginDetails']);
-                Route::get("/stafflogindetails", [LoginDetailsController::class, 'staffloginDetails']);
+            Route::get("/studentlogindetails", [LoginDetailsController::class, 'loginDetails']);
+            Route::get("/stafflogindetails", [LoginDetailsController::class, 'staffloginDetails']);
 
-                // Student By Class (Principal)
-                Route::get("/studentbyclass/{present_class}", [StudentBySessionTermClassController::class, 'studentbyclass']);
-                Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
-                ->where('date', '.+');
-            });
+            // Student By Class (Principal)
+            Route::get("/studentbyclass/{present_class}", [StudentBySessionTermClassController::class, 'studentbyclass']);
+            Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
+            ->where('date', '.+');
         });
 
         Route::group(['middleware' => ['auth:sanctum']], function(){
