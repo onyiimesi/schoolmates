@@ -6,7 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "coedevtech/fixit": "^1.4.2",
+        "coedevtech/fixit": "^1.9",
         "geoip2/geoip2": "~2.0",
         "guzzlehttp/guzzle": "^7.9.2",
         "imagekit/imagekit": "^4.0",

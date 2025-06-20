@@ -75,8 +75,6 @@ class ResultTwoController extends Controller
     {
         $this->validateRequest($request);
 
-        throw new \Exception('Not implemented');
-
         $teacher = Auth::user();
 
         if ($request->period === PeriodicName::SECONDHALF) {
