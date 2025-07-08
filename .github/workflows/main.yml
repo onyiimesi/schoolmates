@@ -28,7 +28,7 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-        server: ftp.sapsms.com
+        server: ftp.schoolmateglobal.com
         username: ${{ secrets.ftp_username }}
         password: ${{ secrets.ftp_password }}
         exclude: |
