@@ -6,17 +6,12 @@ use Illuminate\Http\JsonResponse;
 use ImageKit\ImageKit;
 
 class ImageKitService {
-
-    public $file;
-    public $folderPath;
-    public $folderName;
-
-    public function __construct($file, $folderPath, $folderName)
-    {
-        $this->file = $file;
-        $this->folderPath = $folderPath;
-        $this->folderName = $folderName;
-    }
+    public function __construct(
+        public $file,
+        public $folderPath,
+        public $folderName
+    )
+    {}
 
     public function run(): JsonResponse
     {

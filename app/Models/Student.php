@@ -43,7 +43,18 @@ class Student extends Authenticatable implements Auditable
         'status',
         'created_by',
         'is_preschool',
-        'file_id'
+        'file_id',
+        'in_present_class',
+    ];
+
+    protected $hidden = [
+        'password',
+        'pass_word',
+        'updated_at',
+    ];
+
+    protected $casts = [
+        'in_present_class' => 'boolean',
     ];
 
     public function assignmentanswer()
