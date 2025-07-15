@@ -18,12 +18,10 @@ trait ResultTrait
 {
     public function getStudentsByClass($user, $class)
     {
-        $data = Student::where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'present_class' => $class,
-                'status' => StudentStatus::ACTIVE
-            ])
+        $data = Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('present_class', $class)
+            ->where('status', StudentStatus::ACTIVE)
             ->get();
 
         return StudentResource::collection($data);
