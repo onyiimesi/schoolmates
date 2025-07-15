@@ -23,10 +23,10 @@ trait CummulativeResult
         $subjects = [];
         foreach ($results as $result) {
             foreach ($result->studentscore as $score) {
-                $subject = $score->subject;
-                if (!isset($subjects[$subject])) {
-                    $subjects[$subject] = [
-                        'subject' => $subject,
+                $subjectKey = $this->normalizeSubject($score->subject);
+                if (!isset($subjects[$subjectKey])) {
+                    $subjects[$subjectKey] = [
+                        'subject' => $score->subject,
                         'First Term' => 0,
                         'Second Term' => 0,
                         'Third Term' => 0,
@@ -41,6 +41,7 @@ trait CummulativeResult
                 }
             }
         }
+
         return $subjects;
     }
 
@@ -54,14 +55,15 @@ trait CummulativeResult
             $studentTotalSubjects = 0;
 
             foreach ($result->studentscore as $score) {
-                $subject = $score->subject;
+                $subjectKey = $this->normalizeSubject($score->subject);
                 $term = $result->term;
                 $scoreValue = $score->score;
 
-                $studentTotalScore += $scoreValue;
-                $studentTotalSubjects++;
-
-                $this->updateSubjectScores($subjects[$subject], $term, $scoreValue);
+                if ($term && isset($subjects[$subjectKey])) {
+                    $studentTotalScore += $scoreValue;
+                    $studentTotalSubjects++;
+                    $this->updateSubjectScores($subjects[$subjectKey], $term, $scoreValue);
+                }
             }
 
             if ($studentTotalSubjects > 0) {
@@ -95,7 +97,8 @@ trait CummulativeResult
         $subjectRanks = $this->calculateRanksPerSubject($user, $request, $student);
 
         foreach ($subjects as $subjectName => &$subject) {
-            $subject['Rank'] = $subjectRanks[$subjectName][$request->student_id] ?? null;
+            $subjectKey = $this->normalizeSubject($subjectName);
+            $subject['Rank'] = $subjectRanks[$subjectKey][$request->student_id] ?? null;
             $subject['Average Score'] = ($subject['Total Score'] > 0) ? $subject['Total Score'] / 3 : 0;
             $subject['Remark'] = $this->getRemark($subject, $user);
             $subject['Class Average'] = $classAverage;
@@ -136,18 +139,18 @@ trait CummulativeResult
         foreach ($allResults as $result) {
             $studentId = $result->student_id;
             foreach ($result->studentscore as $score) {
-                $subject = $score->subject;
+                $subjectKey = $this->normalizeSubject($score->subject);
                 $scoreValue = $score->score;
 
-                if (!isset($subjectScores[$subject])) {
-                    $subjectScores[$subject] = [];
+                if (!isset($subjectScores[$subjectKey])) {
+                    $subjectScores[$subjectKey] = [];
                 }
 
-                if (!isset($subjectScores[$subject][$studentId])) {
-                    $subjectScores[$subject][$studentId] = 0;
+                if (!isset($subjectScores[$subjectKey][$studentId])) {
+                    $subjectScores[$subjectKey][$studentId] = 0;
                 }
 
-                $subjectScores[$subject][$studentId] += $scoreValue;
+                $subjectScores[$subjectKey][$studentId] += $scoreValue;
             }
         }
 
@@ -161,5 +164,10 @@ trait CummulativeResult
         }
 
         return $subjectRanks;
+    }
+    
+    public function normalizeSubject($subject)
+    {
+        return strtoupper(trim($subject));
     }
 }
