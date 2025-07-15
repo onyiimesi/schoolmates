@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enum\PeriodicName;
+use App\Enum\StaffStatus;
 use App\Models\Result;
 use App\Models\StudentScore;
 use App\Models\GradingSystem;
@@ -97,7 +98,7 @@ class ResultPresenter
             'sch_id' => $result->sch_id,
             'campus' => $result->campus,
             'class_assigned' => $className,
-            'status' => \App\Enum\StaffStatus::ACTIVE,
+            'status' => StaffStatus::ACTIVE,
         ])->get();
 
         $hodQuery = Staff::where([

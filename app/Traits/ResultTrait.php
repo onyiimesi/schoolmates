@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Enum\StudentStatus;
 use App\Http\Resources\GradingSystemResource;
 use App\Http\Resources\MidTermResultResource;
 use App\Http\Resources\StudentResource;
@@ -21,6 +22,7 @@ trait ResultTrait
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
                 'present_class' => $class,
+                'status' => StudentStatus::ACTIVE
             ])
             ->get();
 
