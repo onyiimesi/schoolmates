@@ -19,20 +19,18 @@ class StudentBySessionTermClassController extends Controller
         $user = Auth::user();
 
         $session = AcademicSessions::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('academic_session', $request->session)
-        ->first();
+            ->where('campus', $user->campus)
+            ->where('academic_session', $request->session)
+            ->first();
 
         if(!$session){
             return $this->error(null, "Academic session does not match", 400);
         }
 
-        $search = Student::where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'present_class' => $request->class,
-                'status' => StudentStatus::ACTIVE
-            ])
+        $search = Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where("present_class", $request->class)
+            ->where('status', StudentStatus::ACTIVE)
             ->get();
 
         $data = StudentResource::collection($search);
@@ -45,12 +43,10 @@ class StudentBySessionTermClassController extends Controller
     {
         $user = Auth::user();
 
-        $searchStud = Student::where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'present_class' => $request->class,
-                'status' => StudentStatus::ACTIVE
-            ])
+        $searchStud = Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where("present_class", $request->present_class)
+            ->where('status', StudentStatus::ACTIVE)
             ->get();
 
         $data = StudentResource::collection($searchStud);
