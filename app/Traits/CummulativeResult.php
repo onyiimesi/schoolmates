@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Enum\StudentStatus;
 use App\Models\GradingSystem;
 use App\Models\Result;
 
@@ -13,6 +14,9 @@ trait CummulativeResult
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
             ->where('session', $request->session)
+            ->whereHas('student', function($q) {
+                $q->where('status', StudentStatus::ACTIVE);
+            })
             ->with('studentscore')
             ->get();
     }
@@ -123,6 +127,9 @@ trait CummulativeResult
         $allResults = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('session', $request->session)
+            ->whereHas('student', function($q) {
+                $q->where('status', StudentStatus::ACTIVE);
+            })
             ->with('studentscore')
             ->get();
 
