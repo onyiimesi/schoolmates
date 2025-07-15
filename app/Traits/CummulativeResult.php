@@ -14,9 +14,6 @@ trait CummulativeResult
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
             ->where('session', $request->session)
-            ->whereHas('student', function($q) {
-                $q->where('status', StudentStatus::ACTIVE);
-            })
             ->with('studentscore')
             ->get();
     }
@@ -93,9 +90,9 @@ trait CummulativeResult
         return $totalStudents > 0 ? $totalStudentsAverage / $totalStudents : 0;
     }
 
-    public function finalizeSubjectData(&$subjects, $classAverage, $user, $request)
+    public function finalizeSubjectData(&$subjects, $classAverage, $user, $request, $student)
     {
-        $subjectRanks = $this->calculateRanksPerSubject($user, $request);
+        $subjectRanks = $this->calculateRanksPerSubject($user, $request, $student);
 
         foreach ($subjects as $subjectName => &$subject) {
             $subject['Rank'] = $subjectRanks[$subjectName][$request->student_id] ?? null;
@@ -122,13 +119,14 @@ trait CummulativeResult
         return $grades->isNotEmpty() ? $grades->first()->remark : null;
     }
 
-    public function calculateRanksPerSubject($user, $request)
+    public function calculateRanksPerSubject($user, $request, $student)
     {
         $allResults = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('session', $request->session)
-            ->whereHas('student', function($q) {
-                $q->where('status', StudentStatus::ACTIVE);
+            ->whereHas('student', function($q) use ($student) {
+                $q->where('present_class', $student->present_class)
+                  ->where('status', StudentStatus::ACTIVE);
             })
             ->with('studentscore')
             ->get();
