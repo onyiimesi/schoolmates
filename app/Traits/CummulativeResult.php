@@ -89,21 +89,14 @@ trait CummulativeResult
         return $totalStudents > 0 ? $totalStudentsAverage / $totalStudents : 0;
     }
 
-    public function finalizeSubjectData(&$subjects, $classAverage, $user)
+    public function finalizeSubjectData(&$subjects, $classAverage, $user, $request)
     {
-        uasort($subjects, function ($a, $b) {
-            return $b['Total Score'] <=> $a['Total Score'];
-        });
+        $subjectRanks = $this->calculateRanksPerSubject($user, $request);
 
-        $rank = 1;
-
-        foreach ($subjects as &$subject) {
+        foreach ($subjects as $subjectName => &$subject) {
+            $subject['Rank'] = $subjectRanks[$subjectName][$request->student_id] ?? null;
             $subject['Average Score'] = ($subject['Total Score'] > 0) ? $subject['Total Score'] / 3 : 0;
-
-            $subject['Rank'] = $rank++;
-
             $subject['Remark'] = $this->getRemark($subject, $user);
-
             $subject['Class Average'] = $classAverage;
         }
     }
@@ -123,5 +116,45 @@ trait CummulativeResult
             ->get();
 
         return $grades->isNotEmpty() ? $grades->first()->remark : null;
+    }
+
+    public function calculateRanksPerSubject($user, $request)
+    {
+        $allResults = Result::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('session', $request->session)
+            ->with('studentscore')
+            ->get();
+
+        $subjectScores = [];
+
+        foreach ($allResults as $result) {
+            $studentId = $result->student_id;
+            foreach ($result->studentscore as $score) {
+                $subject = $score->subject;
+                $scoreValue = $score->score;
+
+                if (!isset($subjectScores[$subject])) {
+                    $subjectScores[$subject] = [];
+                }
+
+                if (!isset($subjectScores[$subject][$studentId])) {
+                    $subjectScores[$subject][$studentId] = 0;
+                }
+
+                $subjectScores[$subject][$studentId] += $scoreValue;
+            }
+        }
+
+        $subjectRanks = [];
+        foreach ($subjectScores as $subject => $students) {
+            arsort($students);
+            $rank = 1;
+            foreach ($students as $studentId => $score) {
+                $subjectRanks[$subject][$studentId] = $rank++;
+            }
+        }
+
+        return $subjectRanks;
     }
 }
