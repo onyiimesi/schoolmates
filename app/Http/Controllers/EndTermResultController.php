@@ -210,7 +210,7 @@ class EndTermResultController extends Controller
         $user = userAuth();
 
         $validated = request()->validate([
-            'student_id' => 'required|exists:students,student_id',
+            'student_id' => 'required|exists:students,id',
             'period' => 'required|string',
             'term' => 'required|string',
             'session' => 'required|string',
