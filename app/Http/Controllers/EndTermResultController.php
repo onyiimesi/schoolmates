@@ -77,6 +77,7 @@ class EndTermResultController extends Controller
 
         return $this->success($data, 'End term result');
     }
+
     public function cummulative(Request $request)
     {
         $user = Auth::user();
@@ -85,7 +86,7 @@ class EndTermResultController extends Controller
         $totalStudentsData = $this->calculateStudentScores($results, $subjects);
 
         $classAverage = $this->calculateClassAverage($totalStudentsData['totalStudents'], $totalStudentsData['totalStudentsAverage']);
-        $this->finalizeSubjectData($subjects, $classAverage, $user);
+        $this->finalizeSubjectData($subjects, $classAverage, $user, $request);
 
         $resourceCollection = CummulativeScoreResource::collection(collect(array_values($subjects)));
 
