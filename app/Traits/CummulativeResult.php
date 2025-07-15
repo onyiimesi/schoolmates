@@ -124,9 +124,9 @@ trait CummulativeResult
         $allResults = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('session', $request->session)
-            ->whereHas('student', function($q) use ($student) {
-                $q->where('present_class', $student->present_class)
-                  ->where('status', StudentStatus::ACTIVE);
+            ->where('class_name', $student->present_class)
+            ->whereHas('student', function($q) {
+                $q->where('status', StudentStatus::ACTIVE);
             })
             ->with('studentscore')
             ->get();
