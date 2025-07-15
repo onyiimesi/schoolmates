@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\StudentStatus;
 use App\Http\Resources\StudentResource;
 use App\Models\AcademicSessions;
 use App\Models\Student;
@@ -26,10 +27,13 @@ class StudentBySessionTermClassController extends Controller
             return $this->error(null, "Academic session does not match", 400);
         }
 
-        $search = Student::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where("present_class", $request->class)
-        ->get();
+        $search = Student::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'present_class' => $request->class,
+                'status' => StudentStatus::ACTIVE
+            ])
+            ->get();
 
         $data = StudentResource::collection($search);
 
@@ -41,10 +45,13 @@ class StudentBySessionTermClassController extends Controller
     {
         $user = Auth::user();
 
-        $searchStud = Student::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where("present_class", $request->present_class)
-        ->get();
+        $searchStud = Student::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'present_class' => $request->class,
+                'status' => StudentStatus::ACTIVE
+            ])
+            ->get();
 
         $data = StudentResource::collection($searchStud);
 
