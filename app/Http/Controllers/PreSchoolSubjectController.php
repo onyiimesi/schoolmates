@@ -90,7 +90,11 @@ class PreSchoolSubjectController extends Controller
 
     public function editSubject(Request $request)
     {
-        $subject = PreSchoolSubject::find($request->id);
+        $user = Auth::user();
+
+        $subject = PreSchoolSubject::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('id', $request->id);
 
         if (!$subject) {
             return $this->error(null, "Subject not found", 404);
