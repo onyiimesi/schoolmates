@@ -94,7 +94,8 @@ class PreSchoolSubjectController extends Controller
 
         $subject = PreSchoolSubject::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('id', $request->id);
+            ->where('id', $request->id)
+            ->first();
 
         if (!$subject) {
             return $this->error(null, "Subject not found", 404);
