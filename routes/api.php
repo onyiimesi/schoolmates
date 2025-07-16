@@ -224,7 +224,6 @@ Route::middleware('check.allowed.url')
                 ->where('session', '.+');
 
             Route::get('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'getSubjectID']);
-
             Route::patch('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'editSubject']);
             Route::delete('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'deleteSubject']);
 
