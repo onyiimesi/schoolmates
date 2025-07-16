@@ -90,10 +90,10 @@ class PreSchoolSubjectController extends Controller
 
     public function editSubject(Request $request)
     {
-        $subject = PreSchoolSubject::where('id', $request->id)->first();
+        $subject = PreSchoolSubject::find($request->id);
 
         if (!$subject) {
-            return response(null, 404);
+            return $this->error(null, "Subject not found", 404);
         }
 
         $subject->update([
@@ -102,11 +102,7 @@ class PreSchoolSubjectController extends Controller
             'topic' => $request->topic
         ]);
 
-        return [
-            'status' => 'success',
-            'message' => 'Edited Successfully',
-            'data' => $subject
-        ];
+        return $this->success($subject, "Updated successfully");
     }
 
     public function deleteSubject(Request $request)
@@ -178,14 +174,13 @@ class PreSchoolSubjectController extends Controller
     {
         $user = Auth::user();
 
-        $subjects = PreSchoolSubjectClass::where([
-            ['sch_id', $user->sch_id],
-            ['campus', $user->campus],
-            ['period', $request->period],
-            ['term', $request->term],
-            ['session', $request->session],
-            ['class', $request->class],
-        ])->get();
+        $subjects = PreSchoolSubjectClass::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->where('class', $request->class)
+            ->get();
 
         $presubjects = PreSchoolSubjectClassResource::collection($subjects);
 
