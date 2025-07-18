@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\StaffStatus;
 use App\Http\Requests\StaffRequest;
 use App\Http\Resources\StaffsResource;
 use App\Mail\StaffWelcomeMail;
 use App\Models\Campus;
-use App\Models\Schools;
 use App\Models\Staff;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use ImageKit\ImageKit;
 
 class StaffController extends Controller
 {
@@ -24,33 +22,16 @@ class StaffController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
+        $user = userAuth();
 
-        if ($user->designation_id == 6) {
-            $staff = Staff::where('sch_id', $user->sch_id)
-                ->where('status', 'active')
-                ->paginate(25);
-        } else {
-            $staff = Staff::where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->where('status', 'active')
-                ->paginate(25);
-        }
+        $staff = Staff::where('sch_id', $user->sch_id)
+            ->where('status', StaffStatus::ACTIVE)
+            ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
+            ->paginate(25);
 
         $staffCollection = StaffsResource::collection($staff);
 
-        return [
-            'status' => true,
-            'message' => 'Staff List',
-            'data' => $staffCollection,
-            'pagination' => [
-                'current_page' => $staff->currentPage(),
-                'last_page' => $staff->lastPage(),
-                'per_page' => $staff->perPage(),
-                'prev_page_url' => $staff->previousPageUrl(),
-                'next_page_url' => $staff->nextPageUrl(),
-            ],
-        ];
+        return $this->withPagination($staffCollection, "Staff list");
     }
 
     /**
@@ -61,97 +42,32 @@ class StaffController extends Controller
      */
     public function store(StaffRequest $request)
     {
-        $request->validated($request->all());
-        $user = Auth::user();
-
-        $imageKit = new ImageKit(
-            env('IMAGEKIT_PUBLIC_KEY'),
-            env('IMAGEKIT_PRIVATE_KEY'),
-            env('IMAGEKIT_URL_ENDPOINT')
-        );
+        $user = userAuth();
 
         $campus = Campus::where('sch_id', $user->sch_id)
-        ->where('name', $request->campus)
-        ->first();
+            ->where('name', $request->campus)
+            ->first();
 
-        $sch = Schools::where('sch_id', $user->sch_id)
-        ->first();
+        if (!$campus) {
+            return $this->error(null, 'Campus does not exist', 404);
+        }
 
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
-        if($request->image){
-
-            $file = $request->image;
-            $baseFolder = 'staff';
-            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1);
-            $image = str_replace($replace, '', $file);
-            $image = str_replace(' ', '+', $image);
-            $file_name = time().'.'.$extension;
-            $folderPath = $file_name;
-
-            $folderName = $baseFolder . '/' . $cleanSchId;
-
-            $uploadFile = $imageKit->uploadFile([
-                'file' => $file,
-                'fileName' => $folderPath,
-                'folder' => $folderName
-            ]);
-
-            $url = $uploadFile->result->url;
-            $fileId = $uploadFile->result->fileId;
-
-            $paths = $url;
-        }else{
-            $paths = "";
-            $fileId = "";
+        if ($request->image) {
+            $imagePath = uploadImage($request->image, 'staff', $cleanSchId);
         }
 
-        if($request->signature){
-
-            $file = $request->signature;
-            $baseFolder = 'signature';
-            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1);
-            $sig = str_replace($replace, '', $file);
-            $sig = str_replace(' ', '+', $sig);
-            $file_name = uniqid().'.'.$extension;
-            $folderPath = $file_name;
-
-            $folderName = $baseFolder . '/' . $cleanSchId;
-
-            $uploadFile = $imageKit->uploadFile([
-                'file' => $file,
-                'fileName' => $folderPath,
-                'folder' => $folderName
-            ]);
-
-            $url = $uploadFile->result->url;
-            $sigId = $uploadFile->result->fileId;
-
-            $pathss = $url;
-        }else{
-            $pathss = "";
-            $sigId = "";
+        if ($request->signature) {
+            $signaturePath = uploadSignature($request->signature, 'signature', $cleanSchId);
         }
 
-        if($request->teacher_type == ""){
-            $type = "";
-        }else{
-            $type = $request->teacher_type;
-        }
+        $type = !empty($request->teacher_type) ? $request->teacher_type : null;
 
-        $baseUsername = strtolower($request->firstname . '.' . $request->surname);
-        $username = $baseUsername;
-        $counter = 1;
-
-        while (Staff::where('username', $username)->exists()) {
-            $username = $baseUsername . $counter;
-            $counter++;
-        }
+        $username = Staff::generateUsername($request->firstname, $request->surname);
 
         $staff = Staff::create([
-            'sch_id' => $sch->sch_id,
+            'sch_id' => $user->sch_id,
             'campus' => $request->campus,
             'campus_type' => $campus->campus_type,
             'designation_id' => $request->designation_id,
@@ -164,15 +80,15 @@ class StaffController extends Controller
             'phoneno' => $request->phoneno,
             'address' => $request->address,
             'class_assigned' => $request->class_assigned,
-            'image' => $paths,
-            'signature' => $pathss,
+            'image' => $imagePath['url'] ?? null,
+            'signature' => $signaturePath['url'] ?? null,
             'teacher_type' => $type,
             'is_preschool' => $campus->is_preschool,
-            'file_id' => $fileId,
-            'sig_id' => $sigId,
+            'file_id' => $imagePath['file_id'] ?? null,
+            'sig_id' => $signaturePath['file_id'] ?? null,
             'password' => bcrypt($request->password),
             'pass_word' => $request->password,
-            'status' => 'active'
+            'status' => StaffStatus::ACTIVE,
         ]);
 
         defer_email($request->email, new StaffWelcomeMail($staff));
@@ -189,7 +105,6 @@ class StaffController extends Controller
     public function show(Staff $staff)
     {
         $staffs = new StaffsResource($staff);
-
         return $this->success($staffs, 'Staff Details');
     }
 
@@ -202,87 +117,29 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
-        $user = Auth::user();
-        
         $request->validate([
             'username' => ['required', 'string', 'unique:staff,username']
         ]);
 
-        $imageKit = new ImageKit(
-            env('IMAGEKIT_PUBLIC_KEY'),
-            env('IMAGEKIT_PRIVATE_KEY'),
-            env('IMAGEKIT_URL_ENDPOINT')
-        );
+        $user = userAuth();
 
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
-        if($request->image){
-            $file = $request->image;
-            $baseFolder = 'staff';
-            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1);
-            $image = str_replace($replace, '', $file);
-            $image = str_replace(' ', '+', $image);
-            $file_name = time().'.'.$extension;
-            $folderPath = $file_name;
-            $folderName = $baseFolder . '/' . $cleanSchId;
-
-            $fileId = $staff->file_id;
-            $imageKit->deleteFile($fileId);
-
-            $uploadFile = $imageKit->uploadFile([
-                'file' => $file,
-                'fileName' => $folderPath,
-                'folder' => $folderName
-            ]);
-
-            $url = $uploadFile->result->url;
-            $fileId = $uploadFile->result->fileId;
-            $paths = $url;
-        }else{
-            $paths = $staff->image;
-            $fileId = "";
+        if ($request->image){
+            $imagePath = uploadImage($request->image, 'staff', $cleanSchId, $staff->file_id);
         }
 
-        if($request->signature){
-            $file = $request->signature;
-            $baseFolder = 'signature';
-            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1);
-            $sig = str_replace($replace, '', $file);
-            $sig = str_replace(' ', '+', $sig);
-            $file_name = uniqid().'.'.$extension;
-            $folderPath = $file_name;
-            $folderName = $baseFolder . '/' . $cleanSchId;
-
-            $sigId = $staff->sig_id;
-            $imageKit->deleteFile($sigId);
-
-            $uploadFile = $imageKit->uploadFile([
-                'file' => $file,
-                'fileName' => $folderPath,
-                'folder' => $folderName
-            ]);
-
-            $url = $uploadFile->result->url;
-            $sigId = $uploadFile->result->fileId;
-            $pathss = $url;
-        }else{
-            $pathss = $staff->signature;
-            $sigId = "";
+        if ($request->signature){
+            $signaturePath = uploadSignature($request->signature, 'signature', $cleanSchId, $staff->sig_id);
         }
 
-        if($request->teacher_type == ""){
-            $type = $staff->teacher_type;
-        }else{
-            $type = $request->teacher_type;
-        }
+        $type = !empty($request->teacher_type) ? $request->teacher_type : null;
 
         $campus = Campus::where('name', $request->campus)->first();
 
         $staff->update([
             'campus' => $request->campus,
-            'campus_type' => $campus->campus_type,
+            'campus_type' => $campus->campus_type ?? null,
             'designation_id' => $request->designation_id,
             'department' => $request->department,
             'surname' => $request->surname,
@@ -294,11 +151,11 @@ class StaffController extends Controller
             'address' => $request->address,
             'class_assigned' => $request->class_assigned,
             'is_preschool' => $campus->is_preschool,
-            'image' => $paths,
-            'signature' => $pathss,
+            'image' => $imagePath['url'] ?? $staff->image,
+            'signature' => $signaturePath['url'] ?? $staff->signature,
             'teacher_type' => $type,
-            'file_id' => $fileId,
-            'sig_id' => $sigId
+            'file_id' => $imagePath['file_id'] ?? $staff->file_id,
+            'sig_id' => $signaturePath['file_id'] ?? $staff->sig_id,
         ]);
 
         return $this->success(null, 'Updated Successfully');
@@ -316,11 +173,4 @@ class StaffController extends Controller
 
         return response(null, 204);
     }
-
-    private function isNotAuthorized($staff){
-        if(Auth::user()->id !== $staff->user_id){
-            return $this->error('', 'You are not authorized to make this request', 403);
-        }
-    }
-
 }
