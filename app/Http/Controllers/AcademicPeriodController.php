@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AcademicPeriodRequest;
-use App\Http\Resources\AcademicPeriodResource;
 use App\Models\AcademicPeriod;
 use App\Models\AcademicSessions;
 use App\Models\Schools;
@@ -15,21 +14,19 @@ class AcademicPeriodController extends Controller
 {
     use HttpResponses;
 
-    public function changeperiod(AcademicPeriodRequest $request){
-
-        $request->validated($request->all());
+    public function changeperiod(AcademicPeriodRequest $request)
+    {
         $user = Auth::user();
 
         $academicPeriod  = AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('session', $request->session)
-        ->first();
+            ->where('campus', $user->campus)
+            ->where('session', $request->session)
+            ->first();
 
         $sch = Schools::where('sch_id', $user->sch_id)
-        ->firstOrFail();
+            ->firstOrFail();
 
-        if(!$academicPeriod){
-
+        if(! $academicPeriod){
             AcademicPeriod::create([
                 'sch_id' => $sch->sch_id,
                 'campus' => $user->campus,
@@ -44,7 +41,7 @@ class AcademicPeriodController extends Controller
                 'academic_session' => $request->session,
             ]);
 
-            return $this->success(null, "Academic Period Added Successfully");
+            return $this->success(null, "Academic Period Added Successfully", 201);
 
         }else {
 
@@ -56,9 +53,12 @@ class AcademicPeriodController extends Controller
                 'session' => $request->session,
             ]);
 
-            $sess = AcademicSessions::where('academic_session', $request->session)->first();
+            $academicSession = AcademicSessions::where('sch_id', $sch->sch_id)
+                ->where('campus', $user->campus)
+                ->where('academic_session', $request->session)
+                ->first();
 
-            if(!$sess){
+            if(! $academicSession){
                 AcademicSessions::create([
                     'sch_id' => $sch->sch_id,
                     'campus' => $user->campus,
@@ -70,32 +70,24 @@ class AcademicPeriodController extends Controller
         }
     }
 
-    public function getperiod(){
-
+    public function getperiod()
+    {
         $user = Auth::user();
-        $getaca = AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->get();
+        $data = AcademicPeriod::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get();
 
-        return [
-            "status" => 'true',
-            "message" => 'Academic Period',
-            "data" => $getaca
-        ];
+        return $this->success($data, "Academic Periods");
     }
 
-    public function getsessions(){
-
+    public function getsessions()
+    {
         $user = Auth::user();
-        $getsess = AcademicSessions::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->get();
+        $data = AcademicSessions::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->get();
 
-        return [
-            "status" => 'true',
-            "message" => 'Academic Sessions',
-            "data" => $getsess
-        ];
+        return $this->success($data, "Academic Sessions");
     }
 
     public function setCurrentAcademicPeriod(Request $request)
@@ -103,9 +95,9 @@ class AcademicPeriodController extends Controller
         $user = Auth::user();
 
         $academicPeriod  = AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('session', $request->session)
-        ->first();
+            ->where('campus', $user->campus)
+            ->where('session', $request->session)
+            ->first();
 
         if(! $academicPeriod) {
             return $this->error(null, "Academic period doesn't exist!", 404);
@@ -125,10 +117,10 @@ class AcademicPeriodController extends Controller
         $user = Auth::user();
 
         $academicPeriod = AcademicPeriod::select('id', 'period', 'term', 'session', 'is_current_period')
-        ->where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('is_current_period', 1)
-        ->first();
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('is_current_period', true)
+            ->first();
 
         if(! $academicPeriod) {
             return $this->error(null, 'Current period has not been set.', 404);
