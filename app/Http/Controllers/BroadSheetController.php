@@ -26,72 +26,76 @@ class BroadSheetController extends Controller
             ->with('studentscore', 'student')
             ->get();
 
-        $groupedResults = $sheet->groupBy(['student_id']);
+        $groupedResults = $sheet->groupBy('student_id');
         $signature = Staff::where('class_assigned', $request->class_name)->get();
 
         $data = $groupedResults->map(function ($studentResults, $studentId) {
-            $name = $studentResults->first();
+            $firstEntry = $studentResults->first();
 
             $totalScore = 0;
-            $uniqueSubjects = [];
+            $subjectScores = [];
+
+            // Build subject-wise scores
             foreach ($studentResults as $result) {
                 foreach ($result->studentscore as $score) {
-                    if ($score->score != 0) {
-                        $totalScore += $score->score;
-                        $uniqueSubjects[] = $score->subject;
+                    $subject = $score->subject;
+                    $scoreValue = (int) $score->score;
+
+                    if (!isset($subjectScores[$subject])) {
+                        $subjectScores[$subject] = 0;
                     }
+
+                    $subjectScores[$subject] += $scoreValue;
+                    $totalScore += $scoreValue;
                 }
             }
-            $totalSubject = count(array_unique($uniqueSubjects));
-            $studentAverage = $totalSubject > 0 ? $totalScore / $totalSubject : 0;
 
-            $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
-            if($studentAverage > 90){
+            $totalSubjects = count($subjectScores);
+            $studentAverage = $totalSubjects > 0 ? $totalScore / $totalSubjects : 0;
+
+            // Grade logic
+            if ($studentAverage > 90) {
                 $grades = "EXCELLENT";
-            }else{
+            } else {
+                $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
                 $grades = $grade->remark ?? "";
             }
 
-            $combinedScores = $studentResults->flatMap(function ($result) {
-                return $result->studentscore->map(function ($score) {
-                    return [
-                        'subject' => $score->subject,
-                        'total_score' => $score->score,
-                    ];
-                });
-            })->groupBy('subject')->map(function ($subjectScores, $subject) {
-                $average = round($subjectScores->avg('score'));
+            // Format subject results
+            $combinedScores = collect($subjectScores)->map(function ($totalScore, $subject) {
                 return [
                     'subject' => $subject,
-                    'total_score' => $average,
+                    'total_score' => $totalScore,
                 ];
             })->values()->toArray();
 
+            // Optionally skip students with all zero scores
+            $hasNonZero = collect($subjectScores)->some(fn($score) => $score > 0);
+            if (!$hasNonZero) {
+                return null;
+            }
+
             return [
                 'student_id' => $studentId,
-                'class_name' => $name->class_name,
-                'student_fullname' => $name->student_fullname,
+                'class_name' => $firstEntry->class_name,
+                'student_fullname' => $firstEntry->student_fullname,
                 'results' => $combinedScores,
                 'student_average' => number_format($studentAverage, 2),
-                'grade' => $grades
+                'grade' => $grades,
             ];
-        })->values()->toArray();
+        })->filter()->values()->toArray(); // filter out nulls
 
-        if($data){
-            return response()->json([
-                'status' => "true",
-                'message' => "Broadsheet",
-                'class_name' => $request->class_name,
-                'data' => $data,
-                'teacher' => $signature->map(function($teacher) {
-                    return [
-                        "name" => $teacher->surname .' '. $teacher->firstname,
-                        "signature" => $teacher->signature
-                    ];
-                })->toArray()
-            ], 200);
-        }
-
-        return $this->success([], "Broadsheet", 200);
+        return response()->json([
+            'status' => "true",
+            'message' => "Broadsheet",
+            'class_name' => $request->class_name,
+            'data' => $data,
+            'teacher' => $signature->map(function ($teacher) {
+                return [
+                    "name" => $teacher->surname . ' ' . $teacher->firstname,
+                    "signature" => $teacher->signature
+                ];
+            })->toArray()
+        ], 200);
     }
 }
