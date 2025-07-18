@@ -21,7 +21,7 @@ class AssignSubjectsController extends Controller
             ->where('campus', $user->campus)
             ->first();
 
-        if (!$period) {
+        if (! $period) {
             return $this->error(null, 'Academic period not set', 404);
         }
 
@@ -33,7 +33,7 @@ class AssignSubjectsController extends Controller
         $class = ClassModel::find($request->class_id);
 
         if (! $class) {
-            return $this->error('', 'Class does not exist', 400);
+            return $this->error(null, 'Class does not exist', 400);
         }
 
         if (! $subjects->isEmpty()) {
