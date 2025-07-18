@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\GradingSystem;
 use App\Models\Staff;
-use App\Http\Resources\BroadSheetResource;
 use App\Models\Result;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
@@ -19,13 +18,13 @@ class BroadSheetController extends Controller
         $user = Auth::user();
 
         $sheet = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('class_name', $request->class_name)
-        ->where('term', $request->term)
-        ->whereIn('period', ['First Half', 'Second Half'])
-        ->where('session', $request->session)
-        ->with('studentscore', 'student')
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('class_name', $request->class_name)
+            ->where('term', $request->term)
+            ->whereIn('period', ['First Half', 'Second Half'])
+            ->where('session', $request->session)
+            ->with('studentscore', 'student')
+            ->get();
 
         $groupedResults = $sheet->groupBy(['student_id']);
         $signature = Staff::where('class_assigned', $request->class_name)->get();
@@ -61,10 +60,10 @@ class BroadSheetController extends Controller
                     ];
                 });
             })->groupBy('subject')->map(function ($subjectScores, $subject) {
-                $totalScore = $subjectScores->sum('total_score');
+                $average = round($subjectScores->avg('score'));
                 return [
                     'subject' => $subject,
-                    'total_score' => $totalScore,
+                    'total_score' => $average,
                 ];
             })->values()->toArray();
 
