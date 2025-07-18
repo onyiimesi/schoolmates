@@ -29,10 +29,7 @@ class ClassRequest extends FormRequest
             'class_name' => [
                 'required',
                 'string',
-                // Rule::unique('class_models')->where(function ($query) {
-                //     return $query->where('sch_id', $this->user()->sch_id)
-                //                  ->where('campus', $this->campus);
-                // })
+                Rule::unique('class_models', 'class_name')
             ],
         ];
     }
