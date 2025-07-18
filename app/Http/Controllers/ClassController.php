@@ -44,18 +44,24 @@ class ClassController extends Controller
      */
     public function store(ClassRequest $request)
     {
-        $request->validated($request->all());
-
         $user = Auth::user();
         $campus = Campus::where('name', $request->campus)->first();
 
-        ClassModel::create([
-            'sch_id' => $user->sch_id,
-            'campus' => $request->campus,
-            'campus_type' => $campus->campus_type,
-            'class_name' => $request->class_name,
-            'sub_class' => $request->sub_class
-        ]);
+        if (! $campus) {
+            return $this->error(null, 'Campus not found', 404);
+        }
+
+        ClassModel::updateOrCreate(
+            [
+                'sch_id' => $user->sch_id,
+                'campus' => $campus->name,
+                'class_name' => $request->class_name,
+                'campus_type' => $campus->campus_type,
+            ],
+            [
+                'sub_class' => $request->sub_class
+            ]
+        );
 
         return $this->success(null, 'Class Created Successfully');
     }
@@ -81,7 +87,7 @@ class ClassController extends Controller
     public function update(Request $request, ClassModel $class)
     {
         $validated = $request->validate([
-            'class_name' => 'required|string|max:255',
+            'class_name' => 'required|string|max:255|unique:class_models,class_name',
         ]);
 
         $user = Auth::user();
