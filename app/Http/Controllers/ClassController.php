@@ -87,10 +87,19 @@ class ClassController extends Controller
     public function update(Request $request, ClassModel $class)
     {
         $validated = $request->validate([
-            'class_name' => 'required|string|max:255|unique:class_models,class_name',
+            'class_name' => 'required|string|max:255',
         ]);
 
         $user = Auth::user();
+
+        if (
+            ClassModel::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('class_name', $validated['class_name'])
+                ->exists()
+        ) {
+            return $this->error(null, 'Class already exists', 409);
+        }
 
         if ($class->class_name !== $validated['class_name']) {
             Result::where('sch_id', $user->sch_id)
