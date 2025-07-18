@@ -51,17 +51,22 @@ class ClassController extends Controller
             return $this->error(null, 'Campus not found', 404);
         }
 
-        ClassModel::updateOrCreate(
-            [
-                'sch_id' => $user->sch_id,
-                'campus' => $campus->name,
-                'class_name' => $request->class_name,
-                'campus_type' => $campus->campus_type,
-            ],
-            [
-                'sub_class' => $request->sub_class
-            ]
-        );
+        if (
+            ClassModel::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('class_name', $request->class_name)
+                ->exists()
+        ) {
+            return $this->error(null, 'Class already exists', 409);
+        }
+
+        ClassModel::create([
+            'sch_id' => $user->sch_id,
+            'campus' => $campus->name,
+            'class_name' => $request->class_name,
+            'campus_type' => $campus->campus_type,
+            'sub_class' => $request->sub_class
+        ]);
 
         return $this->success(null, 'Class Created Successfully');
     }
