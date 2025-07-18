@@ -15,8 +15,6 @@ use App\Traits\ResultBase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Spatie\ResponseCache\Facades\ResponseCache;
 
 class ResultTwoController extends Controller
 {
@@ -60,7 +58,7 @@ class ResultTwoController extends Controller
 
             $result = Result::updateOrCreate($match, $data);
 
-            if (!$result->wasRecentlyCreated) {
+            if (! $result->wasRecentlyCreated) {
                 $result->studentscore()->delete();
             }
 
@@ -82,18 +80,17 @@ class ResultTwoController extends Controller
             $getsecondresult = $this->getSecondResult($request, $teacher);
 
             $hosId = Staff::find($request->hos_id);
-            if (!$hosId && empty($request->hos_comment)) {
+
+            if (! $hosId && empty($request->hos_comment)) {
                 return $this->error(null, "Hod needs to add comments", 400);
             }
 
-            if (empty($getsecondresult)) {
-                return $this->handleNewResult($request, $teacher, $hosId);
-            } else {
-                return $this->handleExistingResult($request, $teacher, $hosId, $getsecondresult);
-            }
+            return empty($getsecondresult)
+                ? $this->handleNewResult($request, $teacher, $hosId)
+                : $this->handleExistingResult($request, $teacher, $hosId, $getsecondresult);
         }
 
-        return $this->error('', 'Bad Request', 400);
+        return $this->error(null, "Bad Request", 400);
     }
 
     public function release(ReleaseResultRequest $request)
@@ -102,7 +99,7 @@ class ResultTwoController extends Controller
         $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
         if (empty($studentIds)) {
-            return $this->error("No students selected.", 422);
+            return $this->error(null, "No students selected.", 422);
         }
 
         Result::where([
@@ -125,7 +122,7 @@ class ResultTwoController extends Controller
         $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
         if (empty($studentIds)) {
-            return $this->error("No students selected.", 422);
+            return $this->error(null, "No students selected.", 422);
         }
 
         Result::where([
