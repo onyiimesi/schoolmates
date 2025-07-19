@@ -14,6 +14,7 @@ class Campus extends Model implements Auditable
     protected $fillable = [
         'sch_id',
         'name',
+        'slug',
         'email',
         'image',
         'phoneno',
