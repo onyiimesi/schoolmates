@@ -2,9 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FeeController;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\FeeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\ClassController;
@@ -97,13 +98,39 @@ use App\Http\Controllers\StudentBySessionTermClassController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
 Route::get('/optimize', function () {
     if (App::environment(['staging', 'production'])) {
         Artisan::call('optimize:clear');
         return response()->json(['message' => 'Cache cleared successfully!'], 200);
     }
     return response()->json(['error' => 'Unauthorized action.'], 403);
+});
+
+Route::post('/seed/run', function () {
+    $seederClass = Str::studly(request()->input('seeder_class'));
+
+    if (!class_exists("Database\\Seeders\\{$seederClass}")) {
+        return response()->json([
+            'error' => "Seeder class '{$seederClass}' not found in Database\\Seeders namespace."
+        ], 404);
+    }
+
+    try {
+        Artisan::call('db:seed', [
+            '--class' => $seederClass,
+            '--force' => true,
+        ]);
+
+        return response()->json([
+            'message' => "{$seederClass} executed successfully.",
+            'output' => Artisan::output(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Seeder failed to run.',
+            'details' => $e->getMessage(),
+        ], 500);
+    }
 });
 
 Route::post('/run-migration', [OtherController::class, 'migrate']);
