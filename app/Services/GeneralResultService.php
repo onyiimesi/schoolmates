@@ -85,7 +85,7 @@ class GeneralResultService
 
         $data = [
             'students' => $this->getStudentsByClass($user, $params['class']),
-            'subjects' => $this->getSubjects($user, $params['class']),
+            'subjects' => $this->getSubjects($user, $params),
             'grading' => $this->getGrading($user),
             'extra_curricular' => $this->getExtraCurricular($user),
             'results' => ResultResource::collection($endTermResults),
