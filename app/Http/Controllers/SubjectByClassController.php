@@ -18,12 +18,13 @@ class SubjectByClassController extends Controller
 {
     use HttpResponses;
 
-    public function subjectbyclass(Request $request){
-
+    public function subjectbyclass(Request $request)
+    {
         $user = Auth::user();
 
         $subject = SubjectClassResource::collection(
-            ClassModel::where('sch_id', $user->sch_id)
+            ClassModel::with('subjects')
+            ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class)
             ->get()
