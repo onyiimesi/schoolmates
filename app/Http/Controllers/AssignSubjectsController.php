@@ -36,11 +36,11 @@ class AssignSubjectsController extends Controller
             return $this->error(null, 'Class does not exist', 400);
         }
 
-        if (! $subjects->isEmpty()) {
-            $subjects->each(function ($subject) {
-                $subject->delete();
-            });
-        }
+        // if (! $subjects->isEmpty()) {
+        //     $subjects->each(function ($subject) {
+        //         $subject->delete();
+        //     });
+        // }
 
         foreach ($request->subjects as $subjectData) {
             SubjectClass::create([
