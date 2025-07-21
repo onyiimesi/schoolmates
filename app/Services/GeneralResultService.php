@@ -38,7 +38,7 @@ class GeneralResultService
 
         $data = [
             'students' => $this->getStudentsByClass($user, $params['class']),
-            'subjects' => $this->getSubjects($user, $params['class']),
+            'subjects' => $this->getSubjects($user, $params),
             'results' => $getMidtermResults,
         ];
 
