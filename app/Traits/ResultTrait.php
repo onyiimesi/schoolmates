@@ -27,12 +27,14 @@ trait ResultTrait
         return StudentResource::collection($data);
     }
 
-    public function getSubjects($user, $class)
+    public function getSubjects($user, $request)
     {
         $data = ClassModel::with('subjects')
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('class_name', $class)
+            ->where('term', $request['term'])
+            ->where('session', $request['session'])
+            ->where('class_name', $request['class'])
             ->get();
 
         return SubjectClassResource::collection($data);
