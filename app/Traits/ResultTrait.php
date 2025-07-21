@@ -30,11 +30,9 @@ trait ResultTrait
     public function getSubjects($user, $class)
     {
         $data = ClassModel::with('subjects')
-            ->where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'class_name' => $class,
-            ])
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('class_name', $class)
             ->get();
 
         return SubjectClassResource::collection($data);
