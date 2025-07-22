@@ -20,6 +20,7 @@ class AssignSubjectsController extends Controller
 
         $period = AcademicPeriod::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
+            ->where('is_current_period', true)
             ->first();
 
         if (! $period) {
