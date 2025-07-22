@@ -23,15 +23,28 @@ class SubjectByClassController extends Controller
     {
         $user = Auth::user();
 
-        $subject = SubjectClassResource::collection(
-            ClassModel::with('subjects')
+        $academicPeriod = AcademicPeriod::select('id', 'sch_id', 'campus', 'period', 'term', 'session', 'is_current_period')
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('is_current_period', true)
+            ->first();
+
+        if(! $academicPeriod) {
+            return $this->error(null, 'Current period has not been set.', 404);
+        }
+
+        $subjects = ClassModel::with(['subjects' => function ($query) use($academicPeriod) {
+                $query->where('term', $academicPeriod->term)
+                    ->where('session', $academicPeriod->session);
+            }])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class)
-            ->get()
-        );
+            ->get();
 
-        return $this->success($subject, "Subjects");
+        $data = SubjectClassResource::collection($subjects);
+
+        return $this->success($data, "Subjects");
     }
 
     public function subjectbyId(Request $request)
