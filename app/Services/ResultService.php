@@ -22,6 +22,14 @@ class ResultService
     {
         $user = userAuth();
 
+        $schoolSettings = SchoolScoreSetting::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->exists();
+
+        if ($schoolSettings) {
+            return $this->error(null, "Settings cannot be modified as they are already locked for your school.", 400);
+        }
+
         $scoreOption = ScoreOption::findOrFail($request->score_option_id);
 
         $segments = array_map('trim', explode('-', $request->value));
