@@ -26,7 +26,7 @@ class ResultService
             ->where('campus', $user->campus)
             ->exists();
 
-        if ($schoolSettings) {
+        if ($schoolSettings && ! $request->unlock) {
             return $this->error(null, "Settings cannot be modified as they are already locked for your school.", 400);
         }
 
