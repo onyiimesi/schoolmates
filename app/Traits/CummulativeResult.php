@@ -165,7 +165,7 @@ trait CummulativeResult
 
         return $subjectRanks;
     }
-    
+
     public function normalizeSubject($subject)
     {
         return strtoupper(trim($subject));
