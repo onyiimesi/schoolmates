@@ -18,56 +18,39 @@ class AcademicPeriodController extends Controller
     {
         $user = Auth::user();
 
-        $academicPeriod  = AcademicPeriod::where('sch_id', $user->sch_id)
+        // Check if the academic period already exists
+        $academicPeriod = AcademicPeriod::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
             ->where('session', $request->session)
             ->first();
+
+        // If it already exists, stop further processing and return an error
+        if ($academicPeriod) {
+            return $this->error(null, 'Academic period already exists', 400);
+        }
 
         $sch = Schools::where('sch_id', $user->sch_id)
             ->firstOrFail();
 
-        if(! $academicPeriod){
-            AcademicPeriod::create([
-                'sch_id' => $sch->sch_id,
-                'campus' => $user->campus,
-                'period' => $request->period,
-                'term' => $request->term,
-                'session' => $request->session,
-            ]);
+        // Proceed to create the new academic period and session if it doesn't exist
+        AcademicPeriod::create([
+            'sch_id' => $sch->sch_id,
+            'campus' => $user->campus,
+            'period' => $request->period,
+            'term' => $request->term,
+            'session' => $request->session,
+        ]);
 
-            AcademicSessions::create([
-                'sch_id' => $sch->sch_id,
-                'campus' => $user->campus,
-                'academic_session' => $request->session,
-            ]);
+        // Create the academic session if it doesn't exist
+        AcademicSessions::create([
+            'sch_id' => $sch->sch_id,
+            'campus' => $user->campus,
+            'academic_session' => $request->session,
+        ]);
 
-            return $this->success(null, "Academic Period Added Successfully", 201);
-
-        }else {
-
-            $academicPeriod ->update([
-                'sch_id' => $sch->sch_id,
-                'campus' => $user->campus,
-                'period' => $request->period,
-                'term' => $request->term,
-                'session' => $request->session,
-            ]);
-
-            $academicSession = AcademicSessions::where('sch_id', $sch->sch_id)
-                ->where('campus', $user->campus)
-                ->where('academic_session', $request->session)
-                ->first();
-
-            if(! $academicSession){
-                AcademicSessions::create([
-                    'sch_id' => $sch->sch_id,
-                    'campus' => $user->campus,
-                    'academic_session' => $request->session,
-                ]);
-            }
-
-            return $this->success(null, "Academic Period Updated Successfully");
-        }
+        return $this->success(null, "Academic Period Added Successfully", 201);
     }
 
     public function getperiod()
@@ -106,8 +89,8 @@ class AcademicPeriodController extends Controller
         }
 
         AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->update(['is_current_period' => 0]);
+            ->where('campus', $user->campus)
+            ->update(['is_current_period' => 0]);
 
         $academicPeriod->update(['is_current_period' => 1]);
 
@@ -118,7 +101,7 @@ class AcademicPeriodController extends Controller
     {
         $user = Auth::user();
 
-        $academicPeriod = AcademicPeriod::select('id', 'period', 'term', 'session', 'is_current_period')
+        $academicPeriod = AcademicPeriod::select('id', 'sch_id', 'campus', 'period', 'term', 'session', 'is_current_period')
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('is_current_period', true)
