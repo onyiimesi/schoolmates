@@ -27,7 +27,9 @@ class BroadSheetController extends Controller
             ->get();
 
         $groupedResults = $sheet->groupBy('student_id');
-        $signature = Staff::where('class_assigned', $request->class_name)->get();
+        $signatures = Staff::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('class_assigned', $request->class_name)->get();
 
         $data = $this->getBroadsheetData($groupedResults);
 
@@ -36,7 +38,7 @@ class BroadSheetController extends Controller
             'message' => "Broadsheet",
             'class_name' => $request->class_name,
             'data' => $data,
-            'teacher' => $signature->map(function ($teacher) {
+            'teacher' => $signatures->map(function ($teacher) {
                 return [
                     "name" => $teacher->surname . ' ' . $teacher->firstname,
                     "signature" => $teacher->signature
