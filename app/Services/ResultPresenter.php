@@ -101,14 +101,13 @@ class ResultPresenter
             'status' => StaffStatus::ACTIVE,
         ])->get();
 
-        $hodQuery = Staff::where([
-            'id' => $result->hos_id,
-            'sch_id' => $result->sch_id,
-            'campus' => $result->campus,
-            'designation_id' => 3,
-        ]);
+        $hodQuery = Staff::where('sch_id', $result->sch_id)
+            ->where('campus', $result->campus)
+            ->where('id', $result->hos_id)
+            ->where('designation_id', 3)
+            ->where('status', StaffStatus::ACTIVE);
 
-        if ($class && $class->class_type) {
+        if ($class && $class->class_type !== null) {
             $hodQuery->where('class_type', $class->class_type);
         }
 
