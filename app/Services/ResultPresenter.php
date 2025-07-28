@@ -65,10 +65,12 @@ class ResultPresenter
 
         $position = $studentAverages->search(fn($r) => $r['student_id'] === $result->student_id) + 1;
 
+        // Calculate the sum of all student averages
+        $totalStudentAverages = $studentAverages->sum('average');
+
         $classTotalScore = $classResults->flatMap->studentscore->pluck('score')->sum();
         $classCount = $classResults->count();
-        $subjectCount = $result->studentscore?->count() ?? 1;
-        $classAverage = ($classCount * $subjectCount) > 0 ? round($classTotalScore / ($classCount * $subjectCount), 2) : 0;
+        $classAverage = $classCount > 0 ? round($totalStudentAverages / $classCount, 2) : 0;
 
         $classGrade = GradingSystem::where('sch_id', $result->sch_id)
             ->where('campus', $result->campus)
