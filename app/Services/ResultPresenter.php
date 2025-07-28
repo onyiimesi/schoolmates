@@ -69,7 +69,7 @@ class ResultPresenter
         $totalStudentAverages = $studentAverages->sum('average');
 
         $classTotalScore = $classResults->flatMap->studentscore->pluck('score')->sum();
-        $classCount = $classResults->count();
+        $classCount = $classResults->pluck('student_id')->unique()->count();
         $classAverage = $classCount > 0 ? round($totalStudentAverages / $classCount, 2) : 0;
 
         $classGrade = GradingSystem::where('sch_id', $result->sch_id)
