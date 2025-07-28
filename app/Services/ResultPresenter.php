@@ -105,7 +105,7 @@ class ResultPresenter
             'id' => $result->hos_id,
             'sch_id' => $result->sch_id,
             'campus' => $result->campus,
-            'designation_id' => '3',
+            'designation_id' => 3,
         ]);
 
         if ($class && $class->class_type) {
