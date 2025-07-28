@@ -45,7 +45,6 @@ class ResultPresenter
     public function getClassStats(Result $result): array
     {
         $classResults = Result::with('studentscore')
-            ->withCount('student')
             ->where([
                 'sch_id' => $result->sch_id,
                 'campus' => $result->campus,
