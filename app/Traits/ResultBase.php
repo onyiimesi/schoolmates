@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Enum\PeriodicName;
+use App\Enum\ResultStatus;
 use App\Models\AffectiveDisposition;
 use App\Models\PsychomotorPerformance;
 use App\Models\PsychomotorSkill;
@@ -44,7 +45,7 @@ trait ResultBase
             'computed_midterm' => 'true',
             'result_type' => $request->result_type,
             'teacher_comment' => $request->teacher_comment,
-            'status' => 'not-released'
+            'status' => ResultStatus::NOTRELEASED->value,
         ]);
 
         $this->saveStudentScores($compute, $request->results);
@@ -65,7 +66,7 @@ trait ResultBase
             'computed_midterm' => 'true',
             'result_type' => $request->result_type,
             'teacher_comment' => $request->teacher_comment,
-            'status' => 'not-released'
+            'status' => ResultStatus::NOTRELEASED->value,
         ]);
 
         $getResult->studentscore()->delete();
@@ -77,10 +78,7 @@ trait ResultBase
     protected function saveStudentScores($result, $scores)
     {
         $result->studentscore()->delete();
-        foreach ($scores as $score) {
-            $question = new StudentScore($score);
-            $result->studentscore()->save($question);
-        }
+        $result->studentscore()->createMany($scores);
     }
 
     protected function validateRequest($request)
@@ -90,27 +88,25 @@ trait ResultBase
 
     protected function getSecondResult($request, $teacher)
     {
-        return Result::where([
-                'sch_id' => $teacher->sch_id,
-                'campus' => $teacher->campus,
-                'student_id' => $request->student_id,
-                'period' => 'Second Half',
-                'term' => $request->term,
-                'session' => $request->session
-            ])
+        return Result::where('sch_id', $teacher->sch_id)
+            ->where('campus', $teacher->campus)
+            ->where('student_id', $request->student_id)
+            ->where('period', PeriodicName::SECONDHALF)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
             ->first();
     }
 
-    protected function handleNewResult($request, $teacher, $hosId)
+    protected function handleNewResult($request, $teacher, $hos)
     {
         if ($teacher->teacher_type === "subject teacher") {
-            $compute = Result::createOne($teacher, $request, $hosId);
+            $compute = Result::createOne($teacher, $request, $hos);
             $this->saveStudentScoresTwo($compute, $request->results);
         }
 
         if ($teacher->teacher_type === "class teacher") {
-            $compute = Result::createOne($teacher, $request, $hosId);
-            $this->saveClassTeacherData($compute, $request, $teacher);
+            $compute = Result::createOne($teacher, $request, $hos);
+            $this->saveClassTeacherData($compute, $request);
         }
 
         return $this->success(null, 'Computed Successfully', 201);
@@ -138,10 +134,10 @@ trait ResultBase
                 'hos_id' => $request->hos_id,
                 'hos_fullname' => $hosFullName,
                 'computed_endterm' => 'true',
-                'status' => 'not-released'
+                'status' => ResultStatus::NOTRELEASED->value,
             ]);
             $this->saveStudentScores($getsecondresult, $request->results);
-            $this->saveClassTeacherData($getsecondresult, $request, $teacher);
+            $this->saveClassTeacherData($getsecondresult, $request);
         }
 
         return $this->success(null, 'Updated Successfully');
@@ -157,7 +153,7 @@ trait ResultBase
             'period' => $request->period,
             'term' => $request->term,
             'session' => $request->session,
-            'status' => 'not-released'
+            'status' => ResultStatus::NOTRELEASED->value,
         ], $additionalFields);
 
         $result->update($fields);
@@ -172,7 +168,7 @@ trait ResultBase
         }
     }
 
-    protected function saveClassTeacherData($compute, $request, $teacher)
+    protected function saveClassTeacherData($compute, $request)
     {
         $this->saveStudentScores($compute, $request->results);
         $this->saveAffectiveDispositions($compute, $request->affective_disposition);
