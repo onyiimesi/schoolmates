@@ -210,7 +210,7 @@ Route::middleware('check.allowed.url')
 
             Route::middleware(['throttle:apis'])->group(function () {
                 //New result form
-                Route::post('midTermResult', [ResultTwoController::class, 'mid']);
+                Route::post('midTermResult', [ResultTwoController::class, 'midTerm']);
                 Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
                 Route::patch('release/result', [ResultTwoController::class, 'release']);
                 Route::patch('withhold/result', [ResultTwoController::class, 'hold']);

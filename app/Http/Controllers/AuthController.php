@@ -18,8 +18,8 @@ class AuthController extends Controller
 {
     use HttpResponses;
 
-    public function login(LoginUserRequest $request) {
-
+    public function login(LoginUserRequest $request)
+    {
         $request->validated($request->all());
 
         $staffGuard = Auth::guard('staffs');
@@ -38,8 +38,6 @@ class AuthController extends Controller
                 ->first();
 
             $users = new LoginResource($user);
-
-            $user->tokens()->delete();
             $token = $user->createToken("API Token of {$user->username}");
 
             return $this->success([
@@ -60,8 +58,6 @@ class AuthController extends Controller
                 ->first();
 
             $studs = new StudentLoginResource($stud);
-
-            $stud->tokens()->delete();
             $token = $stud->createToken("API Token of {$stud->username}");
 
             return $this->success([
@@ -74,8 +70,8 @@ class AuthController extends Controller
         return $this->error('', 'Credentials do not match', 401);
     }
 
-    public function register(StoreUserRequest $request) {
-
+    public function register(StoreUserRequest $request)
+    {
         $request->validated($request->all());
 
         $user = User::create([
@@ -90,8 +86,8 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout() {
-
+    public function logout()
+    {
         $user = request()->user();
         $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
 
@@ -102,8 +98,8 @@ class AuthController extends Controller
         ]);
     }
 
-    public function change(ChangePassRequest $request){
-
+    public function change(ChangePassRequest $request)
+    {
         $request->validated($request->all());
 
         $user = $request->user();
@@ -111,20 +107,14 @@ class AuthController extends Controller
         if (Hash::check($request->old_password, $user->password)) {
 
             $user->update([
-
-                'password' => Hash::make($request->new_password),
-                'pass_word' => $request->new_password,
-
+              'password' => Hash::make($request->new_password),
+              'pass_word' => $request->new_password,
             ]);
 
-             return [
-                "status" => 'true',
-                "message" => 'Password Successfully Updated',
-            ];
+            return $this->success(null, 'Password changed successfully');
 
-        }else
-        {
-            return $this->error('', 'Old Password did not match', 422);
+        } else {
+          return $this->error(null, 'Old Password did not match', 422);
         }
     }
 }

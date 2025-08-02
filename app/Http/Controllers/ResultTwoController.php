@@ -25,7 +25,7 @@ class ResultTwoController extends Controller
     )
     {}
 
-    public function mid(MidtermRequest $request)
+    public function midTerm(MidtermRequest $request)
     {
         $teacher = Auth::user();
 
@@ -33,64 +33,70 @@ class ResultTwoController extends Controller
             return $this->error(null, "Unsupported period value: {$request->period}", 400);
         }
 
-        return DB::transaction(function () use ($teacher, $request) {
-            $match = [
-                'sch_id' => $teacher->sch_id,
-                'campus' => $teacher->campus,
-                'student_id' => $request->student_id,
-                'period' => $request->period,
-                'term' => $request->term,
-                'session' => $request->session,
-                'result_type' => $request->result_type,
-            ];
+        try {
+            return DB::transaction(function () use ($teacher, $request) {
+                $match = [
+                    'sch_id' => $teacher->sch_id,
+                    'campus' => $teacher->campus,
+                    'student_id' => $request->student_id,
+                    'period' => $request->period,
+                    'term' => $request->term,
+                    'session' => $request->input('session'),
+                    'result_type' => $request->result_type,
+                ];
 
-            $data = [
-                'campus_type' => $teacher->campus_type,
-                'teacher_id' => $teacher->id,
-                'student_fullname' => $request->student_fullname,
-                'admission_number' => $request->admission_number,
-                'class_name' => $request->class_name,
-                'computed_midterm' => true,
-                'result_type' => $request->result_type,
-                'teacher_comment' => $request->teacher_comment,
-                'status' => ResultStatus::NOTRELEASED->value,
-            ];
+                $data = [
+                    'campus_type' => $teacher->campus_type,
+                    'teacher_id' => $teacher->id,
+                    'student_fullname' => $request->student_fullname,
+                    'admission_number' => $request->admission_number,
+                    'class_name' => $request->class_name,
+                    'computed_midterm' => true,
+                    'teacher_comment' => $request->teacher_comment,
+                    'status' => ResultStatus::NOTRELEASED->value,
+                ];
 
-            $result = Result::updateOrCreate($match, $data);
+                $result = Result::updateOrCreate($match, $data);
+                $this->saveStudentScores($result, $request->results);
 
-            if (! $result->wasRecentlyCreated) {
-                $result->studentscore()->delete();
-            }
-
-            $this->saveStudentScores($result, $request->results);
-
-            $message = $result->wasRecentlyCreated ? 'Computed Successfully' : 'Updated Successfully';
-            return $this->success(null, $message, $result->wasRecentlyCreated ? 201 : 200);
-        });
+                $message = $result->wasRecentlyCreated ? 'Computed Successfully' : 'Updated Successfully';
+                return $this->success(null, $message, $result->wasRecentlyCreated ? 201 : 200);
+            });
+        } catch (\Throwable $th) {
+            return $this->error(null, "An error occurred: {$th->getMessage()}", 400);
+        }
     }
 
     public function endTerm(ResultRequest $request)
     {
         $this->validateRequest($request);
 
-        $teacher = Auth::user();
-
-        if ($request->period === PeriodicName::SECONDHALF) {
-
-            $getsecondresult = $this->getSecondResult($request, $teacher);
-
-            $hosId = Staff::find($request->hos_id);
-
-            if (! $hosId && empty($request->hos_comment)) {
-                return $this->error(null, "Hod needs to add comments", 400);
-            }
-
-            return empty($getsecondresult)
-                ? $this->handleNewResult($request, $teacher, $hosId)
-                : $this->handleExistingResult($request, $teacher, $hosId, $getsecondresult);
+        if ($request->period !== PeriodicName::SECONDHALF) {
+            return $this->error(null, "Bad Request", 400);
         }
 
-        return $this->error(null, "Bad Request", 400);
+        $teacher = Auth::user();
+
+        // Only check HOS if no comment was provided directly
+        $hos = null;
+        if (empty($request->hos_comment)) {
+            $hos = Staff::find($request->hos_id);
+            if (! $hos) {
+                return $this->error(null, "HOS needs to add comments", 400);
+            }
+        }
+
+        try {
+            return DB::transaction(function () use ($request, $teacher, $hos) {
+                $existingResult = $this->getSecondResult($request, $teacher);
+
+                return $existingResult === null
+                    ? $this->handleNewResult($request, $teacher, $hos)
+                    : $this->handleExistingResult($request, $teacher, $hos, $existingResult);
+            });
+        } catch (\Throwable $th) {
+            return $this->error(null, "An error occurred: {$th->getMessage()}", 400);
+        }
     }
 
     public function release(ReleaseResultRequest $request)
@@ -102,16 +108,14 @@ class ResultTwoController extends Controller
             return $this->error(null, "No students selected.", 422);
         }
 
-        Result::where([
-            'sch_id' => $auth->sch_id,
-            'campus' => $auth->campus,
-            'period' => $request->period,
-            'term' => $request->term,
-            'session' => $request->session,
-            'result_type' => $request->result_type,
-        ])
-        ->whereIn('student_id', $studentIds)
-        ->update(['status' => ResultStatus::RELEASED->value]);
+        Result::where('sch_id', $auth->sch_id)
+            ->where('campus', $auth->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->input('session'))
+            ->where('result_type', $request->result_type)
+            ->whereIn('student_id', $studentIds)
+            ->update(['status' => ResultStatus::RELEASED->value]);
 
         return $this->success(null, "Result released");
     }
@@ -125,16 +129,14 @@ class ResultTwoController extends Controller
             return $this->error(null, "No students selected.", 422);
         }
 
-        Result::where([
-            'sch_id' => $auth->sch_id,
-            'campus' => $auth->campus,
-            'period' => $request->period,
-            'term' => $request->term,
-            'session' => $request->session,
-            'result_type' => $request->result_type,
-        ])
-        ->whereIn('student_id', $studentIds)
-        ->update(['status' => ResultStatus::WITHELD->value]);
+        Result::where('sch_id', $auth->sch_id)
+            ->where('campus', $auth->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->input('session'))
+            ->where('result_type', $request->result_type)
+            ->whereIn('student_id', $studentIds)
+            ->update(['status' => ResultStatus::WITHELD->value]);
 
         return $this->success(null, "Result withheld");
     }
