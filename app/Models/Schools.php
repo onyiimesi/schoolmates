@@ -31,9 +31,35 @@ class Schools extends Model implements Auditable
         'dos',
         'auto_generate',
         'admission_number_initial',
+        'pricing_id',
     ];
 
     protected $casts = [
         'auto_generate' => 'boolean'
     ];
+
+    public function schoolPayment()
+    {
+        return $this->hasOne(SchoolPayment::class, 'sch_id', 'sch_id');
+    }
+
+    public function campuses()
+    {
+        return $this->hasMany(Campus::class, 'sch_id', 'sch_id');
+    }
+
+    public function staffs()
+    {
+        return $this->hasMany(Staff::class, 'sch_id', 'sch_id');
+    }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class, 'sch_id', 'sch_id');
+    }
+
+    public function pricing()
+    {
+        return $this->belongsTo(Pricing::class, 'pricing_id', 'id');
+    }
 }

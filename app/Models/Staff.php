@@ -77,7 +77,7 @@ class Staff extends Authenticatable implements Auditable
         $counter = 1;
 
         while (self::where('username', $username)->exists()) {
-            $username = $baseUsername . $counter;
+            $username = "{$baseUsername}{$counter}";
             $counter++;
         }
 

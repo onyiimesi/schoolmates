@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\FeeController;
+use App\Http\Controllers\GpaController;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\ClassController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\CampusController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\SkillsController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -38,19 +40,14 @@ use App\Http\Controllers\VehicleLogController;
 use App\Http\Controllers\AssignClassController;
 use App\Http\Controllers\CodeConductController;
 use App\Http\Controllers\DesignationController;
-use App\Http\Controllers\EnableStaffController;
 use App\Http\Controllers\OutstandingController;
 use App\Http\Controllers\ChartAccountController;
-use App\Http\Controllers\DisableStaffController;
 use App\Http\Controllers\DisciplinaryController;
-use App\Http\Controllers\EnableCampusController;
 use App\Http\Controllers\HealthReportController;
 use App\Http\Controllers\IncomeReportController;
 use App\Http\Controllers\LoginDetailsController;
 use App\Http\Controllers\TotalExpenseController;
 use App\Http\Controllers\AcceptStudentController;
-use App\Http\Controllers\DisableCampusController;
-use App\Http\Controllers\EnableStudentController;
 use App\Http\Controllers\EndTermResultController;
 use App\Http\Controllers\GradingSystemController;
 use App\Http\Controllers\MaximumScoresController;
@@ -62,7 +59,6 @@ use App\Http\Controllers\TransferFundsController;
 use App\Http\Controllers\AcademicPeriodController;
 use App\Http\Controllers\AccountBalanceController;
 use App\Http\Controllers\AssignSubjectsController;
-use App\Http\Controllers\DisableStudentController;
 use App\Http\Controllers\ExpectedIncomecontroller;
 use App\Http\Controllers\ExpensesReportController;
 use App\Http\Controllers\PromoteStudentController;
@@ -91,7 +87,6 @@ use App\Http\Controllers\AdmissionNumSearchController;
 use App\Http\Controllers\GetPreschoolResultController;
 use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\AssignmentPerformanceController;
-use App\Http\Controllers\GpaController;
 use App\Http\Controllers\StudentAttendanceDateController;
 use App\Http\Controllers\StudentBySessionTermClassController;
 
@@ -148,14 +143,17 @@ Route::middleware('check.allowed.url')
             Route::resource('/staff', StaffController::class);
             Route::resource('/campus', CampusController::class);
 
-            Route::patch('/enablecampus/{id}', [EnableCampusController::class, 'enable']);
-            Route::patch('/disablecampus/{id}', [DisableCampusController::class, 'disable']);
+            Route::controller(GeneralController::class)
+                ->group(function () {
+                    Route::patch('/enablecampus/{id}', 'enableCampus');
+                    Route::patch('/disablecampus/{id}', 'disableCampus');
 
-            Route::patch('/enablestaff/{id}', [EnableStaffController::class, 'enable']);
-            Route::patch('/disablestaff/{id}', [DisableStaffController::class, 'disable']);
+                    Route::patch('/enablestaff/{id}', 'enableStaff');
+                    Route::patch('/disablestaff/{id}', 'disableStaff');
 
-            Route::patch('/enablestudent/{id}', [EnableStudentController::class, 'enable']);
-            Route::patch('/disablestudent/{id}', [DisableStudentController::class, 'disable']);
+                    Route::patch('/enablestudent/{id}', 'enableStudent');
+                    Route::patch('/disablestudent/{id}', 'disableStudent');
+                });
 
             Route::patch('/assignclass/{id}', [AssignClassController::class, 'assign']);
             Route::patch('/transferstudent/{id}', [TransferStudentController::class, 'transfer']);
@@ -307,7 +305,7 @@ Route::middleware('check.allowed.url')
             ->where('session', '.+');
 
             Route::get("/studentlogindetails", [LoginDetailsController::class, 'loginDetails']);
-            Route::get("/stafflogindetails", [LoginDetailsController::class, 'staffloginDetails']);
+            Route::get("/stafflogindetails", [LoginDetailsController::class, 'staffloginDetails']); // Deprecated
 
             // Student By Class (Principal)
             Route::get("/studentbyclass/{present_class}", [StudentBySessionTermClassController::class, 'studentbyclass']);
