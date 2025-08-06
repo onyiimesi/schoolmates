@@ -23,4 +23,6 @@ class SubjectTeacher extends Model
     protected $casts = [
         'subject' => 'array'
     ];
+
+
 }

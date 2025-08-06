@@ -2,7 +2,16 @@
 
 namespace App\Traits;
 
-trait HttpResponses{
+trait HttpResponses
+{
+    /**
+     * Return a successful response with data and message.
+     *
+     * @param mixed $data
+     * @param string|null $message
+     * @param int $code
+     * @return \Illuminate\Http\JsonResponse
+     */
 	protected function success($data, $message = null, $code = 200){
 		return response()->json([
 			'status' => true,
@@ -11,7 +20,7 @@ trait HttpResponses{
 		], $code);
 	}
 
-    protected function withPagination($collection, $message = null, $code = 200)
+    protected function withPagination($collection, string|null $message = null, $code = 200, array|null $extraMeta = [])
     {
         return response()->json([
             'status' => true,
@@ -25,6 +34,7 @@ trait HttpResponses{
                 'prev_page_url' => $collection->previousPageUrl(),
                 'next_page_url' => $collection->nextPageUrl(),
             ],
+            'meta' => $extraMeta ?? [],
         ], $code);
     }
 
