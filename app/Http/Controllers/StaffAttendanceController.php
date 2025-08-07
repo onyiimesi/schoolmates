@@ -5,15 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StaffAttendanceRequest;
 use App\Http\Resources\StaffAttendanceResource;
 use App\Models\StaffAttendance;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class StaffAttendanceController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -25,47 +28,35 @@ class StaffAttendanceController extends Controller
 
         $staffatten = StaffAttendanceResource::collection($attend);
 
-        return [
-            'status' => 'true',
-            'message' => 'Attendance List',
-            'data' => $staffatten,
-            'pagination' => [
-                'current_page' => $attend->currentPage(),
-                'last_page' => $attend->lastPage(),
-                'per_page' => $attend->perPage(),
-                'prev_page_url' => $attend->previousPageUrl(),
-                'next_page_url' => $attend->nextPageUrl(),
-            ],
-        ];
+        return $this->withPagination($staffatten, "Staff Attendance list");
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StaffAttendanceRequest $request)
     {
         $request->validated($request->all());
-
         $user = Auth::user();
 
-        $staffatt = StaffAttendance::create([
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'staff_id' => $request->staff_id,
-            'time_in' => $request->time_in,
-            'date_in' => $request->date_in,
-            'time_out' => $request->time_out,
-            'date_out' => $request->date_out,
-        ]);
+        $data = StaffAttendance::updateOrCreate(
+            [
+                'sch_id'   => $user->sch_id,
+                'campus'   => $user->campus,
+                'staff_id' => $request->staff_id,
+                'date_in'  => $request->date_in,
+            ],
+            [
+                'time_in'  => $request->time_in,
+                'time_out' => $request->time_out,
+                'date_out' => $request->date_out,
+            ]
+        );
 
-        return [
-            "status" => 'true',
-            "message" => 'Attendance Created Successfully',
-            "data" => $staffatt
-        ];
+        return $this->success($data, 'Attendance Created Successfully', 201);
     }
 
     /**
