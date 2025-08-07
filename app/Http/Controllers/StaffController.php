@@ -147,7 +147,6 @@ class StaffController extends Controller
             'surname' => $request->surname,
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
-            'username' => $request->username,
             'email' => $request->email,
             'phoneno' => $request->phoneno,
             'address' => $request->address,
