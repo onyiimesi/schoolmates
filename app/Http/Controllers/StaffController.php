@@ -123,10 +123,6 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
-        $request->validate([
-            'username' => ['required', 'string', 'unique:staff,username']
-        ]);
-
         $user = userAuth();
 
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
