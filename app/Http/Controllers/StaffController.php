@@ -31,7 +31,6 @@ class StaffController extends Controller
                 'subjectteacher',
             ])
             ->where('sch_id', $user->sch_id)
-            ->where('status', StaffStatus::ACTIVE)
             ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
             ->paginate(25);
 
