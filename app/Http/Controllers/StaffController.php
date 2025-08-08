@@ -24,6 +24,8 @@ class StaffController extends Controller
     {
         $user = userAuth();
 
+        $search = request()->query('search');
+
         $staff = Staff::with([
                 'school.schoolPayment',
                 'school.pricing',
@@ -32,6 +34,13 @@ class StaffController extends Controller
             ])
             ->where('sch_id', $user->sch_id)
             ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
+            ->when($search, fn($query) => $query->where(function ($query) use ($search) {
+                $query->where('firstname', 'like', "%{$search}%")
+                    ->orWhere('surname', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('class_assigned', 'like', "%{$search}%");
+            }))
             ->paginate(25);
 
         $staffCollection = StaffsResource::collection($staff);
