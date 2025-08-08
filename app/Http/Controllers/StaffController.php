@@ -127,13 +127,8 @@ class StaffController extends Controller
 
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
-        if ($request->image){
-            $imagePath = uploadImage($request->image, 'staff', $cleanSchId, $staff->file_id);
-        }
-
-        if ($request->signature){
-            $signaturePath = uploadSignature($request->signature, 'signature', $cleanSchId, $staff->sig_id);
-        }
+        $imagePath = uploadImage($request->image, 'staff', $cleanSchId, $staff->file_id);
+        $signaturePath = uploadSignature($request->signature, 'signature', $cleanSchId, $staff->sig_id);
 
         $type = !empty($request->teacher_type) ? $request->teacher_type : null;
 
@@ -152,8 +147,8 @@ class StaffController extends Controller
             'address' => $request->address,
             'class_assigned' => $request->class_assigned,
             'is_preschool' => $campus->is_preschool,
-            'image' => $imagePath['url'] ?? $staff->image,
-            'signature' => $signaturePath['url'] ?? $staff->signature,
+            'image' => $imagePath['url'] ?? ($request->image ?: $staff->image),
+            'signature' => $signaturePath['url'] ?? ($request->signature ?: $staff->signature),
             'teacher_type' => $type,
             'file_id' => $imagePath['file_id'] ?? $staff->file_id,
             'sig_id' => $signaturePath['file_id'] ?? $staff->sig_id,
