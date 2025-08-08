@@ -1,6 +1,7 @@
 <?php
 
 use GuzzleHttp\Client;
+use Illuminate\Database\Events\QueryExecuted;
 use ImageKit\ImageKit;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;

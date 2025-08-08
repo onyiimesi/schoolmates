@@ -164,4 +164,5 @@ return [
 
     ],
 
+    'slow_query_ms' => 1000,
 ];
