@@ -12,7 +12,7 @@ class SlowQueryMonitor
     public function register(): void
     {
         DB::listen(function (QueryExecuted $query) {
-            $threshold = (int) config('database.slow_query_ms', 1000);
+            $threshold = (int) config('database.slow_query_ms', 300);
 
             if ($query->time <= $threshold) {
                 return;
