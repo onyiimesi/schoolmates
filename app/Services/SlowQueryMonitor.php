@@ -16,7 +16,19 @@ class SlowQueryMonitor
     public function register(): void
     {
         // Capture the *caller* right before PDO executes
-        DB::beforeExecuting(function (Connection $conn, string &$sql, array $bindings) {
+        DB::beforeExecuting(function (...$args) {
+            // Older/L10 style: ($sql, $bindings, $conn)
+            if (!($args[0] instanceof Connection)) {
+                [$sql, $bindings, $conn] = $args;
+            } else {
+                // Newer/L11 style: ($conn, &$sql, $bindings)
+                [$conn, $sql, $bindings] = $args;
+            }
+
+            if (! $conn instanceof Connection) {
+                return; // safety
+            }
+
             $key = $this->queryKey($conn->getName(), $sql, $bindings);
             $this->frames[$key] = $this->findCallerFrame();
         });
