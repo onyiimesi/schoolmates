@@ -10,7 +10,6 @@ use App\Models\GradingSystem;
 use App\Models\ClassModel;
 use App\Models\Schools;
 use App\Models\Staff;
-use Illuminate\Support\Facades\DB;
 
 class ResultPresenter
 {
@@ -127,17 +126,19 @@ class ResultPresenter
 
     public function getSubjectAverages(Result $result): array
     {
-        return DB::table('student_scores as ss')
-            ->join('results as r', 'ss.result_id', '=', 'r.id')
-            ->where('r.sch_id',     $result->sch_id)
-            ->where('r.campus',     $result->campus)
-            ->where('r.class_name', $result->class_name)
-            ->where('r.term',       $result->term)
-            ->where('r.session',    $result->session)
-            ->whereNotNull('ss.score') // ignore nulls (matches SQL AVG behavior)
-            ->groupBy('ss.subject')
-            ->pluck(DB::raw('AVG(ss.score)'), 'ss.subject') // raw avg
-            ->map(fn ($v) => round((float) $v, 2))          // round in PHP for consistency
+        return StudentScore::query()
+            ->whereHas('result', fn ($q) => $q->where([
+                'sch_id'     => $result->sch_id,
+                'campus'     => $result->campus,
+                'class_name' => $result->class_name,
+                'term'       => $result->term,
+                'session'    => $result->session,
+            ]))
+            ->whereNotNull('score')
+            ->selectRaw('subject, ROUND(AVG(score), 2) as avg_score')
+            ->groupBy('subject')
+            ->pluck('avg_score', 'subject')
+            ->map(fn ($v) => (float) $v)
             ->toArray();
     }
 
