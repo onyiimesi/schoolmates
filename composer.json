@@ -10,7 +10,7 @@
         "guzzlehttp/guzzle": "^7.9.2",
         "imagekit/imagekit": "^4.0",
         "jenssegers/agent": "^2.6",
-        "laravel/framework": "^12.12",
+        "laravel/framework": "^12.22.1",
         "laravel/sanctum": "^4.1",
         "laravel/tinker": "^2.10",
         "maatwebsite/excel": "^3.1",

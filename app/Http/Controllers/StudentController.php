@@ -29,10 +29,18 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
+        $user = userAuth();
+        $search = request()->query('search');
 
         $students = Student::where('sch_id', $user->sch_id)
             ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
+            ->when($search, fn($query) =>
+                $query->whereAny(
+                    ['firstname', 'surname', 'email_address', 'username', 'admission_number', 'present_class'],
+                    'like',
+                    "%{$search}%"
+                )
+            )
             ->paginate(25);
 
         $studentCollection = StudentResource::collection($students);
