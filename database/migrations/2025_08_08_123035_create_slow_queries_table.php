@@ -11,28 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('slow_queries', function (Blueprint $table) {
-            $table->id();
-            $table->string('fingerprint', 64)->index();
-            $table->string('connection')->nullable();
-            $table->text('sql');
-            $table->longText('raw_sql');
-            $table->json('bindings')->nullable();
-            $table->integer('time');
-            $table->unsignedBigInteger('occurrences')->default(0);
-            $table->integer('max_time')->default(0);
-            $table->integer('avg_time')->default(0);
-            $table->string('file')->nullable();
-            $table->integer('line')->nullable();
-            $table->timestamp('first_seen_at')->nullable();
-            $table->timestamp('last_seen_at')->nullable();
-            $table->boolean('resolved')->default(false)->index();
-            $table->timestamps();
-
-            $table->index('last_seen_at');
-            $table->index('avg_time');
-            $table->index('time');
-        });
+        if (!Schema::hasTable('slow_queries')) {
+            Schema::create('slow_queries', function (Blueprint $table) {
+                $table->id();
+                $table->string('fingerprint', 64)->index();
+                $table->string('connection')->nullable();
+                $table->text('sql');
+                $table->longText('raw_sql');
+                $table->json('bindings')->nullable();
+                $table->integer('time');
+                $table->unsignedBigInteger('occurrences')->default(0);
+                $table->integer('max_time')->default(0);
+                $table->integer('avg_time')->default(0);
+                $table->string('file')->nullable();
+                $table->integer('line')->nullable();
+                $table->timestamp('first_seen_at')->nullable();
+                $table->timestamp('last_seen_at')->nullable();
+                $table->boolean('resolved')->default(false)->index();
+                $table->timestamps();
+    
+                $table->index('last_seen_at');
+                $table->index('avg_time');
+                $table->index('time');
+            });
+        }
     }
 
     /**

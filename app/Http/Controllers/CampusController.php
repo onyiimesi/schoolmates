@@ -39,22 +39,12 @@ class CampusController extends Controller
     public function store(CampusRequest $request)
     {
         $request->validated($request->all());
-
         $user = Auth::user();
 
-        $paths = "";
-        if($request->image){
-            $file = $request->image;
-            $folderName = config('services.campus_url');
-            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1);
-            $image = str_replace($replace, '', $file);
+        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
-            $image = str_replace(' ', '+', $image);
-            $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/campus/'.$file_name, base64_decode($image));
-
-            $paths = $folderName.'/'.$file_name;
+        if($request->image) {
+            $campusPath = uploadImage($request->image, 'campus', $cleanSchId);
         }
 
         $slug = Str::slug($request->name);
@@ -67,14 +57,15 @@ class CampusController extends Controller
             'name' => $request->name,
             'slug' => $slug,
             'email' => $request->email,
-            'image' => $paths,
+            'image' => $campusPath['url'] ?? null,
+            'file_id' => $campusPath['file_id'] ?? null,
             'phoneno' => $request->phoneno,
             'address' => $request->address,
             'state' => $request->state,
             'campus_type' => $request->campus_type,
             'is_preschool' => $request->is_preschool,
             'status' => 'active',
-            'created_by' => $user->surname .' '. $user->firstname .' '. $user->middlename,
+            'created_by' => "{$user->surname} {$user->firstname} {$user->middlename}",
         ]);
 
         return $this->success(null, 'Campus Created Successfully', 201);
@@ -93,7 +84,6 @@ class CampusController extends Controller
         return $this->success($campuss, 'Campus Details');
     }
 
-
     /**
      * Update the specified resource in storage.
      *
@@ -103,20 +93,11 @@ class CampusController extends Controller
      */
     public function update(Request $request, Campus $campus)
     {
-        if($request->image){
-            $file = $request->image;
-            $folderName = config('services.campus_url');
-            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-            $replace = substr($file, 0, strpos($file, ',')+1);
-            $image = str_replace($replace, '', $file);
+        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $campus->sch_id);
 
-            $image = str_replace(' ', '+', $image);
-            $file_name = time().'.'.$extension;
-            file_put_contents(public_path().'/campus/'.$file_name, base64_decode($image));
-
-            $paths = $folderName.'/'.$file_name;
-        } else {
-            $paths = $campus->image;
+        if($request->image) {
+            $fileId = $campus->file_id ?? null;
+            $campusPath = uploadImage($request->image, 'campus', $cleanSchId, $fileId);
         }
 
         if ($request->filled('name')) {
@@ -130,7 +111,8 @@ class CampusController extends Controller
             'name' => $request->name,
             'slug' => $slug ?? $campus->slug,
             'email' => $request->email,
-            'image' => $paths,
+            'image' => $campusPath['url'] ?? $campus->image,
+            'file_id' => $campusPath['file_id'] ?? $campus->file_id,
             'phoneno' => $request->phoneno,
             'address' => $request->address,
             'state' => $request->state,

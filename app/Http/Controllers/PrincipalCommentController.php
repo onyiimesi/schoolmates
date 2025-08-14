@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 class PrincipalCommentController extends Controller
 {
     use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -28,11 +29,7 @@ class PrincipalCommentController extends Controller
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Principal Comments',
-            'data' => $principal
-        ];
+        return $this->success($principal, "Principal comments");
     }
 
     /**
@@ -47,31 +44,22 @@ class PrincipalCommentController extends Controller
         $user = Auth::user();
 
         $school = Schools::where('sch_id', $user->sch_id)
-        ->first();
+        ->firstOrFail();
 
-        if($user->designation_id == '3'){
-            $user_id = $user->id;
-            $user_fullname = $user->surname . ' '. $user->firstname;
-
-        }else {
-            return $this->error('', "Can't perform this action", 401);
+        if($user->designation_id !== '3'){
+            return $this->error(null, "You cannot perform this action", 403);
         }
 
         $principal = PrincipalComment::create([
             'sch_id' => $school->sch_id,
             'campus' => $user->campus,
-            'hos_id' => $user_id,
-            'hos_fullname' => $user_fullname,
+            'hos_id' => $user->id,
+            'hos_fullname' => "{$user->surname} {$user->firstname}",
             'hos_comment' => $request->hos_comment,
             'signature' => $user->signature,
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Added Successfully',
-            "data" => $principal
-        ];
-
+        return $this->success($principal, "Principal comments");
     }
 
     /**
@@ -80,20 +68,10 @@ class PrincipalCommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(PrincipalComment $principalComment)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        $comment = new PrincipalCommentResource($principalComment);
+        return $this->success($comment, "Principal comment");
     }
 
     /**
@@ -103,9 +81,13 @@ class PrincipalCommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, PrincipalComment $principalComment)
     {
-        //
+        $principalComment->update([
+            'hos_comment' => $request->hos_comment,
+        ]);
+
+        return $this->success(null, "Principal comments updated successfully");
     }
 
     /**
@@ -114,8 +96,9 @@ class PrincipalCommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(PrincipalComment $principalComment)
     {
-        //
+        $principalComment->delete();
+        return $this->success(null, "Principal comments deleted successfully");
     }
 }
