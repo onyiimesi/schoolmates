@@ -53,7 +53,7 @@ class ClassPopulationController extends Controller
         return $this->success($totalCount, "Total Teacher Population");
     }
 
-    public function getSchoolPopulation()
+    public function getschoolpopulation()
     {
         $user = Auth::user();
 
