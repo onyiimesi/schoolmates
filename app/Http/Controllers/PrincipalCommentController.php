@@ -81,8 +81,14 @@ class PrincipalCommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, PrincipalComment $principalComment)
+    public function update(Request $request, $id)
     {
+        $request->validate([
+            'hos_comment' => 'required|string|max:500',
+        ]);
+
+        $principalComment = PrincipalComment::findOrFail($id);
+
         $principalComment->update([
             'hos_comment' => $request->hos_comment,
         ]);
@@ -96,8 +102,10 @@ class PrincipalCommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(PrincipalComment $principalComment)
+    public function destroy($id)
     {
+        $principalComment = PrincipalComment::findOrFail($id);
+
         $principalComment->delete();
         return $this->success(null, "Principal comments deleted successfully");
     }
