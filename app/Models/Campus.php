@@ -17,6 +17,7 @@ class Campus extends Model implements Auditable
         'slug',
         'email',
         'image',
+        'file_id',
         'phoneno',
         'address',
         'state',
@@ -25,4 +26,9 @@ class Campus extends Model implements Auditable
         'status',
         'created_by'
     ];
+
+    public function school()
+    {
+        return $this->belongsTo(Schools::class, "sch_id", "sch_id");
+    }
 }
