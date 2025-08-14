@@ -24,6 +24,7 @@ class Staff extends Authenticatable implements Auditable
         'middlename',
         'username',
         'email',
+        'gender',
         'phoneno',
         'address',
         'image',
