@@ -44,9 +44,9 @@ class PrincipalCommentController extends Controller
         $user = Auth::user();
 
         $school = Schools::where('sch_id', $user->sch_id)
-        ->firstOrFail();
+            ->firstOrFail();
 
-        if($user->designation_id !== '3'){
+        if ($user->designation_id !== 3) {
             return $this->error(null, "You cannot perform this action", 403);
         }
 
