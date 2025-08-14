@@ -315,7 +315,7 @@ class OtherController extends Controller
 
         return $this->success($school, "Admission number settings");
     }
-
+    
     public function send(Request $request)
     {
         $request->validate([
