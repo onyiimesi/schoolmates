@@ -101,6 +101,8 @@ Route::get('/optimize', function () {
     return response()->json(['error' => 'Unauthorized action.'], 403);
 });
 
+Route::post('/test-email', [OtherController::class, 'send']);
+
 Route::post('/seed/run', function () {
     $seederClass = Str::studly(request()->input('seeder_class'));
 
