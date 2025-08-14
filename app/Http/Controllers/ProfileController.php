@@ -117,8 +117,6 @@ class ProfileController extends Controller
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
             'username' => $request->username,
-            'email_address' => $request->email,
-            'phoneno' => $request->phoneno,
             'address' => $request->address,
             'image' => $imageUrl,
             'file_id' => $imageFileId,
@@ -128,6 +126,13 @@ class ProfileController extends Controller
 
         if ($user->designation_id != '7') {
             $updateData['department'] = $request->department;
+            $updateData['phoneno'] = $request->phoneno;
+            $updateData['email'] = $request->email;
+        }
+
+        if ($user->designation_id == '7') {
+            $updateData['phone_number'] = $request->phoneno;
+            $updateData['email_address'] = $request->email;
         }
 
         $user->update($updateData);
