@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Enum\StudentStatus;
 use App\Models\GradingSystem;
 use App\Models\Result;
 
@@ -22,10 +23,10 @@ trait CummulativeResult
         $subjects = [];
         foreach ($results as $result) {
             foreach ($result->studentscore as $score) {
-                $subject = $score->subject;
-                if (!isset($subjects[$subject])) {
-                    $subjects[$subject] = [
-                        'subject' => $subject,
+                $subjectKey = $this->normalizeSubject($score->subject);
+                if (!isset($subjects[$subjectKey])) {
+                    $subjects[$subjectKey] = [
+                        'subject' => $score->subject,
                         'First Term' => 0,
                         'Second Term' => 0,
                         'Third Term' => 0,
@@ -40,6 +41,7 @@ trait CummulativeResult
                 }
             }
         }
+
         return $subjects;
     }
 
@@ -53,14 +55,15 @@ trait CummulativeResult
             $studentTotalSubjects = 0;
 
             foreach ($result->studentscore as $score) {
-                $subject = $score->subject;
+                $subjectKey = $this->normalizeSubject($score->subject);
                 $term = $result->term;
                 $scoreValue = $score->score;
 
-                $studentTotalScore += $scoreValue;
-                $studentTotalSubjects++;
-
-                $this->updateSubjectScores($subjects[$subject], $term, $scoreValue);
+                if ($term && isset($subjects[$subjectKey])) {
+                    $studentTotalScore += $scoreValue;
+                    $studentTotalSubjects++;
+                    $this->updateSubjectScores($subjects[$subjectKey], $term, $scoreValue);
+                }
             }
 
             if ($studentTotalSubjects > 0) {
@@ -89,21 +92,15 @@ trait CummulativeResult
         return $totalStudents > 0 ? $totalStudentsAverage / $totalStudents : 0;
     }
 
-    public function finalizeSubjectData(&$subjects, $classAverage, $user)
+    public function finalizeSubjectData(&$subjects, $classAverage, $user, $request, $student)
     {
-        uasort($subjects, function ($a, $b) {
-            return $b['Total Score'] <=> $a['Total Score'];
-        });
+        $subjectRanks = $this->calculateRanksPerSubject($user, $request, $student);
 
-        $rank = 1;
-
-        foreach ($subjects as &$subject) {
+        foreach ($subjects as $subjectName => &$subject) {
+            $subjectKey = $this->normalizeSubject($subjectName);
+            $subject['Rank'] = $subjectRanks[$subjectKey][$request->student_id] ?? null;
             $subject['Average Score'] = ($subject['Total Score'] > 0) ? $subject['Total Score'] / 3 : 0;
-
-            $subject['Rank'] = $rank++;
-
             $subject['Remark'] = $this->getRemark($subject, $user);
-
             $subject['Class Average'] = $classAverage;
         }
     }
@@ -123,5 +120,54 @@ trait CummulativeResult
             ->get();
 
         return $grades->isNotEmpty() ? $grades->first()->remark : null;
+    }
+
+    public function calculateRanksPerSubject($user, $request, $student)
+    {
+        $allResults = Result::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('session', $request->session)
+            ->where('class_name', $student->present_class)
+            ->whereHas('student', function($q) {
+                $q->where('status', StudentStatus::ACTIVE);
+            })
+            ->with('studentscore')
+            ->get();
+
+        $subjectScores = [];
+
+        foreach ($allResults as $result) {
+            $studentId = $result->student_id;
+            foreach ($result->studentscore as $score) {
+                $subjectKey = $this->normalizeSubject($score->subject);
+                $scoreValue = $score->score;
+
+                if (!isset($subjectScores[$subjectKey])) {
+                    $subjectScores[$subjectKey] = [];
+                }
+
+                if (!isset($subjectScores[$subjectKey][$studentId])) {
+                    $subjectScores[$subjectKey][$studentId] = 0;
+                }
+
+                $subjectScores[$subjectKey][$studentId] += $scoreValue;
+            }
+        }
+
+        $subjectRanks = [];
+        foreach ($subjectScores as $subject => $students) {
+            arsort($students);
+            $rank = 1;
+            foreach ($students as $studentId => $score) {
+                $subjectRanks[$subject][$studentId] = $rank++;
+            }
+        }
+
+        return $subjectRanks;
+    }
+
+    public function normalizeSubject($subject)
+    {
+        return strtoupper(trim($subject));
     }
 }

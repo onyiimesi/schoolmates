@@ -16,34 +16,41 @@ class ProfileController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
+        // $stud = Auth::user();
 
-        $stud = Auth::user();
+        // if($stud->designation_id){
 
-        if($stud->designation_id){
+        //     $staffs = new StaffsResource($stud);
 
-            $staffs = new StaffsResource($stud);
+        //     return $this->success($staffs, 'Profile Details');
 
-            return [
-                'status' => 'true',
-                'message' => 'Profile Details',
-                'data' => $staffs
-            ];
+        // }elseif($stud->designation_id == '7'){
 
-        }else if($stud->designation_id == '7'){
+        //     $studs = new StudentResource($stud);
 
-            $studs = new StudentResource($stud);
+        //     return $this->success($studs, 'Profile Details');
+        // }
 
-            return [
-                'status' => 'true',
-                'message' => 'Profile Details',
-                'data' => $studs
-            ];
+        $user = Auth::user();
+        if (!$user) {
+            return $this->error(null, 'Unauthenticated.', 401);
         }
 
+        $designationId = (int) ($user->designation_id ?? 0);
+
+        if ($designationId === 7) {
+            $resource = new StudentResource($user);
+        } elseif ($designationId > 0) {
+            $resource = new StaffsResource($user);
+        } else {
+            return $this->error('Designation not set for this user.', 422);
+        }
+
+        return $this->success($resource, 'Profile Details');
     }
 
     /**
@@ -73,7 +80,7 @@ class ProfileController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request)
     {
@@ -110,8 +117,6 @@ class ProfileController extends Controller
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
             'username' => $request->username,
-            'email' => $request->email,
-            'phoneno' => $request->phoneno,
             'address' => $request->address,
             'image' => $imageUrl,
             'file_id' => $imageFileId,
@@ -121,6 +126,13 @@ class ProfileController extends Controller
 
         if ($user->designation_id != '7') {
             $updateData['department'] = $request->department;
+            $updateData['phoneno'] = $request->phoneno;
+            $updateData['email'] = $request->email;
+        }
+
+        if ($user->designation_id == '7') {
+            $updateData['phone_number'] = $request->phoneno;
+            $updateData['email_address'] = $request->email;
         }
 
         $user->update($updateData);

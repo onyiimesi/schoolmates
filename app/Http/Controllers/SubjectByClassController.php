@@ -6,6 +6,7 @@ use App\Http\Resources\StudentExcelImportResource;
 use App\Http\Resources\SubjectClassResource;
 use App\Http\Resources\SubjectClassResultResource;
 use App\Http\Resources\SubjectResource;
+use App\Models\AcademicPeriod;
 use App\Models\ClassModel;
 use App\Models\StudentExcelImport;
 use App\Models\Subject;
@@ -18,31 +19,60 @@ class SubjectByClassController extends Controller
 {
     use HttpResponses;
 
-    public function subjectbyclass(Request $request){
-
+    public function subjectbyclass(Request $request)
+    {
         $user = Auth::user();
 
-        $subject = SubjectClassResource::collection(
-            ClassModel::where('sch_id', $user->sch_id)
+        $academicPeriod = AcademicPeriod::select('id', 'sch_id', 'campus', 'period', 'term', 'session', 'is_current_period')
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('is_current_period', true)
+            ->first();
+
+        if(! $academicPeriod) {
+            return $this->error(null, 'Current period has not been set.', 404);
+        }
+
+        $subjects = ClassModel::with(['subjects' => function ($query) use($academicPeriod) {
+                $query->where('term', $academicPeriod->term)
+                    ->where('session', $academicPeriod->session);
+            }])
+            ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class)
-            ->get()
-        );
+            ->get();
 
-        return $this->success($subject, "Subjects");
+        $data = SubjectClassResource::collection($subjects);
+
+        return $this->success($data, "Subjects");
     }
 
-    public function subjectbyId(Request $request){
-
+    public function subjectbyId(Request $request)
+    {
         $user = Auth::user();
-        $subject = SubjectClassResource::collection(
-            ClassModel::where('sch_id', $user->sch_id)
+
+        $academicPeriod = AcademicPeriod::select('id', 'sch_id', 'campus', 'period', 'term', 'session', 'is_current_period')
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('is_current_period', true)
+            ->first();
+
+        if(! $academicPeriod) {
+            return $this->error(null, 'Current period has not been set.', 404);
+        }
+
+        $subjects = ClassModel::with(['subjects' => function ($query) use($academicPeriod) {
+                $query->where('term', $academicPeriod->term)
+                    ->where('session', $academicPeriod->session);
+            }])
+            ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('id', $request->id)
-            ->get()
-        );
+            ->get();
 
-        return $this->success($subject, "Subjects");
+        $data = SubjectClassResource::collection($subjects);
+
+        return $this->success($data, "Subjects");
     }
 
     public function subjectbyCampus(){
@@ -70,13 +100,13 @@ class SubjectByClassController extends Controller
         // }
 
         if ($user->teacher_type === "subject teacher") {
-            return $this->get_subjects_for_subject_teacher($user);
+            return $this->getSubjectsForSubjectTeacher($user);
         }
 
-        return $this->get_subjects_for_other_teachers($user);
+        return $this->getSubjectsForOtherTeachers($user);
     }
 
-    private function get_subjects_for_subject_teacher($user)
+    private function getSubjectsForSubjectTeacher($user)
     {
         $class = ClassModel::where([
             'sch_id' => $user->sch_id,
@@ -98,7 +128,7 @@ class SubjectByClassController extends Controller
         return $this->success($subjectResources, "Subjects retrieved successfully.");
     }
 
-    private function get_subjects_for_other_teachers($user)
+    private function getSubjectsForOtherTeachers($user)
     {
         $class = ClassModel::where([
                 'sch_id' => $user->sch_id,

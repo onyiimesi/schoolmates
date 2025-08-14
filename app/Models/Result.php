@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\ResultStatus;
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -81,10 +82,10 @@ class Result extends Model implements Auditable
         $create->teacher_fullname = $staff->surname . ' '. $staff->firstname;
         $create->hos_comment = $data->hos_comment;
         $create->hos_id = $data->hos_id;
-        $create->hos_fullname = !empty($hos) ? $hos->surname . ' ' . $hos->firstname : '';
+        $create->hos_fullname = !empty($hos) ? "{$hos->surname} {$hos->firstname}" : null;
         $create->computed_endterm = 'true';
         $create->result_type = 'endterm';
-        $create->status = 'not-released';
+        $create->status = ResultStatus::NOTRELEASED->value;
         $create->save();
 
         return $create;

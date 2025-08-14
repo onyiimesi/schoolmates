@@ -38,7 +38,7 @@ class GeneralResultService
 
         $data = [
             'students' => $this->getStudentsByClass($user, $params['class']),
-            'subjects' => $this->getSubjects($user, $params['class']),
+            'subjects' => $this->getSubjects($user, $params),
             'results' => $getMidtermResults,
         ];
 
@@ -60,32 +60,32 @@ class GeneralResultService
         $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
 
         $endTermResults = Result::with([
-            'student',
-            'studentscore',
-            'affectivedisposition',
-            'psychomotorskill',
-            'resultextracurricular',
-            'abacus',
-            'psychomotorperformance',
-            'pupilreport',
-        ])
-        ->where([
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'student_id' => $params['student_id'],
-            'period' => $params['period'],
-            'term' => $params['term'],
-            'session' => $params['session'],
-            'result_type' => $params['result_type'],
-        ])
-        ->when(!empty($params['status']), function ($query) use ($params) {
-            $query->where('status', $params['status']);
-        })
-        ->get();
+                'student',
+                'studentscore',
+                'affectivedisposition',
+                'psychomotorskill',
+                'resultextracurricular',
+                'abacus',
+                'psychomotorperformance',
+                'pupilreport',
+            ])
+            ->where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $params['student_id'],
+                'period' => $params['period'],
+                'term' => $params['term'],
+                'session' => $params['session'],
+                'result_type' => $params['result_type'],
+            ])
+            ->when(!empty($params['status']), function ($query) use ($params) {
+                $query->where('status', $params['status']);
+            })
+            ->get();
 
         $data = [
             'students' => $this->getStudentsByClass($user, $params['class']),
-            'subjects' => $this->getSubjects($user, $params['class']),
+            'subjects' => $this->getSubjects($user, $params),
             'grading' => $this->getGrading($user),
             'extra_curricular' => $this->getExtraCurricular($user),
             'results' => ResultResource::collection($endTermResults),

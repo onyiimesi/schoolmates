@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Enum\StudentStatus;
 use App\Http\Resources\GradingSystemResource;
 use App\Http\Resources\MidTermResultResource;
 use App\Http\Resources\StudentResource;
@@ -17,24 +18,24 @@ trait ResultTrait
 {
     public function getStudentsByClass($user, $class)
     {
-        $data = Student::where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'present_class' => $class,
-            ])
+        $data = Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('present_class', $class)
+            ->where('status', StudentStatus::ACTIVE)
             ->get();
 
         return StudentResource::collection($data);
     }
 
-    public function getSubjects($user, $class)
+    public function getSubjects($user, $request)
     {
-        $data = ClassModel::with('subjects')
-            ->where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'class_name' => $class,
-            ])
+        $data = ClassModel::with(['subjects' => function ($query) use($request) {
+                $query->where('term', $request['term'])
+                    ->where('session', $request['session']);
+            }])
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('class_name', $request['class'])
             ->get();
 
         return SubjectClassResource::collection($data);

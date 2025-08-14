@@ -77,15 +77,21 @@ class EndTermResultController extends Controller
 
         return $this->success($data, 'End term result');
     }
+
     public function cummulative(Request $request)
     {
         $user = Auth::user();
+        $student = Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('id', $request->student_id)
+            ->firstOrFail();
+
         $results = $this->getResults($user, $request);
         $subjects = $this->initializeSubjects($results);
         $totalStudentsData = $this->calculateStudentScores($results, $subjects);
 
         $classAverage = $this->calculateClassAverage($totalStudentsData['totalStudents'], $totalStudentsData['totalStudentsAverage']);
-        $this->finalizeSubjectData($subjects, $classAverage, $user);
+        $this->finalizeSubjectData($subjects, $classAverage, $user, $request, $student);
 
         $resourceCollection = CummulativeScoreResource::collection(collect(array_values($subjects)));
 
@@ -210,7 +216,7 @@ class EndTermResultController extends Controller
         $user = userAuth();
 
         $validated = request()->validate([
-            'student_id' => 'required|integer',
+            'student_id' => 'required|exists:students,id',
             'period' => 'required|string',
             'term' => 'required|string',
             'session' => 'required|string',

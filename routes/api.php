@@ -1,9 +1,11 @@
 <?php
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FeeController;
+use App\Http\Controllers\GpaController;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankController;
@@ -14,6 +16,7 @@ use App\Http\Controllers\CampusController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\SkillsController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -37,19 +40,14 @@ use App\Http\Controllers\VehicleLogController;
 use App\Http\Controllers\AssignClassController;
 use App\Http\Controllers\CodeConductController;
 use App\Http\Controllers\DesignationController;
-use App\Http\Controllers\EnableStaffController;
 use App\Http\Controllers\OutstandingController;
 use App\Http\Controllers\ChartAccountController;
-use App\Http\Controllers\DisableStaffController;
 use App\Http\Controllers\DisciplinaryController;
-use App\Http\Controllers\EnableCampusController;
 use App\Http\Controllers\HealthReportController;
 use App\Http\Controllers\IncomeReportController;
 use App\Http\Controllers\LoginDetailsController;
 use App\Http\Controllers\TotalExpenseController;
 use App\Http\Controllers\AcceptStudentController;
-use App\Http\Controllers\DisableCampusController;
-use App\Http\Controllers\EnableStudentController;
 use App\Http\Controllers\EndTermResultController;
 use App\Http\Controllers\GradingSystemController;
 use App\Http\Controllers\MaximumScoresController;
@@ -61,7 +59,6 @@ use App\Http\Controllers\TransferFundsController;
 use App\Http\Controllers\AcademicPeriodController;
 use App\Http\Controllers\AccountBalanceController;
 use App\Http\Controllers\AssignSubjectsController;
-use App\Http\Controllers\DisableStudentController;
 use App\Http\Controllers\ExpectedIncomecontroller;
 use App\Http\Controllers\ExpensesReportController;
 use App\Http\Controllers\PromoteStudentController;
@@ -90,20 +87,47 @@ use App\Http\Controllers\AdmissionNumSearchController;
 use App\Http\Controllers\GetPreschoolResultController;
 use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\AssignmentPerformanceController;
-use App\Http\Controllers\GpaController;
 use App\Http\Controllers\StudentAttendanceDateController;
 use App\Http\Controllers\StudentBySessionTermClassController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
 Route::get('/optimize', function () {
     if (App::environment(['staging', 'production'])) {
         Artisan::call('optimize:clear');
         return response()->json(['message' => 'Cache cleared successfully!'], 200);
     }
     return response()->json(['error' => 'Unauthorized action.'], 403);
+});
+
+Route::post('/test-email', [OtherController::class, 'send']);
+
+Route::post('/seed/run', function () {
+    $seederClass = Str::studly(request()->input('seeder_class'));
+
+    if (!class_exists("Database\\Seeders\\{$seederClass}")) {
+        return response()->json([
+            'error' => "Seeder class '{$seederClass}' not found in Database\\Seeders namespace."
+        ], 404);
+    }
+
+    try {
+        Artisan::call('db:seed', [
+            '--class' => $seederClass,
+            '--force' => true,
+        ]);
+
+        return response()->json([
+            'message' => "{$seederClass} executed successfully.",
+            'output' => Artisan::output(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Seeder failed to run.',
+            'details' => $e->getMessage(),
+        ], 500);
+    }
 });
 
 Route::post('/run-migration', [OtherController::class, 'migrate']);
@@ -121,14 +145,17 @@ Route::middleware('check.allowed.url')
             Route::resource('/staff', StaffController::class);
             Route::resource('/campus', CampusController::class);
 
-            Route::patch('/enablecampus/{id}', [EnableCampusController::class, 'enable']);
-            Route::patch('/disablecampus/{id}', [DisableCampusController::class, 'disable']);
+            Route::controller(GeneralController::class)
+                ->group(function () {
+                    Route::patch('/enablecampus/{id}', 'enableCampus');
+                    Route::patch('/disablecampus/{id}', 'disableCampus');
 
-            Route::patch('/enablestaff/{id}', [EnableStaffController::class, 'enable']);
-            Route::patch('/disablestaff/{id}', [DisableStaffController::class, 'disable']);
+                    Route::patch('/enablestaff/{id}', 'enableStaff');
+                    Route::patch('/disablestaff/{id}', 'disableStaff');
 
-            Route::patch('/enablestudent/{id}', [EnableStudentController::class, 'enable']);
-            Route::patch('/disablestudent/{id}', [DisableStudentController::class, 'disable']);
+                    Route::patch('/enablestudent/{id}', 'enableStudent');
+                    Route::patch('/disablestudent/{id}', 'disableStudent');
+                });
 
             Route::patch('/assignclass/{id}', [AssignClassController::class, 'assign']);
             Route::patch('/transferstudent/{id}', [TransferStudentController::class, 'transfer']);
@@ -183,7 +210,7 @@ Route::middleware('check.allowed.url')
 
             Route::middleware(['throttle:apis'])->group(function () {
                 //New result form
-                Route::post('midTermResult', [ResultTwoController::class, 'mid']);
+                Route::post('midTermResult', [ResultTwoController::class, 'midTerm']);
                 Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
                 Route::patch('release/result', [ResultTwoController::class, 'release']);
                 Route::patch('withhold/result', [ResultTwoController::class, 'hold']);
@@ -199,47 +226,40 @@ Route::middleware('check.allowed.url')
                             ->where('session', '.+');
                     });
 
-                Route::middleware('cacheResponse:600')->group(function () {
-                    Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
-                        ->where('session', '.+');
-                    Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
-                        ->where('session', '.+');
+                Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
+                    ->where('session', '.+');
+                Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
+                    ->where('session', '.+');
 
-                    // Deprecating soon
-                    Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
-                        ->where('session', '.+');
-                    Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
-                        ->where('session', '.+');
-                    Route::get("/result/firstassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'first'])
-                        ->where('session', '.+');
-                    Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
-                        ->where('session', '.+');
+                // Deprecating soon
+                Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
+                    ->where('session', '.+');
+                Route::get("/endtermresult/{student_id}/{term}/{session}", [EndTermResultController::class, 'endterm'])
+                    ->where('session', '.+');
+                Route::get("/result/firstassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'first'])
+                    ->where('session', '.+');
+                Route::get("/result/secondassesment/{student_id}/{term}/{session}", [MidTermResultController::class, 'second'])
+                    ->where('session', '.+');
 
-                    Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
-                        ->where('session', '.+');
-                });
+                Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
+                    ->where('session', '.+');
             });
 
             //PreSchool Subject
             Route::post('/preschoolsubject', [PreSchoolSubjectController::class, 'addSubject']);
             Route::get('/preschoolsubject/{period}/{term}/{session}', [PreSchoolSubjectController::class, 'getSubject'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+                ->where('session', '.+');
 
-            Route::get('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'getSubjectID'])
-                ->middleware('cacheResponse:600');
-
+            Route::get('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'getSubjectID']);
             Route::patch('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'editSubject']);
             Route::delete('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'deleteSubject']);
 
             Route::post('/preschoolsubjectclass', [PreSchoolSubjectController::class, 'addSubjectClass']);
             Route::get('/preschoolsubjectclass/{period}/{term}/{session}', [PreSchoolSubjectController::class, 'getSubjectClass'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+                ->where('session', '.+');
 
             Route::get('/preschoolsubjects/{period}/{term}/{session}/{class}', [PreSchoolSubjectController::class, 'getSubjectByClass'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+                ->where('session', '.+');
 
             //Search Routes
             Route::get("/studentsessionsearch/{session}", [SessionSearchController::class, 'sessionsearch'])
@@ -268,33 +288,31 @@ Route::middleware('check.allowed.url')
             Route::patch('/promotestudent/{id}', [PromoteStudentController::class, 'promote']);
             Route::patch('/promote-students', [PromoteStudentController::class, 'promotestudents']);
 
-            Route::middleware('cacheResponse:600')->group(function () {
-                Route::get("/expectedincome", [ExpectedIncomecontroller::class, 'expected']);
-                Route::get("/receivedincome", [ReceivedIncomeController::class, 'received']);
-                Route::get("/outstanding", [OutstandingController::class, 'outstanding']);
-                Route::get("/discount", [DiscountController::class, 'discount']);
-                Route::get("/totalexpense", [TotalExpenseController::class, 'totalexpense']);
-                Route::get("/accountbalance", [AccountBalanceController::class, 'account']);
-                Route::get("/studentfeehistory", [StudentFeeHistoryController::class, 'feehistory']);
-                Route::get("/studentinvoice", [StudentInvoiceController::class, 'studentinvoices']);
-                Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
-                Route::get("/school", [SchoolsController::class, 'schools']);
-                Route::get("/subject/{class}", [SubjectByClassController::class, 'subjectbyclass']);
-                Route::get("/subjectby/{id}", [SubjectByClassController::class, 'subjectbyId']);
-                Route::get("/subject", [SubjectByClassController::class, 'subjectbyCampus']);
-                Route::get("/teacher-subject", [SubjectByClassController::class, 'subjectbyteacher']);
-                Route::get("/student-subject", [SubjectByClassController::class, 'subjectbystudent']);
-                Route::get("/student/{session}/{class}", [StudentBySessionTermClassController::class, 'studentsessionclassterm'])
-                ->where('session', '.+');
+            Route::get("/expectedincome", [ExpectedIncomecontroller::class, 'expected']);
+            Route::get("/receivedincome", [ReceivedIncomeController::class, 'received']);
+            Route::get("/outstanding", [OutstandingController::class, 'outstanding']);
+            Route::get("/discount", [DiscountController::class, 'discount']);
+            Route::get("/totalexpense", [TotalExpenseController::class, 'totalexpense']);
+            Route::get("/accountbalance", [AccountBalanceController::class, 'account']);
+            Route::get("/studentfeehistory", [StudentFeeHistoryController::class, 'feehistory']);
+            Route::get("/studentinvoice", [StudentInvoiceController::class, 'studentinvoices']);
+            Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
+            Route::get("/school", [SchoolsController::class, 'schools']);
+            Route::get("/subject/{class}", [SubjectByClassController::class, 'subjectbyclass']);
+            Route::get("/subjectby/{id}", [SubjectByClassController::class, 'subjectbyId']);
+            Route::get("/subject", [SubjectByClassController::class, 'subjectbyCampus']);
+            Route::get("/teacher-subject", [SubjectByClassController::class, 'subjectbyteacher']);
+            Route::get("/student-subject", [SubjectByClassController::class, 'subjectbystudent']);
+            Route::get("/student/{session}/{class}", [StudentBySessionTermClassController::class, 'studentsessionclassterm'])
+            ->where('session', '.+');
 
-                Route::get("/studentlogindetails", [LoginDetailsController::class, 'loginDetails']);
-                Route::get("/stafflogindetails", [LoginDetailsController::class, 'staffloginDetails']);
+            Route::get("/studentlogindetails", [LoginDetailsController::class, 'loginDetails']);
+            Route::get("/stafflogindetails", [LoginDetailsController::class, 'staffloginDetails']); // Deprecated
 
-                // Student By Class (Principal)
-                Route::get("/studentbyclass/{present_class}", [StudentBySessionTermClassController::class, 'studentbyclass']);
-                Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
-                ->where('date', '.+');
-            });
+            // Student By Class (Principal)
+            Route::get("/studentbyclass/{present_class}", [StudentBySessionTermClassController::class, 'studentbyclass']);
+            Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
+            ->where('date', '.+');
         });
 
         Route::group(['middleware' => ['auth:sanctum']], function(){
@@ -326,12 +344,10 @@ Route::middleware('check.allowed.url')
             // PreSchool Result
             Route::post('/preschoolresult', [PreSchoolResultController::class, 'result']);
             Route::get('/preschoolresult/{student_id}/{period}/{term}/{session}', [GetPreschoolResultController::class, 'getResult'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+                ->where('session', '.+');
 
             Route::get('/computedresult/{period}/{term}/{session}', [GetPreschoolResultController::class, 'getComputeResult'])
-                ->where('session', '.+')
-                ->middleware('cacheResponse:600');
+                ->where('session', '.+');
 
             // Assignment
             Route::post('/objective-assignment', [AssignmentController::class, 'objective']);
@@ -379,7 +395,7 @@ Route::middleware('check.allowed.url')
             Route::delete("/delete-preschoolcurricular/{id}", [OtherController::class, 'predelextra']);
             Route::get("/role", [OtherController::class, 'role']);
             Route::get("/broadsheet/{class_name}/{term}/{session}", [BroadSheetController::class, 'broadsheet'])
-            ->where('session', '.+');
+                ->where('session', '.+');
 
             // Admission Number Settings
             Route::post('admission-number/settings', [OtherController::class, 'admissionNumberSettings']);

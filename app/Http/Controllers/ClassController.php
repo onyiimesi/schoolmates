@@ -44,16 +44,27 @@ class ClassController extends Controller
      */
     public function store(ClassRequest $request)
     {
-        $request->validated($request->all());
-
         $user = Auth::user();
         $campus = Campus::where('name', $request->campus)->first();
 
+        if (! $campus) {
+            return $this->error(null, 'Campus not found', 404);
+        }
+
+        if (
+            ClassModel::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('class_name', $request->class_name)
+                ->exists()
+        ) {
+            return $this->error(null, 'Class already exists', 409);
+        }
+
         ClassModel::create([
             'sch_id' => $user->sch_id,
-            'campus' => $request->campus,
-            'campus_type' => $campus->campus_type,
+            'campus' => $campus->name,
             'class_name' => $request->class_name,
+            'campus_type' => $campus->campus_type,
             'sub_class' => $request->sub_class
         ]);
 
@@ -85,6 +96,15 @@ class ClassController extends Controller
         ]);
 
         $user = Auth::user();
+
+        if (
+            ClassModel::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('class_name', $validated['class_name'])
+                ->exists()
+        ) {
+            return $this->error(null, 'Class already exists', 409);
+        }
 
         if ($class->class_name !== $validated['class_name']) {
             Result::where('sch_id', $user->sch_id)

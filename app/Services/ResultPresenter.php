@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enum\PeriodicName;
+use App\Enum\StaffStatus;
 use App\Models\Result;
 use App\Models\StudentScore;
 use App\Models\GradingSystem;
@@ -64,10 +65,12 @@ class ResultPresenter
 
         $position = $studentAverages->search(fn($r) => $r['student_id'] === $result->student_id) + 1;
 
+        // Calculate the sum of all student averages
+        $totalStudentAverages = $studentAverages->sum('average');
+
         $classTotalScore = $classResults->flatMap->studentscore->pluck('score')->sum();
-        $classCount = $classResults->count();
-        $subjectCount = $result->studentscore?->count() ?? 1;
-        $classAverage = ($classCount * $subjectCount) > 0 ? round($classTotalScore / ($classCount * $subjectCount), 2) : 0;
+        $classCount = $classResults->pluck('student_id')->unique()->count();
+        $classAverage = $classCount > 0 ? round($totalStudentAverages / $classCount, 2) : 0;
 
         $classGrade = GradingSystem::where('sch_id', $result->sch_id)
             ->where('campus', $result->campus)
@@ -97,16 +100,16 @@ class ResultPresenter
             'sch_id' => $result->sch_id,
             'campus' => $result->campus,
             'class_assigned' => $className,
-            'status' => \App\Enum\StaffStatus::ACTIVE,
+            'status' => StaffStatus::ACTIVE,
         ])->get();
 
-        $hodQuery = Staff::where([
-            'id' => $result->hos_id,
-            'sch_id' => $result->sch_id,
-            'campus' => $result->campus,
-        ]);
+        $hodQuery = Staff::where('sch_id', $result->sch_id)
+            ->where('campus', $result->campus)
+            ->where('id', $result->hos_id)
+            ->where('designation_id', 3)
+            ->where('status', StaffStatus::ACTIVE);
 
-        if ($class && $class->class_type) {
+        if ($class && $class->class_type !== null) {
             $hodQuery->where('class_type', $class->class_type);
         }
 
@@ -123,23 +126,20 @@ class ResultPresenter
 
     public function getSubjectAverages(Result $result): array
     {
-        $scores = StudentScore::with('result')
-            ->whereHas('result', function ($query) use ($result) {
-                $query->where([
-                    'sch_id' => $result->sch_id,
-                    'campus' => $result->campus,
-                    'class_name' => $result->class_name,
-                    'term' => $result->term,
-                    'session' => $result->session
-                ]);
-            })
-            ->get()
-            ->groupBy('subject');
-
-        return $scores->mapWithKeys(function ($items, $subject) {
-            $avg = round($items->avg('score'), 2);
-            return [$subject => $avg];
-        })->toArray();
+        return StudentScore::query()
+            ->whereHas('result', fn ($q) => $q->where([
+                'sch_id'     => $result->sch_id,
+                'campus'     => $result->campus,
+                'class_name' => $result->class_name,
+                'term'       => $result->term,
+                'session'    => $result->session,
+            ]))
+            ->whereNotNull('score')
+            ->selectRaw('subject, ROUND(AVG(score), 2) as avg_score')
+            ->groupBy('subject')
+            ->pluck('avg_score', 'subject')
+            ->map(fn ($v) => (float) $v)
+            ->toArray();
     }
 
     public function getSubjectPositions(Result $result): array

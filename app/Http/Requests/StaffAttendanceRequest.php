@@ -24,11 +24,11 @@ class StaffAttendanceRequest extends FormRequest
     public function rules()
     {
         return [
-            'staff_id' => ['required', 'string',],
-            'time_in' => ['required', 'string', 'max:255'],
-            'date_in' => ['required', 'string', 'max:255'],
-            'time_out' => ['required', 'string', 'max:255'],
-            'date_out' => ['required', 'string', 'max:255'],
+            'staff_id' => ['nullable', 'string',],
+            'time_in' => ['nullable', 'string', 'max:255'],
+            'date_in' => ['nullable', 'string', 'max:255'],
+            'time_out' => ['nullable', 'string', 'max:255'],
+            'date_out' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

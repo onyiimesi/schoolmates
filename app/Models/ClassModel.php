@@ -19,7 +19,6 @@ class ClassModel extends Model implements Auditable
         'campus_type',
         'class_name',
         'sub_class',
-
     ];
 
     protected function className(): Attribute

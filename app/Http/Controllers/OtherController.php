@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
 
 class OtherController extends Controller
 {
@@ -313,5 +314,31 @@ class OtherController extends Controller
         }
 
         return $this->success($school, "Admission number settings");
+    }
+    
+    public function send(Request $request)
+    {
+        $request->validate([
+            'to' => 'required|email',
+        ]);
+
+        try {
+            Mail::raw('This is a test email from Laravel.', function ($message) use ($request) {
+                $message->to($request->to)
+                        ->subject('Laravel Email Test');
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => "Test email sent successfully to {$request->to}"
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send test email.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

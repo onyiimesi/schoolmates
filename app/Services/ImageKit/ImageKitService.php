@@ -2,29 +2,28 @@
 
 namespace App\Services\ImageKit;
 
-use Illuminate\Http\JsonResponse;
 use ImageKit\ImageKit;
 
 class ImageKitService {
+    public function __construct(
+        public $file,
+        public $folderPath,
+        public $folderName,
+        public $fileId = null
+    )
+    {}
 
-    public $file;
-    public $folderPath;
-    public $folderName;
-
-    public function __construct($file, $folderPath, $folderName)
-    {
-        $this->file = $file;
-        $this->folderPath = $folderPath;
-        $this->folderName = $folderName;
-    }
-
-    public function run(): JsonResponse
+    public function run(): array
     {
         $imageKit = new ImageKit(
             config('services.imagekit.public_key'),
             config('services.imagekit.private_key'),
             config('services.imagekit.endpoint_key')
         );
+
+        if ($this->fileId) {
+            $imageKit->deleteFile($this->fileId);
+        }
 
         $uploadFile = $imageKit->uploadFile([
             'file' => $this->file,
@@ -35,10 +34,10 @@ class ImageKitService {
         $url = $uploadFile->result->url;
         $fileId = $uploadFile->result->fileId;
 
-        return response()->json([
+        return [
             'url' => $url,
             'file_id' => $fileId
-        ]);
+        ];
     }
 }
 

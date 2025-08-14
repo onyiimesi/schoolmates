@@ -16,16 +16,18 @@ class GetPreschoolResultController extends Controller
     {
         $user = Auth::user();
 
-        $search = PreSchoolResult::with(['preschoolresultextracurricular'])
-            ->where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where("student_id", $request->student_id)
-            ->where("period", $request->period)
-            ->where("term", $request->term)
-            ->where("session", $request->session)
+        $results = PreSchoolResult::with(['preschoolresultextracurricular'])
+            ->where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'period' => $request->period,
+                'term' => $request->term,
+                'session' => $request->session
+            ])
             ->get();
 
-        $data = PreSchoolResultResource::collection($search);
+        $data = PreSchoolResultResource::collection($results);
 
         return $this->success($data, 'Result Retrieved Successfully');
     }
@@ -35,11 +37,14 @@ class GetPreschoolResultController extends Controller
         $user = Auth::user();
 
         $computed = PreSchoolResultResource::collection(
-            PreSchoolResult::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where("period", $request->period)
-            ->where("term", $request->term)
-            ->where("session", $request->session)
+            PreSchoolResult::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $request->student_id,
+                'period' => $request->period,
+                'term' => $request->term,
+                'session' => $request->session
+            ])
             ->get()
         );
 

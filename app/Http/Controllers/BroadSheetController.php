@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\GradingSystem;
 use App\Models\Staff;
-use App\Http\Resources\BroadSheetResource;
 use App\Models\Result;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
@@ -19,80 +18,103 @@ class BroadSheetController extends Controller
         $user = Auth::user();
 
         $sheet = Result::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('class_name', $request->class_name)
-        ->where('term', $request->term)
-        ->whereIn('period', ['First Half', 'Second Half'])
-        ->where('session', $request->session)
-        ->with('studentscore', 'student')
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('class_name', $request->class_name)
+            ->where('term', $request->term)
+            ->whereIn('period', ['First Half', 'Second Half'])
+            ->where('session', $request->session)
+            ->with('studentscore', 'student')
+            ->get();
 
-        $groupedResults = $sheet->groupBy(['student_id']);
-        $signature = Staff::where('class_assigned', $request->class_name)->get();
+        $groupedResults = $sheet->groupBy('student_id');
+        $signatures = Staff::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('class_assigned', $request->class_name)->get();
 
-        $data = $groupedResults->map(function ($studentResults, $studentId) {
-            $name = $studentResults->first();
+        $data = $this->getBroadsheetData($groupedResults);
 
-            $totalScore = 0;
-            $uniqueSubjects = [];
-            foreach ($studentResults as $result) {
-                foreach ($result->studentscore as $score) {
-                    if ($score->score != 0) {
-                        $totalScore += $score->score;
-                        $uniqueSubjects[] = $score->subject;
-                    }
-                }
-            }
-            $totalSubject = count(array_unique($uniqueSubjects));
-            $studentAverage = $totalSubject > 0 ? $totalScore / $totalSubject : 0;
-
-            $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
-            if($studentAverage > 90){
-                $grades = "EXCELLENT";
-            }else{
-                $grades = $grade->remark ?? "";
-            }
-
-            $combinedScores = $studentResults->flatMap(function ($result) {
-                return $result->studentscore->map(function ($score) {
-                    return [
-                        'subject' => $score->subject,
-                        'total_score' => $score->score,
-                    ];
-                });
-            })->groupBy('subject')->map(function ($subjectScores, $subject) {
-                $totalScore = $subjectScores->sum('total_score');
+        return response()->json([
+            'status' => "true",
+            'message' => "Broadsheet",
+            'class_name' => $request->class_name,
+            'data' => $data,
+            'teacher' => $signatures->map(function ($teacher) {
                 return [
-                    'subject' => $subject,
-                    'total_score' => $totalScore,
+                    "name" => $teacher->surname . ' ' . $teacher->firstname,
+                    "signature" => $teacher->signature
                 ];
-            })->values()->toArray();
+            })->toArray()
+        ], 200);
+    }
 
-            return [
-                'student_id' => $studentId,
-                'class_name' => $name->class_name,
-                'student_fullname' => $name->student_fullname,
-                'results' => $combinedScores,
-                'student_average' => number_format($studentAverage, 2),
-                'grade' => $grades
-            ];
-        })->values()->toArray();
+    private function getBroadsheetData($groupedResults)
+    {
+        return $groupedResults->map(function ($studentResults, $studentId) {
+            return $this->calculateStudentSummary($studentResults, $studentId);
+        })->filter()->values()->toArray();
+    }
 
-        if($data){
-            return response()->json([
-                'status' => "true",
-                'message' => "Broadsheet",
-                'class_name' => $request->class_name,
-                'data' => $data,
-                'teacher' => $signature->map(function($teacher) {
-                    return [
-                        "name" => $teacher->surname .' '. $teacher->firstname,
-                        "signature" => $teacher->signature
-                    ];
-                })->toArray()
-            ], 200);
+    private function calculateStudentSummary($studentResults, $studentId)
+    {
+        $student = $studentResults->first();
+
+        // Calculate average
+        $subjectScores = [];
+        $totalScore = 0;
+        foreach ($studentResults as $result) {
+            foreach ($result->studentscore as $score) {
+                $subjectScores[$score->subject] = true;
+                $totalScore += (int) $score->score;
+            }
         }
 
-        return $this->success([], "Broadsheet", 200);
+        $totalSubjects = count($subjectScores);
+        $studentAverage = $totalSubjects > 0 ? $totalScore / $totalSubjects : 0;
+
+        // Build results per subject
+        $combinedScores = $this->buildSubjectScores($studentResults);
+
+        return [
+            'student_id' => $studentId,
+            'class_name' => $student->class_name,
+            'student_fullname' => $student->student_fullname,
+            'results' => $combinedScores,
+            'student_average' => number_format($studentAverage, 2),
+            'grade' => $this->calculateGrade($studentAverage),
+        ];
+    }
+
+    private function buildSubjectScores($studentResults)
+    {
+        return $studentResults->flatMap(function ($result) {
+            return $result->studentscore->map(function ($score) use ($result) {
+                return [
+                    'subject' => $score->subject,
+                    'period' => $result->period,
+                    'score' => (int) $score->score,
+                ];
+            });
+        })
+            ->groupBy(fn($item) => $item['subject'] . '|' . $item['period']) // Dedup by subject + period
+            ->map(fn($group) => $group->first()) // Take only one per subject+period
+            ->groupBy('subject')
+            ->map(function ($subjectScores, $subject) {
+                return [
+                    'subject' => $subject,
+                    'total_score' => collect($subjectScores)->sum('score'),
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
+    private function calculateGrade($average)
+    {
+        if ($average > 90) {
+            return "EXCELLENT";
+        }
+
+        $grade = GradingSystem::where('score_to', '>=', $average)->first();
+        return $grade->remark ?? "";
     }
 }

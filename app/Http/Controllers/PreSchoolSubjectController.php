@@ -11,7 +11,6 @@ use App\Models\PreSchoolSubjectClass;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Spatie\ResponseCache\Facades\ResponseCache;
 
 class PreSchoolSubjectController extends Controller
 {
@@ -29,8 +28,6 @@ class PreSchoolSubjectController extends Controller
             'session' => $request->session,
             'subject' => $request->subject
         ])->first();
-
-        ResponseCache::clear();
 
         if($subjects) {
 
@@ -90,10 +87,15 @@ class PreSchoolSubjectController extends Controller
 
     public function editSubject(Request $request)
     {
-        $subject = PreSchoolSubject::where('id', $request->id)->first();
+        $user = Auth::user();
+
+        $subject = PreSchoolSubject::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('id', $request->id)
+            ->first();
 
         if (!$subject) {
-            return response(null, 404);
+            return $this->error(null, "Subject not found", 404);
         }
 
         $subject->update([
@@ -102,11 +104,7 @@ class PreSchoolSubjectController extends Controller
             'topic' => $request->topic
         ]);
 
-        return [
-            'status' => 'success',
-            'message' => 'Edited Successfully',
-            'data' => $subject
-        ];
+        return $this->success($subject, "Updated successfully");
     }
 
     public function deleteSubject(Request $request)
@@ -134,8 +132,6 @@ class PreSchoolSubjectController extends Controller
             'session' => $request->session,
             'class' => $request->class
         ])->first();
-
-        ResponseCache::clear();
 
         if ($existingSubjectClass) {
             $existingSubjectClass->update([
@@ -178,14 +174,13 @@ class PreSchoolSubjectController extends Controller
     {
         $user = Auth::user();
 
-        $subjects = PreSchoolSubjectClass::where([
-            ['sch_id', $user->sch_id],
-            ['campus', $user->campus],
-            ['period', $request->period],
-            ['term', $request->term],
-            ['session', $request->session],
-            ['class', $request->class],
-        ])->get();
+        $subjects = PreSchoolSubjectClass::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->session)
+            ->where('class', $request->class)
+            ->get();
 
         $presubjects = PreSchoolSubjectClassResource::collection($subjects);
 

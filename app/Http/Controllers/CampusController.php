@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CampusRequest;
-use App\Http\Resources\CampusResource;
 use App\Models\Campus;
-use App\Traits\HttpResponses;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Traits\HttpResponses;
 use Illuminate\Support\Facades\App;
+use App\Http\Requests\CampusRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\CampusResource;
 
 class CampusController extends Controller
 {
@@ -56,9 +57,15 @@ class CampusController extends Controller
             $paths = $folderName.'/'.$file_name;
         }
 
+        $slug = Str::slug($request->name);
+        if (Campus::where('slug', $slug)->exists()) {
+            $slug .= '-'.uniqid();
+        }
+
         Campus::create([
             'sch_id' => $user->sch_id,
             'name' => $request->name,
+            'slug' => $slug,
             'email' => $request->email,
             'image' => $paths,
             'phoneno' => $request->phoneno,
@@ -112,8 +119,16 @@ class CampusController extends Controller
             $paths = $campus->image;
         }
 
+        if ($request->filled('name')) {
+            $slug = Str::slug($request->name);
+            if (Campus::where('slug', $slug)->exists()) {
+                $slug .= '-'.uniqid();
+            }
+        }
+
         $campus->update([
             'name' => $request->name,
+            'slug' => $slug ?? $campus->slug,
             'email' => $request->email,
             'image' => $paths,
             'phoneno' => $request->phoneno,

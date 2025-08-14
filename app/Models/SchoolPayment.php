@@ -13,7 +13,7 @@ class SchoolPayment extends Model
 
     public function school()
     {
-        return $this->hasOne(Schools::class, 'sch_id', 'sch_id');
+        return $this->belongsTo(Schools::class, 'sch_id', 'sch_id');
     }
 
     public function staff()
