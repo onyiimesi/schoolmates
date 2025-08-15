@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -46,6 +47,17 @@ class Student extends Authenticatable implements Auditable
         'file_id',
         'in_present_class',
     ];
+
+    protected static function booted()
+    {
+        static::saved(function ($staff) {
+            Cache::forget("school_population_{$staff->sch_id}");
+        });
+
+        static::deleted(function ($staff) {
+            Cache::forget("school_population_{$staff->sch_id}");
+        });
+    }
 
     protected $hidden = [
         'password',

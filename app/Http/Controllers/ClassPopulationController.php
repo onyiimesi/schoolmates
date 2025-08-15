@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\StaffStatus;
+use App\Enum\StudentStatus;
 use App\Models\Staff;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ClassPopulationController extends Controller
 {
@@ -56,42 +59,64 @@ class ClassPopulationController extends Controller
     public function getschoolpopulation()
     {
         $user = Auth::user();
+        $cacheKey = "school_population_{$user->sch_id}";
 
-        // STAFF counts in one query
-        $staffCounts = Staff::select('gender', DB::raw('COUNT(*) as total'))
-            ->where('sch_id', $user->sch_id)
-            ->groupBy('gender')
-            ->pluck('total', 'gender');
+        $data = Cache::remember($cacheKey, now()->addHour(), function () use ($user) {
 
-        // STUDENT counts in one query
-        $studentCounts = Student::select('gender', DB::raw('COUNT(*) as total'))
-            ->where('sch_id', $user->sch_id)
-            ->groupBy('gender')
-            ->pluck('total', 'gender');
+            $staffCounts = Staff::select('gender', DB::raw('COUNT(*) as total'))
+                ->where('sch_id', $user->sch_id)
+                ->where('status', StaffStatus::ACTIVE)
+                ->groupBy('gender')
+                ->pluck('total', 'gender');
 
-        $staffMale   = $staffCounts->get('male', 0);
-        $staffFemale = $staffCounts->get('female', 0);
-        $staffTotal  = $staffMale + $staffFemale;
+            $staffTotal  = Staff::where('sch_id', $user->sch_id)
+                ->where('status', StaffStatus::ACTIVE)
+                ->count();
 
-        $studentMale   = $studentCounts->get('male', 0);
-        $studentFemale = $studentCounts->get('female', 0);
-        $studentTotal  = $studentMale + $studentFemale;
+            $studentCounts = Student::select('gender', DB::raw('COUNT(*) as total'))
+                ->where('sch_id', $user->sch_id)
+                ->where('status', StudentStatus::ACTIVE)
+                ->groupBy('gender')
+                ->pluck('total', 'gender');
 
-        $data = [
-            'staff' => [
-                'male'   => $staffMale,
-                'female' => $staffFemale,
-                'total'  => $staffTotal
-            ],
-            'student' => [
-                'male'   => $studentMale,
-                'female' => $studentFemale,
-                'total'  => $studentTotal
-            ],
-            'total_school_population' => $staffTotal + $studentTotal
-        ];
+            $studentTotal  = Student::where('sch_id', $user->sch_id)
+                ->where('status', StudentStatus::ACTIVE)
+                ->count();
+
+            $teacherCounts = Staff::select('gender', DB::raw('COUNT(*) as total'))
+                ->where('sch_id', $user->sch_id)
+                ->where('status', StaffStatus::ACTIVE)
+                ->where('designation_id', '4')
+                ->groupBy('gender')
+                ->pluck('total', 'gender');
+
+            $teacherTotal = Staff::where('sch_id', $user->sch_id)
+                ->where('status', StaffStatus::ACTIVE)
+                ->where('designation_id', '4')
+                ->count();
+
+            $getCount = fn($counts, $key) => (int)($counts[$key] ?? 0);
+
+            return [
+                'staffs' => [
+                    'male'   => $getCount($staffCounts, 'male'),
+                    'female' => $getCount($staffCounts, 'female'),
+                    'total'  => $staffTotal
+                ],
+                'students' => [
+                    'male'   => $getCount($studentCounts, 'male'),
+                    'female' => $getCount($studentCounts, 'female'),
+                    'total'  => $studentTotal
+                ],
+                'teachers' => [
+                    'male'   => $getCount($teacherCounts, 'male'),
+                    'female' => $getCount($teacherCounts, 'female'),
+                    'total'  => $teacherTotal
+                ],
+                'total_school_population' => $staffTotal + $studentTotal
+            ];
+        });
 
         return $this->success($data, "School population");
     }
-
 }
