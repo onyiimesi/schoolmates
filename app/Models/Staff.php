@@ -6,6 +6,7 @@ use App\Models\v2\LessonNote;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -40,6 +41,17 @@ class Staff extends Authenticatable implements Auditable
         'file_id',
         'sig_id'
     ];
+
+    protected static function booted()
+    {
+        static::saved(function ($staff) {
+            Cache::forget("school_population_{$staff->sch_id}");
+        });
+
+        static::deleted(function ($staff) {
+            Cache::forget("school_population_{$staff->sch_id}");
+        });
+    }
 
     public function school()
     {

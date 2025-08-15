@@ -30,6 +30,7 @@ class StaffsResource extends JsonResource
                 'username' => (string) $this->username,
                 'email' => (string) $this->email,
                 'phoneno' => (string) $this->phoneno,
+                'gender' => (string) $this->gender,
                 'address' => (string) $this->address,
                 'image' => (string) $this->image,
                 'class_assigned' => (string) $this->class_assigned,
