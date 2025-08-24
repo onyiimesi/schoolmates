@@ -412,6 +412,9 @@ Route::middleware('check.allowed.url')
                     Route::post("/staff", 'staffAttendance');
                 });
 
+            // Announcments
+            Route::get('/announcements', [GeneralController::class, 'getAnnouncements']);
+
             Route::post('/changepassword', [AuthController::class, 'change']);
             Route::post('/logout', [AuthController::class, 'logout']);
         });

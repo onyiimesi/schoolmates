@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Enum\StaffStatus;
-use App\Models\Campus;
 use App\Models\Staff;
+use App\Models\Campus;
 use App\Models\Student;
-use App\Traits\HttpResponses;
+use App\Enum\StaffStatus;
+use App\Models\Announcement;
 use Illuminate\Http\Request;
+use App\Traits\HttpResponses;
 
 class GeneralController extends Controller
 {
@@ -89,5 +90,29 @@ class GeneralController extends Controller
         $student->update(['status' => 'disabled']);
 
         return $this->success(null, 'Account Disabled Successfully');
+    }
+
+    public function getAnnouncements()
+    {
+        $schoolId = request()->query('sch_id');
+
+        if (! $schoolId) {
+            return $this->error(null, 'School ID is required', 400);
+        }
+
+        $announcements = Announcement::query()
+            ->where(function ($q) use ($schoolId) {
+                $q->whereJsonContains('schools', 'all')
+                ->orWhereJsonContains('schools', $schoolId);
+            })
+            ->where(function ($q) {
+                $q->whereNull('expiry_date')
+                ->orWhere('expiry_date', '>=', now());
+            })
+            ->where('status', 'active')
+            ->latest()
+            ->get();
+
+        return $this->success($announcements, 'Announcements retrieved successfully');
     }
 }
