@@ -19,6 +19,7 @@ class SubjectClassResultResource extends JsonResource
             'attributes' => [
                 'subject' => $this->subjects->map(function($name) {
                     return [
+                        "id" => $name->id,
                         "name" => $name->subject
                     ];
                 })->toArray(),

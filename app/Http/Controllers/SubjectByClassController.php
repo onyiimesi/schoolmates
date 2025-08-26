@@ -186,7 +186,7 @@ class SubjectByClassController extends Controller
         $user = Auth::user();
 
         if($user->designation_id === 5){
-            return $this->error('', 'Unauthenticated', 401);
+            return $this->error(null, 'Unauthenticated', 401);
         }
 
         $subject = SubjectResource::collection(
