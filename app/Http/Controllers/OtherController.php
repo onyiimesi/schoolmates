@@ -99,34 +99,23 @@ class OtherController extends Controller
     public function role()
     {
         $user = Auth::user();
+        $school = Schools::where('sch_id', $user->sch_id)->first();
 
-        if($user->designation_id === 6){
+        $roleNot = match ($user->designation_id) {
+            3, 6 => ($school->pricing_id == 1 || $school->pricing_id == 3)
+                ? ['2', '6', '7']
+                : ['6', '7'],
 
-            $school = Schools::where('sch_id', $user->sch_id)->first();
+            1 => ($school->pricing_id == 1 || $school->pricing_id == 2)
+                ? ['1', '2', '6', '7']
+                : ['1', '6', '7'],
 
-            if($school->pricing_id == 1 || $school->pricing_id == 3){
-                $roleNot = ['2' ,'6', '7'];
-            }else{
-                $roleNot = ['6', '7'];
-            }
+            default => []
+        };
 
-            return DesignationResource::collection(
-                Designation::whereNotIn('id', $roleNot)->get()
-            );
-
-        } elseif($user->designation_id === 1){
-
-            $school = Schools::where('sch_id', $user->sch_id)->first();
-
-            if($school->pricing_id == 1 || $school->pricing_id == 2){
-                $roleNot = ['1', '2' ,'6', '7'];
-            }else{
-                $roleNot = ['1', '6', '7'];
-            }
-
-            return DesignationResource::collection(Designation::whereNotIn('id', $roleNot)->get());
-
-        }
+        return DesignationResource::collection(
+            Designation::whereNotIn('id', $roleNot)->get()
+        );
     }
 
     public function preextra(Request $request): JsonResponse
@@ -315,7 +304,7 @@ class OtherController extends Controller
 
         return $this->success($school, "Admission number settings");
     }
-    
+
     public function send(Request $request)
     {
         $request->validate([

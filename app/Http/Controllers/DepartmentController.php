@@ -5,16 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DepartmentRequest;
 use App\Http\Resources\DepartmentResource;
 use App\Models\Department;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DepartmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    use HttpResponses;
+
     public function index()
     {
         $user = Auth::user();
@@ -25,20 +23,9 @@ class DepartmentController extends Controller
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Department List',
-            'data' => $depart
-        ];
+        return $this->success($depart, 'All Departments Fetched Successfully');
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(DepartmentRequest $request)
     {
         $request->validated($request->all());
@@ -51,49 +38,22 @@ class DepartmentController extends Controller
             'department_id' => $request->department_id
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Department Created Successfully',
-            "data" => $departm
-        ];
+        return $this->success($departm, 'Department Created Successfully');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show(Department $department)
     {
         $departments = new DepartmentResource($department);
 
-        return [
-            'status' => 'true',
-            'message' => 'Department Details',
-            'data' => $departments
-        ];
+        return $this->success($departments, 'Department Details');
     }
-
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Department $department)
     {
         $department->update($request->all());
 
         $depart = new DepartmentResource($department);
 
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully',
-            "data" => $depart
-        ];
+        return $this->success($depart, 'Updated Successfully');
     }
 
     /**
