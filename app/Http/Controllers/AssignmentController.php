@@ -103,7 +103,7 @@ class AssignmentController extends Controller
             ->where('campus', $user->campus)
             ->where('period', $request->period)
             ->where('term', $request->term)
-            ->where('session', $request->input('session'))
+            ->where('session', $request->session)
             ->where('question_type', $request->type)
             ->where('week', $request->week)
             ->get();
@@ -193,7 +193,7 @@ class AssignmentController extends Controller
         ->where('campus', $user->campus)
         ->where('period', $request->period)
         ->where('term', $request->term)
-        ->where('session', $request->input('session'))
+        ->where('session', $request->session)
         ->where('question_type', $request->type)
         ->where('week', $request->week)
         ->get();
@@ -348,7 +348,7 @@ class AssignmentController extends Controller
             ->where('campus', $user->campus)
             ->where('period', $request->period)
             ->where('term', $request->term)
-            ->where('session', operator: $request->input('session'))
+            ->where('session', operator: $request->session)
             ->where('question_type', $request->type)
             ->where('week', $request->week)
             ->get();
@@ -373,7 +373,7 @@ class AssignmentController extends Controller
             ->where('student_id', $request->student_id)
             ->where('period', $request->period)
             ->where('term', $request->term)
-            ->where('session', $request->input('session'))
+            ->where('session', $request->session)
             ->where('question_type', $request->type)
             ->where('week', $request->week)
             ->get();
@@ -512,7 +512,7 @@ class AssignmentController extends Controller
             ->where('campus', $user->campus)
             ->where('period', $request->period)
             ->where('term', $request->term)
-            ->where('session', operator: $request->input('session'))
+            ->where('session', operator: $request->session)
             ->where('question_type', $request->type)
             ->where('week', $request->week)
             ->get();
@@ -531,7 +531,7 @@ class AssignmentController extends Controller
             ->where('student_id', $request->student_id)
             ->where('period', $request->period)
             ->where('term', $request->term)
-            ->where('session', operator: $request->input('session'))
+            ->where('session', operator: $request->session)
             ->where('question_type', $request->type)
             ->get();
 
@@ -557,7 +557,7 @@ class AssignmentController extends Controller
             ->where('campus', $user->campus)
             ->where('period', $request->period)
             ->where('term', $request->term)
-            ->where('session', operator: $request->input('session'))
+            ->where('session', operator: $request->session)
             ->where('question_type', $request->question_type)
             ->where('week', $request->week)
             ->get();
