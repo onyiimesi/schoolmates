@@ -8,7 +8,6 @@ use App\Http\Resources\AssignmentMarkResource;
 use App\Http\Resources\AssignmentResource;
 use App\Http\Resources\AssignmentResultResource;
 use App\Http\Resources\TheoryResource;
-use App\Models\AcademicPeriod;
 use App\Models\Assignment;
 use App\Models\AssignmentAnswer;
 use App\Models\AssignmentMark;
@@ -23,20 +22,17 @@ class AssignmentController extends Controller
 {
     use HttpResponses;
 
-    const SUCCESS = 'Submitted Successfully';
-    const UPDATE = 'Updated Successfully';
-    const ASSIGNMENT_ERROR = 'Assignment does not exist';
-    const ASSIGNMENT_MARK_ERROR = 'Does not exist';
+    public const SUCCESS = 'Submitted Successfully';
+    public const UPDATE = 'Updated Successfully';
+    public const ASSIGNMENT_ERROR = 'Assignment does not exist';
+    public const ASSIGNMENT_MARK_ERROR = 'Does not exist';
 
     public function objective(Request $request)
     {
-
         $user = Auth::user();
-
         $data = $request->json()->all();
 
         foreach ($data as $item) {
-
             Assignment::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -65,41 +61,15 @@ class AssignmentController extends Controller
 
     public function theory(Request $request)
     {
-
         $user = Auth::user();
         $data = $request->json()->all();
 
         foreach ($data as $item) {
 
-            if($item['image']){
+            if ($item['image']) {
                 $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
-
                 $file = $item['image'];
-                $baseFolder = 'assignment';
-                $userFolder = $cleanSchId;
-                $folderPath = public_path($baseFolder . '/' . $userFolder);
-
-                $folderName = env('ASSIGNMENT_FOLDER') . '/' . $cleanSchId;
-                $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
-                $replace = substr($file, 0, strpos($file, ',')+1);
-                $image = str_replace($replace, '', $file);
-
-                $image = str_replace(' ', '+', $image);
-                $file_name = time().'.'.$extension;
-
-                if (!file_exists(public_path($baseFolder))) {
-                    mkdir(public_path($baseFolder), 0777, true);
-                }
-
-                if (!file_exists($folderPath)) {
-                    mkdir($folderPath, 0777, true);
-                }
-
-                file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
-
-                $paths = $folderName.'/'.$file_name;
-            }else{
-                $paths = "";
+                $imagePath = uploadImage($file, 'assignment', $cleanSchId);
             }
 
             Assignment::create([
@@ -114,7 +84,7 @@ class AssignmentController extends Controller
                 'question_number' => $item['question_number'],
                 'answer' => $item['answer'],
                 'subject_id' => $item['subject_id'],
-                'image' => $paths,
+                'image' => $imagePath['url'] ?? null,
                 'total_question' => $item['total_question'],
                 'question_mark' => $item['question_mark'],
                 'total_mark' => $item['total_mark'],
@@ -130,33 +100,26 @@ class AssignmentController extends Controller
         $user = Auth::user();
 
         $assign = Assignment::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('question_type', $request->type)
-        ->where('week', $request->week)
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->input('session'))
+            ->where('question_type', $request->type)
+            ->where('week', $request->week)
+            ->get();
 
-        if($request->type === "objective"){
-            $assigns = AssignmentResource::collection($assign);
-        }else{
-            $assigns = TheoryResource::collection($assign);
-        }
+        $assigns = $request->type === "objective" ?
+            AssignmentResource::collection($assign) :
+            TheoryResource::collection($assign);
 
-        return [
-            "status" => 'true',
-            "message" => 'List',
-            "data" => $assigns
-        ];
+        return $this->success($assigns, 'List');
     }
-
     public function objectiveanswer(Request $request)
     {
         $user = Auth::user();
 
         if($user->designation_id === 3){
-            return $this->error('', 'Unauthenticated', 401);
+            return $this->error(null, 'Unauthenticated', 401);
         }
 
         $data = $request->json()->all();
@@ -183,19 +146,15 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => SELF::SUCCESS
-        ];
+        return $this->success(null, SELF::SUCCESS);
     }
 
     public function theoryanswer(Request $request)
     {
-
         $user = Auth::user();
 
-        if($user->designation_id === 3){
-            return $this->error('', 'Unauthenticated', 401);
+        if ($user->designation_id === 3) {
+            return $this->error(null, 'Unauthenticated', 401);
         }
 
         $data = $request->json()->all();
@@ -224,7 +183,6 @@ class AssignmentController extends Controller
         }
 
         return $this->success(null, SELF::SUCCESS, 200);
-
     }
 
     public function getanswer(Request $request)
@@ -235,7 +193,7 @@ class AssignmentController extends Controller
         ->where('campus', $user->campus)
         ->where('period', $request->period)
         ->where('term', $request->term)
-        ->where('session', $request->session)
+        ->where('session', $request->input('session'))
         ->where('question_type', $request->type)
         ->where('week', $request->week)
         ->get();
@@ -248,11 +206,7 @@ class AssignmentController extends Controller
             $assigns = [];
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'List',
-            "data" => $assigns
-        ];
+        return $this->success($assigns, 'List');
     }
 
     public function objectivemark(Request $request)
@@ -283,23 +237,18 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => SELF::SUCCESS
-        ];
-
+        return $this->success(null, SELF::SUCCESS);
     }
 
     public function updateobjectivemark(Request $request)
     {
-        $user = Auth::user();
         $data = $request->json()->all();
 
         foreach ($data as $item) {
             $assign = AssignmentMark::where('id', $item['id'])->first();
 
-            if(!$assign){
-                return $this->error('', SELF::ASSIGNMENT_MARK_ERROR, 400);
+            if(! $assign) {
+                return $this->error(null, SELF::ASSIGNMENT_MARK_ERROR, 400);
             }
 
             $assign->update([
@@ -321,11 +270,7 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => SELF::UPDATE
-        ];
-
+        return $this->success(null, SELF::UPDATE);
     }
 
     public function theorymark(Request $request)
@@ -334,7 +279,6 @@ class AssignmentController extends Controller
         $data = $request->json()->all();
 
         foreach ($data as $item) {
-
             AssignmentMark::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -354,7 +298,6 @@ class AssignmentController extends Controller
                 'teacher_mark' =>  $item['teacher_mark'],
                 'week' => $item['week']
             ]);
-
         }
 
         return $this->success(null, SELF::SUCCESS, 200);
@@ -366,11 +309,10 @@ class AssignmentController extends Controller
         $data = $request->json()->all();
 
         foreach ($data as $item) {
-            $assign = AssignmentMark::where('id', $item['id'])
-            ->first();
+            $assign = AssignmentMark::where('id', $item['id'])->first();
 
-            if(!$assign){
-                return $this->error('', SELF::ASSIGNMENT_MARK_ERROR, 400);
+            if (! $assign) {
+                return $this->error(null, SELF::ASSIGNMENT_MARK_ERROR, 400);
             }
 
             $assign->update([
@@ -394,10 +336,7 @@ class AssignmentController extends Controller
             ]);
         }
 
-        return [
-            "status" => 'true',
-            "message" => SELF::UPDATE
-        ];
+        return $this->success(null, SELF::UPDATE);
     }
 
     public function marked(Request $request)
@@ -405,28 +344,24 @@ class AssignmentController extends Controller
         $user = Auth::user();
 
         $assign = AssignmentMark::with('assignment')
-        ->where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('question_type', $request->type)
-        ->where('week', $request->week)
-        ->get();
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', operator: $request->input('session'))
+            ->where('question_type', $request->type)
+            ->where('week', $request->week)
+            ->get();
 
-        if($request->type === "objective"){
+        if ($request->type === "objective") {
             $assigns = AssignmentMarkResource::collection($assign);
-        }elseif($request->type === "theory"){
+        } elseif ($request->type === "theory") {
             $assigns = AssignmentMarkResource::collection($assign);
-        }else{
+        } else {
             $assigns = [];
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'List',
-            "data" => $assigns
-        ];
+        return $this->success($assigns, 'List');
     }
 
     public function markedbystudent(Request $request)
@@ -434,28 +369,24 @@ class AssignmentController extends Controller
         $user = Auth::user();
 
         $assign = AssignmentMark::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('student_id', $request->student_id)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('question_type', $request->type)
-        ->where('week', $request->week)
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('student_id', $request->student_id)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->input('session'))
+            ->where('question_type', $request->type)
+            ->where('week', $request->week)
+            ->get();
 
-        if($request->type === "objective"){
+        if ($request->type === "objective") {
             $assigns = AssignmentMarkResource::collection($assign);
-        }elseif($request->type === "theory"){
+        } elseif ($request->type === "theory") {
             $assigns = AssignmentMarkResource::collection($assign);
-        }else{
+        } else {
             $assigns = [];
         }
 
-        return [
-            "status" => 'true',
-            "message" => 'List',
-            "data" => $assigns
-        ];
+        return $this->success($assigns, 'List');
     }
 
     public function editObjAssign(Request $request)
@@ -463,11 +394,10 @@ class AssignmentController extends Controller
         $data = $request->json()->all();
 
         foreach ($data as $item) {
-
             $assign = Assignment::where('id', $item['id'])->first();
 
-            if(!$assign){
-                return $this->error('', SELF::ASSIGNMENT_ERROR, 400);
+            if (! $assign) {
+                return $this->error(null, SELF::ASSIGNMENT_ERROR, 400);
             }
 
             $assign->update([
@@ -488,35 +418,36 @@ class AssignmentController extends Controller
 
     public function editTheoAssign(Request $request)
     {
-        $assign = Assignment::where('id', $request->id)->first();
+        $data = $request->json()->all();
 
-        if(!$assign){
-            return $this->error('', SELF::ASSIGNMENT_ERROR, 400);
+        foreach ($data as $item) {
+            $assign = Assignment::where('id', $item['id'])->first();
+
+            if (! $assign) {
+                return $this->error(null, SELF::ASSIGNMENT_ERROR, 400);
+            }
+
+            $assign->update([
+                'question' => $item['question'],
+                'question_number' => $item['question_number'],
+                'question_mark' => $item['question_mark'],
+                'answer' => $item['answer'],
+                'status' => $item['status']
+            ]);
         }
 
-        $assign->update([
-            'question' => $request->question,
-            'question_number' => $request->question_number,
-            'question_mark' => $request->question_mark,
-            'answer' => $request->answer,
-            'status' => $request->status
-        ]);
-
-        return [
-            "status" => 'true',
-            "message" => 'Updated Successfully'
-        ];
+        return $this->success(null, 'Updated Successfully');
     }
 
     public function delAssign(Request $request)
     {
-        $ass = Assignment::where('id', $request->id)->first();
+        $assignment = Assignment::where('id', $request->id)->first();
 
-        if(!$ass){
-            return $this->error('', SELF::ASSIGNMENT_ERROR, 400);
+        if (! $assignment) {
+            return $this->error(null, SELF::ASSIGNMENT_ERROR, 400);
         }
 
-        $ass->delete();
+        $assignment->delete();
 
         return response(null, 204);
     }
@@ -565,15 +496,12 @@ class AssignmentController extends Controller
             ]);
 
             DB::commit();
+
+            return $this->success(null, 'Submitted Successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error(null, $e->getMessage(), 400);
         }
-
-        return [
-            "status" => 'true',
-            "message" => SELF::SUCCESS
-        ];
     }
 
     public function resultassign(Request $request)
@@ -581,21 +509,17 @@ class AssignmentController extends Controller
         $user = Auth::user();
 
         $assign = AssignmentResult::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('question_type', $request->type)
-        ->where('week', $request->week)
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', operator: $request->input('session'))
+            ->where('question_type', $request->type)
+            ->where('week', $request->week)
+            ->get();
 
         $assigns = AssignmentResultResource::collection($assign);
 
-        return [
-            "status" => 'true',
-            "message" => 'List',
-            "data" => $assigns
-        ];
+        return $this->success($assigns, 'List');
     }
 
     public function resultassignstu(Request $request)
@@ -603,21 +527,17 @@ class AssignmentController extends Controller
         $user = Auth::user();
 
         $assign = AssignmentResult::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('student_id', $request->student_id)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('question_type', $request->type)
-        ->get();
+            ->where('campus', $user->campus)
+            ->where('student_id', $request->student_id)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', operator: $request->input('session'))
+            ->where('question_type', $request->type)
+            ->get();
 
         $assigns = AssignmentResultResource::collection($assign);
 
-        return [
-            "status" => 'true',
-            "message" => 'List',
-            "data" => $assigns
-        ];
+        return $this->success($assigns, 'List');
     }
 
     public function publish(Request $request)
@@ -628,20 +548,21 @@ class AssignmentController extends Controller
             'session' => ['required', 'string'],
             'question_type' => ['required', 'string'],
             'week' => ['required', 'string'],
-            'is_publish' => ['required', 'numeric', 'in:0,1']
+            'is_publish' => ['required', 'boolean', 'in:0,1']
         ]);
 
         $user = Auth::user();
-        $assign = Assignment::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('period', $request->period)
-        ->where('term', $request->term)
-        ->where('session', $request->session)
-        ->where('question_type', $request->question_type)
-        ->where('week', $request->week)
-        ->get();
 
-        if ($request->is_publish == 1) {
+        $assign = Assignment::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', operator: $request->input('session'))
+            ->where('question_type', $request->question_type)
+            ->where('week', $request->week)
+            ->get();
+
+        if ($request->is_publish) {
             $assign->each(function ($assignment) {
                 $assignment->update([
                     'status' => 'published'
@@ -655,6 +576,6 @@ class AssignmentController extends Controller
             });
         }
 
-        return $this->success(null, "Updated successfully!", 200);
+        return $this->success(null, "Updated successfully!");
     }
 }
