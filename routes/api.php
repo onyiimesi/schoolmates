@@ -353,7 +353,7 @@ Route::middleware('check.allowed.url')
             Route::post('/objective-assignment', [AssignmentController::class, 'objective']);
             Route::post('/theory-assignment', [AssignmentController::class, 'theory']);
             Route::patch("/edit-obj-assignment", [AssignmentController::class, 'editObjAssign']);
-            Route::patch("/edit-thoery-assignment/{id}", [AssignmentController::class, 'editTheoAssign']);
+            Route::patch("/edit-thoery-assignment", [AssignmentController::class, 'editTheoAssign']);
             Route::delete("/assignment/{id}", [AssignmentController::class, 'delAssign']);
             Route::get('/assignment/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'assign'])
                 ->where('session', '.+');
