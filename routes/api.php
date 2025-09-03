@@ -350,13 +350,12 @@ Route::middleware('check.allowed.url')
                 ->where('session', '.+');
 
             // Assignment
+            Route::get('/assignment', [AssignmentController::class, 'assign']);
             Route::post('/objective-assignment', [AssignmentController::class, 'objective']);
             Route::post('/theory-assignment', [AssignmentController::class, 'theory']);
             Route::patch("/edit-obj-assignment", [AssignmentController::class, 'editObjAssign']);
             Route::patch("/edit-thoery-assignment", [AssignmentController::class, 'editTheoAssign']);
             Route::delete("/assignment/{id}", [AssignmentController::class, 'delAssign']);
-            Route::get('/assignment/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'assign'])
-                ->where('session', '.+');
 
             Route::post('/objective-assignment-answer', [AssignmentController::class, 'objectiveanswer']);
             Route::post('/theory-assignment-answer', [AssignmentController::class, 'theoryanswer']);

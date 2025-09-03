@@ -99,16 +99,26 @@ class AssignmentController extends Controller
     {
         $user = Auth::user();
 
+        $period = $request->query('period');
+        $term = $request->query('term');
+        $session = $request->query('session');
+        $type = $request->query('type');
+        $week = $request->query('week');
+        $subjectId = $request->query('subject_id');
+
         $assign = Assignment::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('period', $request->period)
-            ->where('term', $request->term)
-            ->where('session', $request->session)
-            ->where('question_type', $request->type)
-            ->where('week', $request->week)
+            ->where('period', $period)
+            ->where('term', $term)
+            ->where('session', $session)
+            ->where('question_type', $type)
+            ->where('week', $week)
+            ->when($subjectId, function ($query, $subjectId) {
+                return $query->where('subject_id', $subjectId);
+            })
             ->get();
 
-        $assigns = $request->type === "objective" ?
+        $assigns = $type === "objective" ?
             AssignmentResource::collection($assign) :
             TheoryResource::collection($assign);
 
