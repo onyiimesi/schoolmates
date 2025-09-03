@@ -99,12 +99,23 @@ class AssignmentController extends Controller
     {
         $user = Auth::user();
 
-        $period = $request->query('period');
-        $term = $request->query('term');
-        $session = $request->query('session');
-        $type = $request->query('type');
-        $week = $request->query('week');
-        $subjectId = $request->query('subject_id');
+        $validated = $request->validate([
+            'period' => 'required',
+            'term' => 'required',
+            'session' => 'required',
+            'type' => 'required|in:objective,theory',
+            'week' => 'required',
+            'subject_id' => 'sometimes|nullable'
+        ]);
+
+        [$period, $term, $session, $type, $week, $subjectId] = [
+            $validated['period'],
+            $validated['term'],
+            $validated['session'],
+            $validated['type'],
+            $validated['week'],
+            $validated['subject_id'] ?? null
+        ];
 
         $assign = Assignment::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
@@ -124,6 +135,7 @@ class AssignmentController extends Controller
 
         return $this->success($assigns, 'List');
     }
+
     public function objectiveanswer(Request $request)
     {
         $user = Auth::user();
