@@ -12,7 +12,6 @@ use App\Services\Upload\UploadService;
 use App\Traits\HttpResponses;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
-use ImageKit\ImageKit;
 
 class LessonNoteService extends Controller
 {
@@ -20,14 +19,16 @@ class LessonNoteService extends Controller
 
     public function addLessonNote($request)
     {
-        try {
-            $auth = $this->auth();
-            $user = Staff::where('id', $request->staff_id)
-            ->where('sch_id', $auth->sch_id)
-            ->where('campus', $auth->campus)->first();
+        $auth = $this->auth();
 
-            if(!$user){
-                throw new LessonNoteException("User does not exist", 400);
+        try {
+            $user = Staff::where('id', $request->staff_id)
+                ->where('sch_id', $auth->sch_id)
+                ->where('campus', $auth->campus)
+                ->first();
+
+            if (! $user) {
+                throw new LessonNoteException('User does not exist', 400);
             }
 
             $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
@@ -45,63 +46,67 @@ class LessonNoteService extends Controller
                 'class_id' => $request->class_id,
                 'topic' => $request->topic,
                 'description' => $request->description,
-                'file' => $data->url ?? $data['url'] ?? $data,
+                'file' => $data['url'] ?? $data,
                 'file_name' => $request->file_name,
-                'file_id' => $data->file_id ?? $data['file_id'] ?? null,
-                'submitted_by' => $user->surname . ' '. $user->firstname . ' ' . $user->middlename,
+                'file_id' => $data['file_id'] ?? null,
+                'submitted_by' => "{$user->surname} {$user->firstname} {$user->middlename}",
                 'date_submitted' => Carbon::now(),
                 'status' => "not approved"
             ]);
 
-            return $this->success(null, "Created successfully");
-
+            return $this->success(null, 'Created successfully' ,201);
         } catch (LessonNoteException $e) {
             return $e->render($request);
 
         } catch (\Exception $e) {
-            return $this->error(null, $e->getMessage(), 500);
+            return $this->error(null, $e->getMessage(), 400);
         }
     }
 
     public function getLessonNote($request)
     {
         $auth = $this->auth();
+
         $user = Staff::where('sch_id', $auth->sch_id)
-        ->where('campus', $auth->campus)->firstOrFail();
+            ->where('campus', $auth->campus)
+            ->firstOrFail();
 
         $data = LessonNote::where([
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'term' => $request->term,
-            'session' => $request->session,
-            'class_id' => $request->class_id,
-            'subject_id' => $request->subject_id,
-            'week' => $request->week,
-        ])->get();
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'term' => $request->term,
+                'session' => $request->session,
+                'class_id' => $request->class_id,
+                'subject_id' => $request->subject_id,
+                'week' => $request->week,
+            ])
+            ->get();
 
-        $data = LessonNoteResource::collection($data);
-        return $this->success($data, "Lesson note");
+        return $this->success(LessonNoteResource::collection($data), "Lesson note");
     }
 
     public function getOneLessonNote($request)
     {
         $auth = $this->auth();
+
         $user = Staff::where('sch_id', $auth->sch_id)
-        ->where('campus', $auth->campus)->firstOrFail();
+            ->where('campus', $auth->campus)
+            ->firstOrFail();
 
         $data = LessonNote::where([
-            'id' => $request->lesson_id,
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'term' => $request->term,
-            'session' => $request->session,
-            'class_id' => $request->class_id,
-            'subject_id' => $request->subject_id,
-            'week' => $request->week
-        ])->first();
+                'id' => $request->lesson_id,
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'term' => $request->term,
+                'session' => $request->session,
+                'class_id' => $request->class_id,
+                'subject_id' => $request->subject_id,
+                'week' => $request->week
+            ])
+            ->first();
 
-        if(!$data){
-            throw new LessonNoteException("Data not found!", 404);
+        if (! $data) {
+            return $this->error(null, 'Data not found!', 404);
         }
 
         $data = new LessonNoteResource($data);
@@ -147,11 +152,11 @@ class LessonNoteService extends Controller
         $lesson = LessonNote::findOrFail($id);
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
-        if(App::environment('production')){
+        if(app()->environment('production')){
             $fileId = $lesson->file_id;
             (new DeleteService($fileId, null))->run();
 
-        } elseif(App::environment(['staging', 'local'])){
+        } else {
             if ($lesson->file) {
                 $filename = basename($lesson->file);
                 $oldPath = public_path('lessonnote/'. $cleanSchId .'/' . $filename);
