@@ -23,7 +23,7 @@ class UploadService
 
     public function run()
     {
-        if(App::environment('production')){
+        if(App::environment('production')) {
 
             $file = $this->file;
             $folderName = $this->name;
@@ -58,8 +58,7 @@ class UploadService
                 (new DeleteService($fileId, null))->run();
             }
 
-            $response = (new ImageKitService($file, $file_name, $path))->run();
-            $data = $response->getData();
+            $data = (new ImageKitService($file, $file_name, $path))->run();
 
         } elseif(App::environment(['staging', 'local'])){
 
