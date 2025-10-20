@@ -16,10 +16,13 @@ class DepartmentController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $campus = request()->query('campus');
 
         $depart = DepartmentResource::collection(
             Department::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
+            ->when($campus, function ($query) use ($campus) {
+                return $query->where('campus', $campus);
+            })
             ->get()
         );
 
@@ -47,6 +50,7 @@ class DepartmentController extends Controller
 
         return $this->success($departments, 'Department Details');
     }
+
     public function update(Request $request, Department $department)
     {
         $department->update($request->all());
