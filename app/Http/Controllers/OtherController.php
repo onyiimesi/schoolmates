@@ -102,10 +102,7 @@ class OtherController extends Controller
         $school = Schools::where('sch_id', $user->sch_id)->first();
 
         $roleNot = match ($user->designation_id) {
-            3, 6 => ($school->pricing_id == 1 || $school->pricing_id == 3)
-                ? ['2', '6', '7']
-                : ['6', '7'],
-
+            3, 6 => ['6', '7'],
             1 => ($school->pricing_id == 1 || $school->pricing_id == 2)
                 ? ['1', '2', '6', '7']
                 : ['1', '6', '7'],
