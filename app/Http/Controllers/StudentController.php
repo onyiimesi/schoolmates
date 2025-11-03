@@ -41,6 +41,7 @@ class StudentController extends Controller
                     "%{$search}%"
                 )
             )
+            ->latest()
             ->paginate(25);
 
         $studentCollection = StudentResource::collection($students);

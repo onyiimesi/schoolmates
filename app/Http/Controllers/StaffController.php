@@ -40,6 +40,7 @@ class StaffController extends Controller
                     "%{$search}%"
                 )
             )
+            ->latest()
             ->paginate(25);
 
         $staffCollection = StaffsResource::collection($staff);
