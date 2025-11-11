@@ -238,15 +238,15 @@ class StudentController extends Controller
 
     private function handleCount($count, $getplan)
     {
-        if($count >= 50 && $getplan->id == 1){
+        if ($count >= 150 && $getplan->id == 1) {
             return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
         }
 
-        if($count >= 250 && $getplan->id == 2){
+        if ($count >= 350 && $getplan->id == 2) {
             return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
         }
 
-        if($count >= 500 && $getplan->id == 3){
+        if ($count >= 1000 && $getplan->id == 3) {
             return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
         }
     }
