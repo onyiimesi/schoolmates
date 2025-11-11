@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\GetCampusAction;
 use App\Http\Requests\ClassRequest;
 use App\Http\Resources\ClassResource;
+use App\Http\Resources\PreSchoolResource;
 use App\Models\Campus;
 use App\Models\ClassModel;
+use App\Models\PreSchool;
 use App\Models\Result;
+use App\Models\Staff;
 use App\Models\SubjectClass;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
@@ -25,13 +29,43 @@ class ClassController extends Controller
     {
         $user = Auth::user();
 
-        $query = ClassModel::where('sch_id', $user->sch_id);
+        $staff = Staff::where('sch_id', $user->sch_id)
+            ->where('username', $user->username)
+            ->first();
 
-        if ($user->designation_id != 6) {
-            $query->where('campus', $user->campus);
+        if (! $staff) {
+            return $this->error(null, 'Staff not found', 404);
         }
 
-        $classes = ClassResource::collection($query->get());
+        $campus = $staff->getCampus();
+
+        if (! $campus) {
+            return $this->error(null, 'Campus not found', 404);
+        }
+
+        if (! $campus->is_preschool) {
+            $query = ClassModel::where('sch_id', $user->sch_id);
+
+            if ($user->designation_id != 6) {
+                $query->where('campus', $campus->name);
+            }
+
+            $classes = ClassResource::collection($query->get());
+        } else {
+            $classData = PreSchool::where('sch_id', $user->sch_id)
+                ->where('campus', $campus->name)
+                ->get();
+
+            $classes = $classData->map(function ($class) {
+                return [
+                    'id' => (string)$class->id,
+                    'attributes' => [
+                        'campus' => (string)$class->campus,
+                        'class_name' => (string)$class->name,
+                    ]
+                ];
+            });
+        }
 
         return $this->success($classes, 'Class List');
     }

@@ -6,11 +6,14 @@ use App\Http\Requests\PreSchoolRequest;
 use App\Http\Resources\PreSchoolResource;
 use App\Models\PreSchool;
 use App\Models\PreSchoolSubjectClass;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PreSchoolController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -25,11 +28,7 @@ class PreSchoolController extends Controller
             ->where('campus', $user->campus)->get()
         );
 
-        return [
-            'status' => '',
-            'message' => 'Preschools',
-            'data' => $preschool
-        ];
+        return $this->success($preschool, 'Preschools');
     }
 
     /**

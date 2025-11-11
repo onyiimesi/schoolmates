@@ -83,6 +83,17 @@ class Staff extends Authenticatable implements Auditable
         return $this->hasMany(StaffScanAttendance::class, 'staff_id');
     }
 
+    public function getCampus()
+    {
+        $campus = Campus::where('name', $this->campus)->first();
+
+        if ($campus) {
+            return $campus;
+        }
+
+        return null;
+    }
+
     public static function generateUsername(string $firstname, string $surname): string
     {
         $baseUsername = strtolower($firstname . '.' . $surname);
