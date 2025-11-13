@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Campus extends Model implements Auditable
 {
@@ -26,6 +27,21 @@ class Campus extends Model implements Auditable
         'status',
         'created_by'
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_preschool' => 'boolean'
+        ];
+    }
+
+    protected function isPreschool(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+            set: fn ($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN)
+        );
+    }
 
     public function school()
     {
