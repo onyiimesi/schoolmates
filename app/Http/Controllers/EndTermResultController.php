@@ -211,7 +211,7 @@ class EndTermResultController extends Controller
         ];
     }
 
-    public function getResult()
+    public function getResult(GeneralResultService $generalResultService)
     {
         $user = userAuth();
 
@@ -228,14 +228,14 @@ class EndTermResultController extends Controller
             'status.in' => 'status must be either released, withheld or not-released',
         ]);
 
-        return $this->getStudentResults($user, $validated);
+        return $this->getStudentResults($user, $validated, $generalResultService);
     }
 
-    private function getStudentResults($user, array $params)
+    private function getStudentResults($user, array $params, GeneralResultService $generalResultService)
     {
         return match ($params['period']) {
-            PeriodicName::FIRSTHALF => (new GeneralResultService())->firstHalf($user, $params),
-            PeriodicName::SECONDHALF => (new GeneralResultService())->secondHalf($user, $params),
+            PeriodicName::FIRSTHALF => $generalResultService->firstHalf($user, $params),
+            PeriodicName::SECONDHALF => $generalResultService->secondHalf($user, $params),
             default => $this->error(null, 'Invalid result type', 400),
         };
     }

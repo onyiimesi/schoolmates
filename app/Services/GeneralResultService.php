@@ -48,12 +48,12 @@ class GeneralResultService
     public function secondHalf($user, array $params)
     {
         if ($params['period'] !== PeriodicName::SECONDHALF) {
-            return $this->error('', 'Invalid Period', 400);
+            return $this->error(null, 'Invalid Period', 400);
         }
 
         $scoreSetting = $this->getScoreSetting($user);
 
-        if (!$scoreSetting || !$scoreSetting->scoreOption) {
+        if (! $scoreSetting || ! $scoreSetting->scoreOption) {
             return $this->error(null, 'Score setting not found', 400);
         }
 
