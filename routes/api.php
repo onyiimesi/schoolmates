@@ -210,10 +210,13 @@ Route::middleware('check.allowed.url')
 
             Route::middleware(['throttle:apis'])->group(function () {
                 //New result form
-                Route::post('midTermResult', [ResultTwoController::class, 'midTerm']);
-                Route::post('endTermResult', [ResultTwoController::class, 'endTerm']);
-                Route::patch('release/result', [ResultTwoController::class, 'release']);
-                Route::patch('withhold/result', [ResultTwoController::class, 'hold']);
+                Route::controller(ResultTwoController::class)
+                    ->group(function () {
+                        Route::post('midTermResult', 'midTerm');
+                        Route::post('endTermResult', 'endTerm');
+                        Route::patch('release/result', 'release');
+                        Route::patch('withhold/result', 'hold');
+                    });
 
                 // New Result API
                 Route::get("/get-result", [EndTermResultController::class, 'getResult']);
@@ -246,20 +249,17 @@ Route::middleware('check.allowed.url')
             });
 
             //PreSchool Subject
-            Route::post('/preschoolsubject', [PreSchoolSubjectController::class, 'addSubject']);
-            Route::get('/preschoolsubject/{period}/{term}/{session}', [PreSchoolSubjectController::class, 'getSubject'])
-                ->where('session', '.+');
-
-            Route::get('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'getSubjectID']);
-            Route::patch('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'editSubject']);
-            Route::delete('/preschoolsubject/{id}', [PreSchoolSubjectController::class, 'deleteSubject']);
-
-            Route::post('/preschoolsubjectclass', [PreSchoolSubjectController::class, 'addSubjectClass']);
-            Route::get('/preschoolsubjectclass/{period}/{term}/{session}', [PreSchoolSubjectController::class, 'getSubjectClass'])
-                ->where('session', '.+');
-
-            Route::get('/preschoolsubjects/{period}/{term}/{session}/{class}', [PreSchoolSubjectController::class, 'getSubjectByClass'])
-                ->where('session', '.+');
+            Route::controller(PreSchoolSubjectController::class)
+                ->group(function () {
+                    Route::post('/preschoolsubject', 'addSubject');
+                    Route::get('/preschoolsubject/{period}/{term}/{session}', 'getSubject')->where('session', '.+');
+                    Route::get('/preschoolsubject/{id}', 'getSubjectID');
+                    Route::patch('/preschoolsubject/{id}', 'editSubject');
+                    Route::delete('/preschoolsubject/{id}', 'deleteSubject');
+                    Route::post('/preschoolsubjectclass', 'addSubjectClass');
+                    Route::get('/preschoolsubjectclass/{period}/{term}/{session}', 'getSubjectClass')->where('session', '.+');
+                    Route::get('/preschoolsubjects/{period}/{term}/{session}/{class}', 'getSubjectByClass')->where('session', '.+');
+                });
 
             //Search Routes
             Route::get("/studentsessionsearch/{session}", [SessionSearchController::class, 'sessionsearch'])
@@ -298,11 +298,6 @@ Route::middleware('check.allowed.url')
             Route::get("/studentinvoice", [StudentInvoiceController::class, 'studentinvoices']);
             Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
             Route::get("/school", [SchoolsController::class, 'schools']);
-            Route::get("/subject/{class}", [SubjectByClassController::class, 'subjectbyclass']);
-            Route::get("/subjectby/{id}", [SubjectByClassController::class, 'subjectbyId']);
-            Route::get("/subject", [SubjectByClassController::class, 'subjectbyCampus']);
-            Route::get("/teacher-subject", [SubjectByClassController::class, 'subjectbyteacher']);
-            Route::get("/student-subject", [SubjectByClassController::class, 'subjectbystudent']);
             Route::get("/student/{session}/{class}", [StudentBySessionTermClassController::class, 'studentsessionclassterm'])
             ->where('session', '.+');
 
@@ -313,20 +308,36 @@ Route::middleware('check.allowed.url')
             Route::get("/studentbyclass/{present_class}", [StudentBySessionTermClassController::class, 'studentbyclass']);
             Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
             ->where('date', '.+');
+
+            Route::controller(SubjectByClassController::class)
+                ->group(function () {
+                    Route::get("/subject/{class}", 'subjectByClass');
+                    Route::get("/subjectby/{id}", 'subjectById');
+                    Route::get("/subject", 'subjectByCampus');
+                    Route::get("/teacher-subject", 'subjectByTeacher');
+                    Route::get("/student-subject", 'subjectByStudent');
+                });
         });
 
         Route::group(['middleware' => ['auth:sanctum']], function(){
-            Route::get('/classpopulation', [ClassPopulationController::class, 'getclasspopulation']);
-            Route::get('/studentpopulation', [ClassPopulationController::class, 'getallpopulation']);
-            Route::get('/staffpopulation', [ClassPopulationController::class, 'getstaffpopulation']);
-            Route::get('/schoolpopulation', [ClassPopulationController::class, 'getschoolpopulation']);
-            Route::get('/teacherpopulation', [ClassPopulationController::class, 'getteacherpopulation']);
-            Route::get('/assignedvehicle', [AssignedVehicleController::class, 'getvehicle']);
-            Route::get('/allassignedvehicle', [AssignedVehicleController::class, 'getvehicles']);
+            Route::controller(ClassPopulationController::class)
+                ->group(function () {
+                    Route::get('/classpopulation', 'getClassPopulation');
+                    Route::get('/studentpopulation', 'getStudentPopulation');
+                    Route::get('/staffpopulation', 'getStaffPopulation');
+                    Route::get('/schoolpopulation', 'getSchoolPopulation');
+                    Route::get('/teacherpopulation', 'getTeacherPopulation');
+                });
+
+            Route::controller(AssignedVehicleController::class)
+                ->group(function () {
+                    Route::get('/assignedvehicle', 'getVehicle');
+                    Route::get('/allassignedvehicle', 'getVehicles');
+                });
 
             Route::post('/busrouting', [BusRoutingController::class, 'route']);
             Route::patch("/releaseresult/{term}/{session}", [ReleaseResultsController::class, 'release'])
-            ->where('session', '.+');
+                ->where('session', '.+');
             Route::post('/healthreport', [HealthReportController::class, 'report']);
             Route::post('/vehiclemaintenance', [VehicleMaintenanceController::class, 'maintenance']);
             Route::get('/vehiclemaintenance', [VehicleMaintenanceController::class, 'getmaintenance']);
@@ -338,7 +349,7 @@ Route::middleware('check.allowed.url')
             Route::delete("/deletefund/{id}", [TransferFundsController::class, 'DeleteFunds']);
             Route::get("/studentexcelimport", [SubjectByClassController::class, 'studentExcelImport']);
             Route::get("/invoicereport/{term}/{session}", [IncomeReportController::class, 'invoicesearch'])
-            ->where('session', '.+');
+                ->where('session', '.+');
 
             Route::get("/audits", [AuditLogController::class, 'getAudit']);
             // PreSchool Result
@@ -350,37 +361,40 @@ Route::middleware('check.allowed.url')
                 ->where('session', '.+');
 
             // Assignment
-            Route::get('/assignment', [AssignmentController::class, 'assign']);
-            Route::post('/objective-assignment', [AssignmentController::class, 'objective']);
-            Route::post('/theory-assignment', [AssignmentController::class, 'theory']);
-            Route::patch("/edit-obj-assignment", [AssignmentController::class, 'editObjAssign']);
-            Route::patch("/edit-thoery-assignment", [AssignmentController::class, 'editTheoAssign']);
-            Route::delete("/assignment/{id}", [AssignmentController::class, 'delAssign']);
+            Route::controller(AssignmentController::class)
+                ->group(function () {
+                    Route::get('/assignment', 'assign');
+                    Route::post('/objective-assignment', 'objective');
+                    Route::post('/theory-assignment', 'theory');
+                    Route::patch("/edit-obj-assignment", 'editObjectiveAssign');
+                    Route::patch("/edit-thoery-assignment", 'editTheoryAssign');
+                    Route::delete("/assignment/{id}", 'delAssign');
 
-            Route::post('/objective-assignment-answer', [AssignmentController::class, 'objectiveanswer']);
-            Route::post('/theory-assignment-answer', [AssignmentController::class, 'theoryanswer']);
-            Route::get('/assignment-answer/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'getanswer'])
-            ->where('session', '.+');
+                    Route::post('/objective-assignment-answer', 'objectiveAnswer');
+                    Route::post('/theory-assignment-answer', 'theoryAnswer');
+                    Route::get('/assignment-answer/{period}/{term}/{session}/{type}/{week}', 'getAnswer')
+                        ->where('session', '.+');
 
-            Route::post('/objective-assignment-mark', [AssignmentController::class, 'objectivemark']);
-            Route::patch('/update/objective/assignment/mark', [AssignmentController::class, 'updateobjectivemark']);
-            Route::post('/theory-assignment-mark', [AssignmentController::class, 'theorymark']);
-            Route::patch('/update/theory/assignment/mark', [AssignmentController::class, 'updatetheorymark']);
-            Route::get('/marked-assignment/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'marked'])
-            ->where('session', '.+');
-            Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'markedbystudent'])
-            ->where('session', '.+');
+                    Route::post('/objective-assignment-mark', 'objectiveMark');
+                    Route::patch('/update/objective/assignment/mark', 'updateObjectiveMark');
+                    Route::post('/theory-assignment-mark', 'theoryMark');
+                    Route::patch('/update/theory/assignment/mark', 'updateTheoryMark');
+                    Route::get('/marked-assignment/{period}/{term}/{session}/{type}/{week}', 'marked')
+                    ->where('session', '.+');
+                    Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}/{week}', 'markedByStudent')
+                    ->where('session', '.+');
 
-            Route::post('/assignment-result', [AssignmentController::class, 'result']);
-            Route::get('/get-assignment-result/{period}/{term}/{session}/{type}/{week}', [AssignmentController::class, 'resultassign'])
-            ->where('session', '.+');
-            Route::patch("/publish/assignment", [AssignmentController::class, 'publish']);
-            Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', [AssignmentController::class, 'resultassignstu'])
-            ->where('session', '.+');
+                    Route::post('/assignment-result', 'result');
+                    Route::get('/get-assignment-result/{period}/{term}/{session}/{type}/{week}', 'resultAssign')
+                    ->where('session', '.+');
+                    Route::patch("/publish/assignment", 'publish');
+                    Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', 'getStudentResult')
+                    ->where('session', '.+');
+                });
 
             Route::get('/assignment/performance', [AssignmentPerformanceController::class, 'chart']);
 
-            //Assign Subjects to class
+            // Assign Subjects to class
             Route::post('/subjects-to-class', [AssignSubjectsController::class, 'assign']);
             Route::post("/add-dos", [SchoolsController::class, 'dos']);
             Route::get("/dos", [SchoolsController::class, 'getdos']);

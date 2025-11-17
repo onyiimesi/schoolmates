@@ -16,6 +16,11 @@ class AssignSubjectsController extends Controller
 
     public function assign(Request $request)
     {
+        $request->validate([
+            'class_id' => 'required|integer|exists:class_models,id',
+            'subjects' => 'required|array',
+        ]);
+
         $user = Auth::user();
 
         $period = AcademicPeriod::where('sch_id', $user->sch_id)
@@ -34,18 +39,18 @@ class AssignSubjectsController extends Controller
         }
 
         DB::transaction(function () use ($user, $request, $period, $class) {
-            // Step 1: Get existing subjects for the class and period
+            // Fetch existing subjects for this session ONLY (no term)
             $existingSubjects = $this->getExistingSubjects($user, $period, $request->class_id);
 
-            // Step 2: Find subjects that need to be deleted
+            // Determine which subjects need to be removed
             $subjectsToDelete = $this->getSubjectsToDelete($existingSubjects, $request->subjects);
 
-            // Step 3: Delete subjects that are no longer in the payload
+            // Delete subjects that were removed from the payload
             if ($subjectsToDelete->isNotEmpty()) {
                 $this->deleteSubjects($user, $period, $request->class_id, $subjectsToDelete);
             }
 
-            // Step 4: Insert or update the subjects in the payload
+            // Assign/update subjects for this session
             $this->assignSubjects($user, $period, $request->class_id, $request->subjects, $class);
         });
 
@@ -56,7 +61,6 @@ class AssignSubjectsController extends Controller
     {
         return SubjectClass::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('term', $period->term)
             ->where('session', $period->session)
             ->where('class_id', $classId)
             ->pluck('subject');
@@ -72,7 +76,6 @@ class AssignSubjectsController extends Controller
     {
         SubjectClass::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('term', $period->term)
             ->where('session', $period->session)
             ->where('class_id', $classId)
             ->whereIn('subject', $subjectsToDelete)
@@ -86,7 +89,6 @@ class AssignSubjectsController extends Controller
                 [
                     'sch_id' => $user->sch_id,
                     'campus' => $user->campus,
-                    'term' => $period->term,
                     'session' => $period->session,
                     'class_id' => $classId,
                     'subject' => $subjectData['name'],

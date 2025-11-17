@@ -19,7 +19,7 @@ class SubjectByClassController extends Controller
 {
     use HttpResponses;
 
-    public function subjectbyclass(Request $request)
+    public function subjectByClass(Request $request)
     {
         $user = Auth::user();
 
@@ -47,7 +47,7 @@ class SubjectByClassController extends Controller
         return $this->success($data, "Subjects");
     }
 
-    public function subjectbyId(Request $request)
+    public function subjectById(Request $request)
     {
         $user = Auth::user();
 
@@ -62,8 +62,7 @@ class SubjectByClassController extends Controller
         }
 
         $subjects = ClassModel::with(['subjects' => function ($query) use($academicPeriod) {
-                $query->where('term', $academicPeriod->term)
-                    ->where('session', $academicPeriod->session);
+                $query->where('session', $academicPeriod->session);
             }])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
@@ -75,7 +74,8 @@ class SubjectByClassController extends Controller
         return $this->success($data, "Subjects");
     }
 
-    public function subjectbyCampus(){
+    public function subjectByCampus()
+    {
         $user = Auth::user();
 
         // if ($user->teacher_type == "subject teacher") {
@@ -150,16 +150,16 @@ class SubjectByClassController extends Controller
         return $this->success($subjectResources, "Subjects retrieved successfully.");
     }
 
-    public function studentExcelImport(){
-
+    public function studentExcelImport()
+    {
         $subject = StudentExcelImportResource::collection(StudentExcelImport::get());
 
         return $this->success($subject, "");
 
     }
 
-    public function subjectbyteacher(){
-
+    public function subjectByTeacher()
+    {
         $user = Auth::user();
 
         if ($user->teacher_type == "subject teacher") {
@@ -181,8 +181,8 @@ class SubjectByClassController extends Controller
         return $this->success($subs, "Subjects");
     }
 
-    public function subjectbystudent(){
-
+    public function subjectByStudent()
+    {
         $user = Auth::user();
 
         if($user->designation_id === 5){
