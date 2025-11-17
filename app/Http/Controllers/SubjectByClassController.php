@@ -34,8 +34,7 @@ class SubjectByClassController extends Controller
         }
 
         $subjects = ClassModel::with(['subjects' => function ($query) use($academicPeriod) {
-                $query->where('term', $academicPeriod->term)
-                    ->where('session', $academicPeriod->session);
+                $query->where('session', $academicPeriod->session);
             }])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
