@@ -13,38 +13,31 @@ class AssignedVehicleController extends Controller
 {
     use HttpResponses;
 
-    public function getvehicle(){
-
+    public function getVehicle()
+    {
         $user = Auth::user();
+        $student = Student::findOrFail($user->id);
 
-        $stud = Student::findOrFail($user->id);
-
-        $bus = BusRoutingResource::collection(
+        $data = BusRoutingResource::collection(
             BusRouting::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('student_id', $stud->id)->get()
+            ->where('student_id', $student->id)
+            ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Your Assigned Bus',
-            'data' => $bus
-        ];
+        return $this->success($data, "Your Assigned Bus");
     }
 
-    public function getvehicles(){
+    public function getVehicles()
+    {
         $user = Auth::user();
 
-        $bus = BusRoutingResource::collection(
+        $data = BusRoutingResource::collection(
             BusRouting::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Assigned Bus',
-            'data' => $bus
-        ];
+        return $this->success($data, "Assigned Bus");
     }
 }

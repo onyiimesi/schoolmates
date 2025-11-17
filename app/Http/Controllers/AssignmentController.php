@@ -136,7 +136,7 @@ class AssignmentController extends Controller
         return $this->success($assigns, 'List');
     }
 
-    public function objectiveanswer(Request $request)
+    public function objectiveAnswer(Request $request)
     {
         $user = Auth::user();
 
@@ -171,7 +171,7 @@ class AssignmentController extends Controller
         return $this->success(null, SELF::SUCCESS);
     }
 
-    public function theoryanswer(Request $request)
+    public function theoryAnswer(Request $request)
     {
         $user = Auth::user();
 
@@ -182,7 +182,6 @@ class AssignmentController extends Controller
         $data = $request->json()->all();
 
         foreach ($data as $item) {
-
             AssignmentAnswer::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -201,13 +200,12 @@ class AssignmentController extends Controller
                 'submitted' =>  $item['submitted'],
                 'week' => $item['week']
             ]);
-
         }
 
         return $this->success(null, SELF::SUCCESS, 200);
     }
 
-    public function getanswer(Request $request)
+    public function getAnswer(Request $request)
     {
         $user = Auth::user();
 
@@ -231,7 +229,7 @@ class AssignmentController extends Controller
         return $this->success($assigns, 'List');
     }
 
-    public function objectivemark(Request $request)
+    public function objectiveMark(Request $request)
     {
         $user = Auth::user();
         $data = $request->json()->all();
@@ -262,7 +260,7 @@ class AssignmentController extends Controller
         return $this->success(null, SELF::SUCCESS);
     }
 
-    public function updateobjectivemark(Request $request)
+    public function updateObjectiveMark(Request $request)
     {
         $data = $request->json()->all();
 
@@ -295,7 +293,7 @@ class AssignmentController extends Controller
         return $this->success(null, SELF::UPDATE);
     }
 
-    public function theorymark(Request $request)
+    public function theoryMark(Request $request)
     {
         $user = Auth::user();
         $data = $request->json()->all();
@@ -325,7 +323,7 @@ class AssignmentController extends Controller
         return $this->success(null, SELF::SUCCESS, 200);
     }
 
-    public function updatetheorymark(Request $request)
+    public function updateTheoryMark(Request $request)
     {
         $user = Auth::user();
         $data = $request->json()->all();
@@ -386,7 +384,7 @@ class AssignmentController extends Controller
         return $this->success($assigns, 'List');
     }
 
-    public function markedbystudent(Request $request)
+    public function markedByStudent(Request $request)
     {
         $user = Auth::user();
 
@@ -411,7 +409,7 @@ class AssignmentController extends Controller
         return $this->success($assigns, 'List');
     }
 
-    public function editObjAssign(Request $request)
+    public function editObjectiveAssign(Request $request)
     {
         $data = $request->json()->all();
 
@@ -438,7 +436,7 @@ class AssignmentController extends Controller
         return $this->success(null, 'Updated Successfully');
     }
 
-    public function editTheoAssign(Request $request)
+    public function editTheoryAssign(Request $request)
     {
         $data = $request->json()->all();
 
@@ -526,7 +524,7 @@ class AssignmentController extends Controller
         }
     }
 
-    public function resultassign(Request $request)
+    public function resultAssign(Request $request)
     {
         $user = Auth::user();
 
@@ -544,7 +542,7 @@ class AssignmentController extends Controller
         return $this->success($assigns, 'List');
     }
 
-    public function resultassignstu(Request $request)
+    public function getStudentResult(Request $request)
     {
         $user = Auth::user();
 

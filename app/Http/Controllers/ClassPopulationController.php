@@ -16,7 +16,7 @@ class ClassPopulationController extends Controller
 {
     use HttpResponses;
 
-    public function getclasspopulation()
+    public function getClassPopulation()
     {
         $staff = Auth::user();
 
@@ -28,7 +28,7 @@ class ClassPopulationController extends Controller
         return $this->success($class, "Class population");
     }
 
-    public function getallpopulation()
+    public function getStudentPopulation()
     {
         $staff = Auth::user();
         $studentCount = Student::where('sch_id', $staff->sch_id)->count();
@@ -36,16 +36,15 @@ class ClassPopulationController extends Controller
         return $this->success($studentCount, "Total Student Population");
     }
 
-    public function getstaffpopulation()
+    public function getStaffPopulation()
     {
         $staff = Auth::user();
-
         $staffCount = Staff::where('sch_id', $staff->sch_id)->count();
 
         return $this->success($staffCount, "Total Staff Population");
     }
 
-    public function getteacherpopulation()
+    public function getTeacherPopulation()
     {
         $staff = Auth::user();
 
@@ -56,7 +55,7 @@ class ClassPopulationController extends Controller
         return $this->success($totalCount, "Total Teacher Population");
     }
 
-    public function getschoolpopulation()
+    public function getSchoolPopulation()
     {
         $user = Auth::user();
         $cacheKey = "school_population_{$user->sch_id}";
