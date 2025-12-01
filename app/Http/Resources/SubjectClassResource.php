@@ -16,8 +16,8 @@ class SubjectClassResource extends JsonResource
     {
         return [
             'attributes' => [
-                'campus' => (string)$this->campus,
-                'class' => (string)$this->class_name,
+                'campus' => (string) $this->campus,
+                'class' => (string) $this->class_name,
                 'subject' => $this->subjects->map(function($name) {
                     return [
                         "id" => $name->id,
