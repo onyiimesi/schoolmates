@@ -164,11 +164,11 @@ class StudentController extends Controller
             return $this->error(null, 'School not found', 404);
         }
 
-        if(! $school->auto_generate) {
-            $request->validate([
-                'admission_number' => ['required', 'string', 'max:255', Rule::unique('students', 'admission_number')],
-            ]);
-        }
+        // if(! $school->auto_generate) {
+        //     $request->validate([
+        //         'admission_number' => ['required', 'string', 'max:255', Rule::unique('students', 'admission_number')],
+        //     ]);
+        // }
 
         $campus = Campus::where('sch_id', $user->sch_id)
             ->where('name', $request->campus)
