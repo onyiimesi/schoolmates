@@ -5,7 +5,7 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "coedevtech/fixit": "^1.9",
         "geoip2/geoip2": "^3.3",
         "guzzlehttp/guzzle": "^7.10",
