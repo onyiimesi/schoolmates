@@ -6,29 +6,29 @@ use App\Http\Requests\AcademicCalenderRequest;
 use App\Http\Resources\AcademicCalenderResource;
 use App\Models\AcademicCalender;
 use App\Models\AcademicPeriod;
+use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AcademicCalenderController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $user = Auth::user();
-        $aca = AcademicCalenderResource::collection(
+        $data = AcademicCalenderResource::collection(
             AcademicCalender::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'Calender List',
-            'data' => $aca
-        ];
+        return $this->success($data, 'Academic calender list');
     }
 
 
@@ -36,9 +36,9 @@ class AcademicCalenderController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(AcademicCalenderRequest $request)
+    public function store(AcademicCalenderRequest $request): JsonResponse
     {
         $request->validated($request->all());
 
@@ -72,11 +72,9 @@ class AcademicCalenderController extends Controller
             file_put_contents($folderPath.'/'.$file_name, base64_decode($image));
 
             $paths = $folderName.'/'.$file_name;
-        }else{
-            $paths = "";
         }
 
-        $aca = AcademicCalender::create([
+        $data = AcademicCalender::create([
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
             'period' => $period->period,
@@ -84,14 +82,10 @@ class AcademicCalenderController extends Controller
             'session' => $period->session,
             'title' => $request->title,
             'description' => $request->description,
-            'file' => $paths
+            'file' => $paths ?? null
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Calender Uploaded Successfully',
-            "data" => $aca
-        ];
+        return $this->success($data, 'Calender uploaded successfully', 201);
     }
 
     /**

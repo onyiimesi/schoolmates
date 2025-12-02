@@ -47,7 +47,6 @@ use App\Http\Controllers\HealthReportController;
 use App\Http\Controllers\IncomeReportController;
 use App\Http\Controllers\LoginDetailsController;
 use App\Http\Controllers\TotalExpenseController;
-use App\Http\Controllers\AcceptStudentController;
 use App\Http\Controllers\EndTermResultController;
 use App\Http\Controllers\GradingSystemController;
 use App\Http\Controllers\MaximumScoresController;
@@ -163,9 +162,9 @@ Route::middleware('check.allowed.url')
             Route::post('/studentimport', [StudentImportController::class, 'import']);
 
             Route::controller(AcademicPeriodController::class)->group(function () {
-                Route::post('/academicperiod', 'changeperiod');
-                Route::get('/getacademicperiod', 'getperiod');
-                Route::get('/getacademicsessions', 'getsessions');
+                Route::post('/academicperiod', 'changePeriod');
+                Route::get('/getacademicperiod', 'getPeriod');
+                Route::get('/getacademicsessions', 'getSessions');
 
                 Route::post('/current/academicperiod', 'setCurrentAcademicPeriod');
                 Route::get('/current/academicperiod', 'getCurrentAcademicPeriod');
@@ -284,7 +283,7 @@ Route::middleware('check.allowed.url')
             ->where('session', '.+');
 
             Route::patch('/withdrawstudent/{id}', [WithdrawStudentController::class, 'withdraw']);
-            Route::patch('/acceptstudent/{id}', [AcceptStudentController::class, 'accept']);
+            Route::patch('/acceptstudent/{id}', [WithdrawStudentController::class, 'acceptStudent']);
             Route::patch('/promotestudent/{id}', [PromoteStudentController::class, 'promote']);
             Route::patch('/promote-students', [PromoteStudentController::class, 'promotestudents']);
 

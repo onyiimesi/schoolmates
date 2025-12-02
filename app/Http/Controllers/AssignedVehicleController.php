@@ -2,42 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\BusRoutingResource;
-use App\Models\BusRouting;
-use App\Models\Student;
+use App\Services\GeneralService;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class AssignedVehicleController extends Controller
 {
     use HttpResponses;
 
-    public function getVehicle()
+    public function __construct(
+        protected GeneralService $generalService
+    )
+    {}
+
+    public function getVehicle(): JsonResponse
     {
-        $user = Auth::user();
-        $student = Student::findOrFail($user->id);
-
-        $data = BusRoutingResource::collection(
-            BusRouting::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('student_id', $student->id)
-            ->get()
-        );
-
-        return $this->success($data, "Your Assigned Bus");
+        return $this->generalService->getVehicle();
     }
 
-    public function getVehicles()
+    public function getVehicles(): JsonResponse
     {
-        $user = Auth::user();
-
-        $data = BusRoutingResource::collection(
-            BusRouting::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->get()
-        );
-
-        return $this->success($data, "Assigned Bus");
+        return $this->generalService->getVehicles();
     }
 }

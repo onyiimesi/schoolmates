@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\WithdrawStudentRequest;
 use App\Models\Student;
+use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class WithdrawStudentController extends Controller
 {
-    public function withdraw(WithdrawStudentRequest $request, Student $student){
+    use HttpResponses;
 
-        $student = Student::find($request->id);
+    public function acceptStudent(Student $student): JsonResponse
+    {
+        $student->update(['status' => 'active']);
 
-        if(!$student){
-            return $this->error('', 'Student does not exist', 400);
-        }
+        return $this->success(null, 'Student Accepted Successfully');
+    }
 
+    public function withdraw(Student $student): JsonResponse
+    {
         $student->update([
             'status' => 'withdrawn',
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Student Withdrawn Successfully',
-        ];
+        return $this->success(null, 'Student Withdrawn Successfully');
     }
 }
