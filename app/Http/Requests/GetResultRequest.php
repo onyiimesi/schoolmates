@@ -22,13 +22,13 @@ class GetResultRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'student_id' => 'required|exists:students,id',
-            'period' => 'required|string',
-            'term' => 'required|string',
-            'session' => 'required|string',
-            'class' => 'required|string',
-            'result_type' => 'required|string',
-            'status' => 'nullable|in:released,withheld,not-released',
+            'student_id' => ['nullable', 'exists:students,id'],
+            'period' => ['required', 'string'],
+            'term' => ['required', 'string'],
+            'session' => ['required', 'string'],
+            'class' => ['required', 'string'],
+            'result_type' => ['required', 'string'],
+            'status' => ['nullable', 'in:released,withheld,not-released'],
         ];
     }
 
