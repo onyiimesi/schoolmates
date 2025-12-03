@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Result;
+use App\Observers\ResultObserver;
 use Illuminate\Http\Request;
 use App\Services\SlowQueryMonitor;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +43,8 @@ class AppServiceProvider extends ServiceProvider
         $this->configureUrl();
 
         app(SlowQueryMonitor::class)->register();
+
+        Result::observe(ResultObserver::class);
     }
 
     /**
@@ -68,6 +72,6 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureUrl(): void
     {
-        URL::formatScheme('https');
+        URL::formatScheme(true);
     }
 }
