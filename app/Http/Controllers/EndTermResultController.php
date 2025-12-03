@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
+use App\Http\Requests\GetResultRequest;
 use App\Http\Resources\CummulativeScoreResource;
 use App\Http\Resources\ResultResource;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Student;
-use App\Services\GeneralResultService;
+use App\Services\Cache\MemoizedCacheService;
 use App\Traits\CummulativeResult;
 use App\Traits\HttpResponses;
 use App\Traits\ResultTrait;
@@ -22,6 +23,12 @@ class EndTermResultController extends Controller
 
     public function endterm(Request $request)
     {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'term' => 'required|string',
+            'session' => 'required|string',
+        ]);
+
         $user = Auth::user();
 
         $search = Result::with([
@@ -37,10 +44,10 @@ class EndTermResultController extends Controller
             ->where([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
-                'student_id' => $request->student_id,
+                'student_id' => $validated['student_id'],
                 'period' => PeriodicName::SECONDHALF,
-                'term' => $request->term,
-                'session' => $request->session,
+                'term' => $validated['term'],
+                'session' => $validated['session'],
                 'status' => ResultStatus::RELEASED
             ])
             ->get();
@@ -52,6 +59,12 @@ class EndTermResultController extends Controller
 
     public function staffEndTerm(Request $request)
     {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'term' => 'required|string',
+            'session' => 'required|string',
+        ]);
+
         $user = Auth::user();
 
         $search = Result::with([
@@ -66,10 +79,10 @@ class EndTermResultController extends Controller
             ->where([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
-                'student_id' => $request->student_id,
+                'student_id' => $validated['student_id'],
                 'period' => PeriodicName::SECONDHALF,
-                'term' => $request->term,
-                'session' => $request->session
+                'term' => $validated['term'],
+                'session' => $validated['session']
             ])
             ->get();
 
@@ -127,15 +140,22 @@ class EndTermResultController extends Controller
 
     public function studentaverage(Request $request)
     {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'term' => 'required|string',
+            'session' => 'required|string',
+            'class_name' => 'required|string',
+        ]);
+
         $user = Auth::user();
 
         $results = Result::where([
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
-            'student_id' => $request->student_id,
-            'class_name' => $request->class_name,
-            'term' => $request->term,
-            'session' => $request->session,
+            'student_id' => $validated['student_id'],
+            'class_name' => $validated['class_name'],
+            'term' => $validated['term'],
+            'session' => $validated['session'],
         ])
             ->with('studentscore')
             ->get();
@@ -143,9 +163,9 @@ class EndTermResultController extends Controller
         $classResults = Result::with('student')->where([
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
-            'class_name' => $request->class_name,
-            'term' => $request->term,
-            'session' => $request->session,
+            'class_name' => $validated['class_name'],
+            'term' => $validated['term'],
+            'session' => $validated['session'],
         ])
             ->whereHas('student', function ($query) {
                 $query->where('status', 'active');
@@ -156,7 +176,7 @@ class EndTermResultController extends Controller
         $studentCount = Student::where([
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
-            'present_class' => $request->class_name,
+            'present_class' => $validated['class_name'],
         ])
             ->count();
 
@@ -211,27 +231,16 @@ class EndTermResultController extends Controller
         ];
     }
 
-    public function getResult(GeneralResultService $generalResultService)
+    public function getResult(GetResultRequest $request, MemoizedCacheService $generalResultService)
     {
         $user = userAuth();
 
-        $validated = request()->validate([
-            'student_id' => 'required|exists:students,id',
-            'period' => 'required|string',
-            'term' => 'required|string',
-            'session' => 'required|string',
-            'class' => 'required|string',
-            'result_type' => 'required|string',
-            'status' => 'nullable|in:released,withheld,not-released',
-        ], [
-            'result_type.in' => 'result type must be either midterm, endterm, first_assessment, second_assessment or third_assessment',
-            'status.in' => 'status must be either released, withheld or not-released',
-        ]);
+        $validated = $request->validated();
 
         return $this->getStudentResults($user, $validated, $generalResultService);
     }
 
-    private function getStudentResults($user, array $params, GeneralResultService $generalResultService)
+    private function getStudentResults($user, array $params, MemoizedCacheService $generalResultService)
     {
         return match ($params['period']) {
             PeriodicName::FIRSTHALF => $generalResultService->firstHalf($user, $params),

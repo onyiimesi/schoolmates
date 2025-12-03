@@ -7,6 +7,47 @@ use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @property int $id
+ * @property string $sch_id
+ * @property string $campus
+ * @property string $campus_type
+ * @property string $student_id
+ * @property string $student_fullname
+ * @property string $admission_number
+ * @property string $class_name
+ * @property string $period
+ * @property string $term
+ * @property string $session
+ * @property float|null $total
+ * @property string|null $grade
+ * @property string|null $remark
+ * @property int|null $total_subject
+ * @property int|null $total_student
+ * @property float|null $student_average
+ * @property float|null $class_average
+ * @property float|null $percent_score
+ * @property array|null $results
+ * @property int|null $school_opened
+ * @property int|null $times_present
+ * @property int|null $times_absent
+ * @property array|null $affective_disposition
+ * @property array|null $psychomotor_skills
+ * @property string|null $teacher_comment
+ * @property string|null $teacher_id
+ * @property string|null $teacher_fullname
+ * @property string|null $hos_comment
+ * @property string|null $hos_id
+ * @property string|null $hos_fullname
+ * @property string|null $computed_midterm
+ * @property string|null $computed_endterm
+ * @property string $status
+ * @property string $result_type
+ * @property string|null $performance_remark
+ * @property-read  \App\Models\StudentScore $studentscore
+ * @property-read  \App\Models\Student $student
+ * @property-read  \App\Models\Staff $results
+ */
 class Result extends Model implements Auditable
 {
     use HasFactory;

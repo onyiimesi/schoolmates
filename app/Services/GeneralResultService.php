@@ -16,7 +16,7 @@ class GeneralResultService
     public function firstHalf($user, array $params)
     {
         if ($params['period'] !== PeriodicName::FIRSTHALF) {
-            return $this->error('', 'Invalid Period', 400);
+            return $this->error(null, 'Invalid Period', 400);
         }
 
         $results = Result::with(['studentscore'])
