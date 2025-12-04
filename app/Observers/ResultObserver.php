@@ -22,7 +22,6 @@ class ResultObserver
             'term' => $result->term,
             'session' => $result->session,
             'result_type' => $result->result_type,
-            'status' => $result->status,
         ]);
     }
 

@@ -33,7 +33,6 @@ class CacheInvalidationService
             $data['term'],
             $data['session'],
             $data['result_type'],
-            $data['status'],
         ]);
     }
 
@@ -46,7 +45,6 @@ class CacheInvalidationService
             $data['term'],
             $data['session'],
             $data['result_type'],
-            $data['status'],
         ]);
     }
 }

@@ -31,7 +31,6 @@ class FlexibleCacheService extends GeneralResultService
             $data['term'],
             $data['session'],
             $data['result_type'],
-            $data['status'],
         ]);
     }
 }
