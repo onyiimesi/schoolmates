@@ -13,7 +13,7 @@ trait HttpResponses
      * @param int $code
      * @return JsonResponse
      */
-	protected function success(mixed $data, ?string $message = null, int $code = Response::HTTP_OK): JsonResponse
+	protected function success(mixed $data, $message = null, $code = Response::HTTP_OK): JsonResponse
     {
 		return new JsonResponse([
 			'status' => true,
@@ -28,7 +28,7 @@ trait HttpResponses
      * @param int $code
      * @return JsonResponse
      */
-	protected function error(mixed $data, ?string $message = null, int $code = Response::HTTP_BAD_REQUEST): JsonResponse
+	protected function error(mixed $data, $message = null, $code = Response::HTTP_BAD_REQUEST): JsonResponse
     {
 		return new JsonResponse([
 			'status' => false,
@@ -44,7 +44,7 @@ trait HttpResponses
      * @param ?array $extraMeta
      * @return JsonResponse
      */
-    protected function withPagination(mixed $collection, $message = null, int $code = Response::HTTP_OK, ?array $extraMeta = []): JsonResponse
+    protected function withPagination(mixed $collection, $message = null, $code = Response::HTTP_OK, ?array $extraMeta = []): JsonResponse
     {
         return new JsonResponse([
             'status' => true,

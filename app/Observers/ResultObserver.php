@@ -31,14 +31,7 @@ class ResultObserver
      */
     public function updated(Result $result): void
     {
-        $statusChanged = $result->isDirty(['status']);
-
-        $studentScoreChanged = $result->studentscore
-            ->contains(fn($score) => $score->isDirty());
-
-        if ($statusChanged || $studentScoreChanged) {
-            $this->created($result);
-        }
+        $this->created($result);
     }
 
     /**
