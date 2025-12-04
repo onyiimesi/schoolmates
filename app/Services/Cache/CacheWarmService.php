@@ -10,8 +10,7 @@ class CacheWarmService
         protected FlexibleCacheService $flexibleCacheService,
     )
     {}
-
-    public function warmResultServiceCache($user, array $data): void
+    public function warmResultServiceCache(array $data, $user): void
     {
         $this->flexibleCacheService->firstHalf($user, $data);
         $this->flexibleCacheService->secondHalf($user, $data);

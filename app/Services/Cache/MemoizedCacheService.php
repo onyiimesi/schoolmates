@@ -35,6 +35,7 @@ class MemoizedCacheService
             $data['term'],
             $data['session'],
             $data['result_type'],
+            $data['class'],
         ]);
     }
 }
