@@ -3,9 +3,14 @@
 namespace App\Services\Cache;
 
 use Illuminate\Support\Facades\Cache;
+use App\Services\Cache\CacheWarmService;
 
 class CacheInvalidationService
 {
+    public function __construct(
+        protected CacheWarmService $cacheWarmService,
+    ) {}
+
     public function clearResultServiceCache(array $data): void
     {
         $firstMemo = $this->buildMemoKey('first_half', $data);
@@ -22,6 +27,12 @@ class CacheInvalidationService
 
         Cache::forget("schoolmates_cache_illuminate:cache:flexible:created:{$firstHalfCacheKey}");
         Cache::forget("schoolmates_cache_illuminate:cache:flexible:created:{$secondHalfCacheKey}");
+    }
+
+    public function refreshResultServiceCache($user, array $data)
+    {
+        $this->clearResultServiceCache($data);
+        $this->cacheWarmService->warmResultServiceCache($user, $data);
     }
 
     private function buildCacheKey(string $type, array $data): string
