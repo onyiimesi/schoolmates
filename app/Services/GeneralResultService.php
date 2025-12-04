@@ -37,7 +37,7 @@ class GeneralResultService
         $getMidtermResults = MidTermResultResource::collection($results);
 
         $data = [
-            'students' => $this->getStudentsByClass($user, $params['class']),
+            'students' => $this->getStudentsByClass($user, $params['class'] ?? $params['class_name']),
             'subjects' => $this->getSubjects($user, $params),
             'results' => $getMidtermResults,
         ];

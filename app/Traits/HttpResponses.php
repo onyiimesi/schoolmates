@@ -44,7 +44,7 @@ trait HttpResponses
      * @param ?array $extraMeta
      * @return JsonResponse
      */
-    protected function withPagination(mixed $collection, $message = null, $code = Response::HTTP_OK, ?array $extraMeta = []): JsonResponse
+    protected function withPagination(mixed $collection, $message = null, $code = Response::HTTP_OK, $extraMeta = []): JsonResponse
     {
         return new JsonResponse([
             'status' => true,
