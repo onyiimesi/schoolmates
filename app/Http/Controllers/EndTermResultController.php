@@ -248,5 +248,4 @@ class EndTermResultController extends Controller
             default => $this->error(null, 'Invalid result type', 400),
         };
     }
-
 }
