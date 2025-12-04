@@ -16,7 +16,7 @@ class ResultObserver
      */
     public function created(Result $result): void
     {
-        $this->cacheInvalidationService->clearResultServiceCache([
+        $this->cacheInvalidationService->refreshResultServiceCache($result,[
             'student_id' => $result->student_id,
             'period' => $result->period,
             'term' => $result->term,
