@@ -8,8 +8,11 @@ class CacheInvalidationService
 {
     public function clearResultServiceCache(array $data): void
     {
-        Cache::forget($this->buildMemoKey('first_half', $data));
-        Cache::forget($this->buildMemoKey('second_half', $data));
+        $firstMemo = $this->buildMemoKey('first_half', $data);
+        $secondMemo = $this->buildMemoKey('second_half', $data);
+
+        Cache::memo()->forget($firstMemo);
+        Cache::memo()->forget($secondMemo);
 
         $firstHalfCacheKey = $this->buildCacheKey('first_half', $data);
         $secondHalfCacheKey = $this->buildCacheKey('second_half', $data);
@@ -17,8 +20,8 @@ class CacheInvalidationService
         Cache::forget($firstHalfCacheKey);
         Cache::forget($secondHalfCacheKey);
 
-        Cache::forget("illuminate:cache:flexible:created:{$firstHalfCacheKey}");
-        Cache::forget("illuminate:cache:flexible:created:{$secondHalfCacheKey}");
+        Cache::forget("schoolmates_cache_illuminate:cache:flexible:created:{$firstHalfCacheKey}");
+        Cache::forget("schoolmates_cache_illuminate:cache:flexible:created:{$secondHalfCacheKey}");
     }
 
     private function buildCacheKey(string $type, array $data): string
@@ -36,7 +39,7 @@ class CacheInvalidationService
 
     private function buildMemoKey(string $type, array $data): string
     {
-        return implode('memo_', [
+        return implode('_memo_', [
             $type,
             $data['student_id'],
             $data['period'],

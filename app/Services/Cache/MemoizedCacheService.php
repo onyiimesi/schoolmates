@@ -28,7 +28,7 @@ class MemoizedCacheService
 
     private function buildMemoKey(string $type, array $data): string
     {
-        return implode('memo_', [
+        return implode('_memo_', [
             $type,
             $data['student_id'],
             $data['period'],

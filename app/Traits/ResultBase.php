@@ -69,7 +69,6 @@ trait ResultBase
             'status' => ResultStatus::NOTRELEASED->value,
         ]);
 
-        $getResult->studentscore()->delete();
         $this->saveStudentScores($getResult, $request->results);
 
         return $this->success(null, 'Updated Successfully');
