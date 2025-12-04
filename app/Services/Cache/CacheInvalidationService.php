@@ -25,14 +25,14 @@ class CacheInvalidationService
         Cache::forget($firstHalfCacheKey);
         Cache::forget($secondHalfCacheKey);
 
-        Cache::forget("schoolmates_cache_illuminate:cache:flexible:created:{$firstHalfCacheKey}");
-        Cache::forget("schoolmates_cache_illuminate:cache:flexible:created:{$secondHalfCacheKey}");
+        Cache::forget("cache:flexible:created:{$firstHalfCacheKey}");
+        Cache::forget("cache:flexible:created:{$secondHalfCacheKey}");
     }
 
-    public function refreshResultServiceCache($user, array $data)
+    public function refreshResultServiceCache(array $data, $user)
     {
         $this->clearResultServiceCache($data);
-        $this->cacheWarmService->warmResultServiceCache($user, $data);
+        $this->cacheWarmService->warmResultServiceCache($data, $user);
     }
 
     private function buildCacheKey(string $type, array $data): string
@@ -44,6 +44,7 @@ class CacheInvalidationService
             $data['term'],
             $data['session'],
             $data['result_type'],
+            $data['class'],
         ]);
     }
 
@@ -56,6 +57,7 @@ class CacheInvalidationService
             $data['term'],
             $data['session'],
             $data['result_type'],
+            $data['class'],
         ]);
     }
 }

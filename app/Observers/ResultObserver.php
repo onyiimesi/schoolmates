@@ -16,13 +16,12 @@ class ResultObserver
      */
     public function created(Result $result): void
     {
-        $this->cacheInvalidationService->clearResultServiceCache([
-            'student_id' => $result->student_id,
-            'period' => $result->period,
-            'term' => $result->term,
-            'session' => $result->session,
-            'result_type' => $result->result_type,
-        ]);
+        $resultData = $this->getData($result);
+        
+        $this->cacheInvalidationService->refreshResultServiceCache(
+            $resultData['data'],
+            $resultData['user']
+        );
     }
 
     /**
@@ -55,5 +54,27 @@ class ResultObserver
     public function forceDeleted(Result $result): void
     {
         $this->created($result);
+    }
+
+    private function getData($result): array
+    {
+        $data = [
+            'student_id' => $result->student_id,
+            'period' => $result->period,
+            'term' => $result->term,
+            'session' => $result->session,
+            'result_type' => $result->result_type,
+            'class' => $result->class_name,
+        ];
+
+        $user = (object) [
+            'sch_id' => $result->sch_id,
+            'campus' => $result->campus,
+        ];
+
+        return [
+            'data' => $data,
+            'user' => $user,
+        ];
     }
 }
