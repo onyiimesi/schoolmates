@@ -4,10 +4,8 @@ namespace App\Providers;
 
 use App\Models\Result;
 use App\Models\StudentScore;
-use App\Models\SubjectClass;
 use App\Observers\ResultObserver;
 use App\Observers\StudentScoreObserver;
-use App\Observers\SubjectClassObserver;
 use Illuminate\Http\Request;
 use App\Services\SlowQueryMonitor;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +48,6 @@ class AppServiceProvider extends ServiceProvider
 
         Result::observe(ResultObserver::class);
         StudentScore::observe(StudentScoreObserver::class);
-        SubjectClass::observe(SubjectClassObserver::class);
     }
 
     /**
