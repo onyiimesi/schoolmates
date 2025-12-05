@@ -17,7 +17,7 @@ class ResultObserver
     public function created(Result $result): void
     {
         $resultData = $this->getData($result);
-        
+
         $this->cacheInvalidationService->refreshResultServiceCache(
             $resultData['data'],
             $resultData['user']
