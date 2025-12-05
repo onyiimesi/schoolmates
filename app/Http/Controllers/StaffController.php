@@ -98,7 +98,7 @@ class StaffController extends Controller
             'image' => $imagePath['url'] ?? null,
             'signature' => $signaturePath['url'] ?? null,
             'teacher_type' => $type,
-            'is_preschool' => $campus->is_preschool,
+            'is_preschool' => $campus->is_preschool ? 'true' : 'false',
             'file_id' => $imagePath['file_id'] ?? null,
             'sig_id' => $signaturePath['file_id'] ?? null,
             'password' => bcrypt($request->password),
