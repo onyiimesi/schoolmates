@@ -30,8 +30,7 @@ trait ResultTrait
     public function getSubjects($user, $request)
     {
         $data = ClassModel::with(['subjects' => function ($query) use($request) {
-                $query->where('term', $request['term'])
-                    ->where('session', $request['session']);
+                $query->where('session', $request['session']);
             }])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
