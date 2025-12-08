@@ -27,13 +27,17 @@ class StudentController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = userAuth();
-        $search = request()->query('search');
+        $search = $request->query('search');
+        $class = $request->query('class');
+        $status = $request->query('status');
 
         $students = Student::where('sch_id', $user->sch_id)
             ->when($user->designation_id != 6, fn ($query) => $query->where('campus', $user->campus))
+            ->when($class, fn($query) => $query->where('present_class', $class))
+            ->when($status, fn($query) => $query->where('status', $status))
             ->when($search, fn($query) =>
                 $query->whereAny(
                     ['firstname', 'surname', 'email_address', 'username', 'admission_number', 'present_class'],
