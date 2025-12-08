@@ -33,7 +33,7 @@ class StudentController extends Controller
         $search = request()->query('search');
 
         $students = Student::where('sch_id', $user->sch_id)
-            ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
+            ->when($user->designation_id != 6, fn ($query) => $query->where('campus', $user->campus))
             ->when($search, fn($query) =>
                 $query->whereAny(
                     ['firstname', 'surname', 'email_address', 'username', 'admission_number', 'present_class'],
