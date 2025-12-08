@@ -23,7 +23,7 @@ class BroadSheetController extends Controller
             ->where('term', $request->term)
             ->whereIn('period', ['First Half', 'Second Half'])
             ->where('session', $request->session)
-            ->with('studentscore', 'student')
+            ->with('studentScores', 'student')
             ->get();
 
         $groupedResults = $sheet->groupBy('student_id');
@@ -62,7 +62,7 @@ class BroadSheetController extends Controller
         $subjectScores = [];
         $totalScore = 0;
         foreach ($studentResults as $result) {
-            foreach ($result->studentscore as $score) {
+            foreach ($result->studentScores as $score) {
                 $subjectScores[$score->subject] = true;
                 $totalScore += (int) $score->score;
             }
@@ -87,7 +87,7 @@ class BroadSheetController extends Controller
     private function buildSubjectScores($studentResults)
     {
         return $studentResults->flatMap(function ($result) {
-            return $result->studentscore->map(function ($score) use ($result) {
+            return $result->studentScores->map(function ($score) use ($result) {
                 return [
                     'subject' => $score->subject,
                     'period' => $result->period,

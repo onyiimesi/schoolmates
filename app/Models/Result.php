@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $status
  * @property string $result_type
  * @property string|null $performance_remark
- * @property-read  \App\Models\StudentScore $studentscore
+ * @property-read  \App\Models\StudentScore $studentScores
  * @property-read  \App\Models\Student $student
  * @property-read  \App\Models\Staff $results
  */
@@ -136,7 +136,7 @@ class Result extends Model implements Auditable
         return $this->belongsTo(Staff::class);
     }
 
-    public function studentscore()
+    public function studentScores()
     {
         return $this->hasMany(StudentScore::class, 'result_id');
     }
@@ -146,33 +146,33 @@ class Result extends Model implements Auditable
         return $this->belongsTo(Student::class, 'student_id');
     }
 
-    public function affectivedisposition()
+    public function affectiveDispositions()
     {
-        return $this->hasMany(AffectiveDisposition::class);
+        return $this->hasMany(AffectiveDisposition::class, 'result_id');
     }
 
     public function psychomotorskill()
     {
-        return $this->hasMany(PsychomotorSkill::class);
+        return $this->hasMany(PsychomotorSkill::class, 'result_id');
     }
 
-    public function resultextracurricular()
+    public function resultExtraCurriculars()
     {
-        return $this->hasMany(ResultExtraCurricular::class);
+        return $this->hasMany(ResultExtraCurricular::class, 'result_id');
     }
 
     public function abacus()
     {
-        return $this->hasOne(Abacus::class);
+        return $this->hasOne(Abacus::class, 'result_id');
     }
 
-    public function psychomotorperformance()
+    public function psychomotorPerformances()
     {
-        return $this->hasMany(PsychomotorPerformance::class);
+        return $this->hasMany(PsychomotorPerformance::class, 'result_id');
     }
 
-    public function pupilreport()
+    public function pupilReports()
     {
-        return $this->hasMany(PupilReport::class);
+        return $this->hasMany(PupilReport::class, 'result_id');
     }
 }

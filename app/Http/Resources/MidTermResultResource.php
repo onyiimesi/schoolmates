@@ -35,7 +35,7 @@ class MidTermResultResource extends JsonResource
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
                 'result_type' => (string)$this->result_type,
-                'results' => $this->studentscore
+                'results' => $this->studentScores
                 ->filter(fn($score) => $score->score != 0)
                 ->map(fn($score) => [
                     "subject" => $score->subject,

@@ -14,7 +14,7 @@ trait CummulativeResult
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
             ->where('session', $request->session)
-            ->with('studentscore')
+            ->with('studentScores')
             ->get();
     }
 
@@ -22,7 +22,7 @@ trait CummulativeResult
     {
         $subjects = [];
         foreach ($results as $result) {
-            foreach ($result->studentscore as $score) {
+            foreach ($result->studentScores as $score) {
                 $subjectKey = $this->normalizeSubject($score->subject);
                 if (!isset($subjects[$subjectKey])) {
                     $subjects[$subjectKey] = [
@@ -54,7 +54,7 @@ trait CummulativeResult
             $studentTotalScore = 0;
             $studentTotalSubjects = 0;
 
-            foreach ($result->studentscore as $score) {
+            foreach ($result->studentScores as $score) {
                 $subjectKey = $this->normalizeSubject($score->subject);
                 $term = $result->term;
                 $scoreValue = $score->score;
@@ -131,14 +131,14 @@ trait CummulativeResult
             ->whereHas('student', function($q) {
                 $q->where('status', StudentStatus::ACTIVE);
             })
-            ->with('studentscore')
+            ->with('studentScores')
             ->get();
 
         $subjectScores = [];
 
         foreach ($allResults as $result) {
             $studentId = $result->student_id;
-            foreach ($result->studentscore as $score) {
+            foreach ($result->studentScores as $score) {
                 $subjectKey = $this->normalizeSubject($score->subject);
                 $scoreValue = $score->score;
 

@@ -67,7 +67,7 @@ trait ResultTrait
     protected function getAssessmentResults($user, $params, string $resultType)
     {
         return MidTermResultResource::collection(
-            Result::with(['student', 'studentscore'])
+            Result::with(['student', 'studentScores'])
                 ->where([
                     'sch_id' => $user->sch_id,
                     'campus' => $user->campus,
@@ -82,7 +82,7 @@ trait ResultTrait
 
     protected function getResultsForStudent($request)
     {
-        return Result::with('studentscore')
+        return Result::with('studentScores')
             ->where('student_id', $request->student_id)
             ->where('class_name', $request->class_name)
             ->where('session', $request->session)
@@ -91,7 +91,7 @@ trait ResultTrait
 
     protected function getAllResultsForClass($request)
     {
-        return Result::with('studentscore')
+        return Result::with('studentScores')
             ->where('class_name', $request->class_name)
             ->where('session', $request->session)
             ->get();
@@ -103,7 +103,7 @@ trait ResultTrait
         $count = 0;
 
         foreach ($results as $result) {
-            foreach ($result->studentscore as $score) {
+            foreach ($result->studentScores as $score) {
                 $total += $score->score;
                 if ($studentSubjectCount && $result->period === "Second Half" && $score->score > 0) {
                     $count++;
