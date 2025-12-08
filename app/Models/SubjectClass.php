@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @property string $sch_id
@@ -14,9 +15,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $class_name
  * @property string $subject
  */
-class SubjectClass extends Model
+class SubjectClass extends Model implements Auditable
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
         'sch_id',

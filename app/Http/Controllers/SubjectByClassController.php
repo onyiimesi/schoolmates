@@ -60,7 +60,7 @@ class SubjectByClassController extends Controller
             return $this->error(null, 'Current period has not been set.', 404);
         }
 
-        $subjects = ClassModel::with(['subjects' => function ($query) use($academicPeriod) {
+        $subjects = ClassModel::with(['subjects' => function ($query) use ($academicPeriod) {
                 $query->where('session', $academicPeriod->session);
             }])
             ->where('sch_id', $user->sch_id)

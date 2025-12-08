@@ -167,16 +167,10 @@ class StaffController extends Controller
         return $this->success(null, 'Updated Successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Staff $staff)
     {
         $staff->delete();
 
-        return response(null, 204);
+        return $this->success(null, 'Deleted Successfully');
     }
 }
