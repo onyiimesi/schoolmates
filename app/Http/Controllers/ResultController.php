@@ -3,16 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ResultRequest;
-use App\Http\Resources\ResultResource;
 use App\Models\AffectiveDisposition;
-use App\Models\GradingSystem;
 use App\Models\PsychomotorSkill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Result;
 use App\Models\Staff;
 use App\Models\StudentScore;
-use stdClass;
 
 class ResultController extends Controller
 {
@@ -66,7 +63,7 @@ class ResultController extends Controller
 
                 foreach ($request->results as $result) {
                     $question = new StudentScore($result);
-                    $compute->studentscore()->save($question);
+                    $compute->studentScores()->save($question);
                 }
 
                 return [
@@ -87,10 +84,10 @@ class ResultController extends Controller
                     'computed_midterm' => 'true'
                 ]);
 
-                $getresult->studentscore()->delete();
+                $getresult->studentScores()->delete();
                 foreach ($request->results as $result) {
                     $question = new StudentScore($result);
-                    $getresult->studentscore()->save($question);
+                    $getresult->studentScores()->save($question);
                 }
 
                 return [
@@ -139,13 +136,10 @@ class ResultController extends Controller
 
                 foreach ($request->results as $result) {
                     $question = new StudentScore($result);
-                    $compute->studentscore()->save($question);
+                    $compute->studentScores()->save($question);
                 }
 
-                foreach ($request->affective_disposition as $affective) {
-                    $disposition = new AffectiveDisposition($affective);
-                    $compute->affectivedisposition()->save($disposition);
-                }
+                $compute->affectiveDispositions()->createMany($request->affective_disposition);
 
                 foreach ($request->psychomotor_skills as $skills) {
                     $psy = new PsychomotorSkill($skills);
@@ -180,16 +174,16 @@ class ResultController extends Controller
                 ]);
 
 
-                $getsecondresult->studentscore()->delete();
+                $getsecondresult->studentScores()->delete();
                 foreach ($request->results as $result) {
                     $question = new StudentScore($result);
-                    $getsecondresult->studentscore()->save($question);
+                    $getsecondresult->studentScores()->save($question);
                 }
 
-                $getsecondresult->affectivedisposition()->delete();
+                $getsecondresult->affectiveDispositions()->delete();
                 foreach ($request->affective_disposition as $affective) {
                     $disposition = new AffectiveDisposition($affective);
-                    $getsecondresult->affectivedisposition()->save($disposition);
+                    $getsecondresult->affectiveDispositions()->save($disposition);
                 }
 
                 $getsecondresult->psychomotorskill()->delete();

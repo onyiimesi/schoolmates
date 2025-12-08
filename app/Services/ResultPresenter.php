@@ -15,7 +15,7 @@ class ResultPresenter
 {
     public function getGpa(Result $result): array
     {
-        $studentResults = Result::with(['studentscore' => function ($query) {
+        $studentResults = Result::with(['studentScores' => function ($query) {
             $query->where('score', '>', 0);
         }])
         ->where([
@@ -27,7 +27,7 @@ class ResultPresenter
             'session' => $result->session,
         ])->get();
 
-        $scores = $studentResults->pluck('studentscore')->flatten();
+        $scores = $studentResults->pluck('studentScores')->flatten();
         $totalScore = $scores->sum('score');
         $totalSubjects = $scores->unique('subject')->count();
 
@@ -44,7 +44,7 @@ class ResultPresenter
 
     public function getClassStats(Result $result): array
     {
-        $classResults = Result::with('studentscore')
+        $classResults = Result::with('studentScores')
             ->where([
                 'sch_id' => $result->sch_id,
                 'campus' => $result->campus,
@@ -55,7 +55,7 @@ class ResultPresenter
             ->get();
 
         $studentAverages = $classResults->map(function ($r) {
-            $scores = $r->studentscore?->pluck('score') ?? collect();
+            $scores = $r->studentScores?->pluck('score') ?? collect();
             $totalSubjects = $scores->count();
             return [
                 'student_id' => $r->student_id,
@@ -68,7 +68,7 @@ class ResultPresenter
         // Calculate the sum of all student averages
         $totalStudentAverages = $studentAverages->sum('average');
 
-        $classTotalScore = $classResults->flatMap->studentscore->pluck('score')->sum();
+        $classTotalScore = $classResults->flatMap->studentScores->pluck('score')->sum();
         $classCount = $classResults->pluck('student_id')->unique()->count();
         $classAverage = $classCount > 0 ? round($totalStudentAverages / $classCount, 2) : 0;
 
@@ -144,7 +144,7 @@ class ResultPresenter
 
     public function getSubjectPositions(Result $result): array
     {
-        $studentScores = $result->studentscore ?? collect();
+        $studentScores = $result->studentScores ?? collect();
         $positions = [];
 
         foreach ($studentScores as $score) {

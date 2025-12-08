@@ -60,7 +60,7 @@ class ResultResource extends JsonResource
             'times_absent' => (string)$this->times_absent,
             'number_in_class' => $classStats['class_count'],
             'class_total' => $classStats['class_total_score'],
-            'results' => $this->studentscore?->filter(fn($s) => $s->score != 0)
+            'results' => $this->studentScores?->filter(fn($s) => $s->score != 0)
             ->map(fn($s) => [
                 "subject" => $s->subject,
                 "score" => $s->score,
@@ -80,12 +80,12 @@ class ResultResource extends JsonResource
     private function remarks(): array
     {
         return [
-            'affective_disposition' => $this->affectivedisposition?->map(fn($a) => ["name" => $a->name, "score" => $a->score])->values() ?? [],
+            'affective_disposition' => $this->affectiveDispositions?->map(fn($a) => ["name" => $a->name, "score" => $a->score])->values() ?? [],
             'psychomotor_skills' => $this->psychomotorskill?->map(fn($p) => ["name" => $p->name, "score" => $p->score])->values() ?? [],
-            'extra_curricular_activities' => $this->resultextracurricular?->map(fn($e) => ["name" => $e->name, "value" => $e->value])->values() ?? [],
+            'extra_curricular_activities' => $this->resultExtraCurriculars?->map(fn($e) => ["name" => $e->name, "value" => $e->value])->values() ?? [],
             'abacus' => (object)["name" => $this->abacus?->name],
-            'psychomotor_performance' => $this->psychomotorperformance?->map(fn($p) => ["name" => $p->name, "score" => $p->score])->values() ?? [],
-            'pupil_report' => $this->pupilreport?->map(fn($r) => ["name" => $r->name, "score" => $r->score])->values() ?? [],
+            'psychomotor_performance' => $this->psychomotorPerformances?->map(fn($p) => ["name" => $p->name, "score" => $p->score])->values() ?? [],
+            'pupil_report' => $this->pupilReports?->map(fn($r) => ["name" => $r->name, "score" => $r->score])->values() ?? [],
             'teacher_comment' => $this->teacher_comment,
             'performance_remark' => (string)$this->performance_remark,
             'hos_comment' => (string)$this->hos_comment,

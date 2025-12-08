@@ -4,13 +4,7 @@ namespace App\Traits;
 
 use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
-use App\Models\AffectiveDisposition;
-use App\Models\PsychomotorPerformance;
-use App\Models\PsychomotorSkill;
-use App\Models\PupilReport;
 use App\Models\Result;
-use App\Models\ResultExtraCurricular;
-use App\Models\StudentScore;
 
 trait ResultBase
 {
@@ -74,12 +68,6 @@ trait ResultBase
         return $this->success(null, 'Updated Successfully');
     }
 
-    protected function saveStudentScores($result, $scores)
-    {
-        $result->studentscore()->delete();
-        $result->studentscore()->createMany($scores);
-    }
-
     protected function validateRequest($request)
     {
         $request->validated($request->all());
@@ -99,8 +87,8 @@ trait ResultBase
     protected function handleNewResult($request, $teacher, $hos)
     {
         if ($teacher->teacher_type === "subject teacher") {
-            $compute = Result::createOne($teacher, $request, $hos);
-            $this->saveStudentScoresTwo($compute, $request->results);
+            $result = Result::createOne($teacher, $request, $hos);
+            $this->saveStudentScores($result, $request->results);
         }
 
         if ($teacher->teacher_type === "class teacher") {
@@ -109,6 +97,12 @@ trait ResultBase
         }
 
         return $this->success(null, 'Computed Successfully', 201);
+    }
+
+    protected function saveStudentScores($result, $scores)
+    {
+        $result->studentScores()->delete();
+        $result->studentScores()->createMany($scores);
     }
 
     protected function handleExistingResult($request, $teacher, $hosId, $getsecondresult)
@@ -158,79 +152,59 @@ trait ResultBase
         $result->update($fields);
     }
 
-    protected function saveStudentScoresTwo($compute, $results)
+    protected function saveClassTeacherData($result, $request)
     {
-        $compute->studentscore()->delete();
-        foreach ($results as $result) {
-            $question = new StudentScore($result);
-            $compute->studentscore()->save($question);
-        }
-    }
-
-    protected function saveClassTeacherData($compute, $request)
-    {
-        $this->saveStudentScores($compute, $request->results);
-        $this->saveAffectiveDispositions($compute, $request->affective_disposition);
-        $this->savePsychomotorSkills($compute, $request->psychomotor_skills);
+        $this->saveStudentScores($result, $request->results);
+        $this->saveAffectiveDispositions($result, $request->affective_disposition);
+        $this->savePsychomotorSkills($result, $request->psychomotor_skills);
 
         if ($request->extra_curricular_activities) {
-            $this->saveExtraCurricularActivities($compute, $request->extra_curricular_activities);
+            $this->saveExtraCurricularActivities($result, $request->extra_curricular_activities);
         }
 
         if (!empty($request->abacus['name'])) {
-            $this->saveAbacus($compute, $request->abacus);
+            $this->saveAbacus($result, $request->abacus);
         }
 
-        $this->savePsychomotorPerformances($compute, $request->psychomotor_performance);
-        $this->savePupilReports($compute, $request->pupil_report);
+        $this->savePsychomotorPerformances($result, $request->psychomotor_performance);
+        $this->savePupilReports($result, $request->pupil_report);
     }
 
-    protected function saveAffectiveDispositions($compute, $affectiveDispositions)
+    protected function saveAffectiveDispositions($result, $affectiveDispositions)
     {
-        $compute->affectivedisposition()->delete();
-        foreach ($affectiveDispositions as $disposition) {
-            $affective = new AffectiveDisposition($disposition);
-            $compute->affectivedisposition()->save($affective);
-        }
+        $result->affectiveDispositions()->delete();
+        $result->affectiveDispositions()->createMany($affectiveDispositions);
     }
 
-    protected function savePsychomotorSkills($compute, $psychomotorSkills)
+    protected function savePsychomotorSkills($result, $psychomotorSkills)
     {
-        $compute->psychomotorskill()->delete();
-        foreach ($psychomotorSkills as $skills) {
-            $psy = new PsychomotorSkill($skills);
-            $compute->psychomotorskill()->save($psy);
-        }
+        $result->psychomotorskill()->delete();
+        $result->psychomotorskill()->createMany($psychomotorSkills);
     }
-    protected function saveExtraCurricularActivities($compute, $extraCurricularActivities)
+
+    protected function saveExtraCurricularActivities($result, $extraCurricularActivities)
     {
-        $compute->resultextracurricular()->delete();
-        foreach ($extraCurricularActivities as $extra) {
-            $ext = new ResultExtraCurricular($extra);
-            $compute->resultextracurricular()->save($ext);
-        }
+        $result->resultExtraCurriculars()->delete();
+        $result->resultExtraCurriculars()->createMany($extraCurricularActivities);
     }
-    protected function saveAbacus($compute, $abacus)
+
+    protected function saveAbacus($result, $abacus)
     {
-        $compute->abacus()->delete();
-        $compute->abacus()->create([
+        $result->abacus()->delete();
+        $result->abacus()->create([
             'name' => $abacus['name']
         ]);
     }
-    protected function savePsychomotorPerformances($compute, $psychomotorPerformances)
+
+    protected function savePsychomotorPerformances($result, $psychomotorPerformances)
     {
-        $compute->psychomotorperformance()->delete();
-        foreach ($psychomotorPerformances as $performance) {
-            $psycho = new PsychomotorPerformance($performance);
-            $compute->psychomotorperformance()->save($psycho);
-        }
+        $result->psychomotorPerformances()->delete();
+        $result->psychomotorPerformances()->createMany($psychomotorPerformances);
     }
-    protected function savePupilReports($compute, $pupilReports)
+
+    protected function savePupilReports($result, $pupilReports)
     {
-        $compute->pupilreport()->delete();
-        foreach ($pupilReports as $report) {
-            $ext = new PupilReport($report);
-            $compute->pupilreport()->save($ext);
-        }
+        $result->pupilReports()->delete();
+        $result->pupilReports()->createMany($pupilReports);
     }
 }

@@ -33,13 +33,13 @@ class EndTermResultController extends Controller
 
         $search = Result::with([
             'student',
-            'studentscore',
-            'affectivedisposition',
+            'studentScores',
+            'affectiveDispositions',
             'psychomotorskill',
-            'resultextracurricular',
+            'resultExtraCurriculars',
             'abacus',
-            'psychomotorperformance',
-            'pupilreport',
+            'psychomotorPerformances',
+            'pupilReports',
         ])
             ->where([
                 'sch_id' => $user->sch_id,
@@ -68,13 +68,13 @@ class EndTermResultController extends Controller
         $user = Auth::user();
 
         $search = Result::with([
-            'studentscore',
-            'affectivedisposition',
+            'studentScores',
+            'affectiveDispositions',
             'psychomotorskill',
-            'resultextracurricular',
+            'resultExtraCurriculars',
             'abacus',
-            'psychomotorperformance',
-            'pupilreport',
+            'psychomotorPerformances',
+            'pupilReports',
         ])
             ->where([
                 'sch_id' => $user->sch_id,
@@ -157,7 +157,7 @@ class EndTermResultController extends Controller
             'term' => $validated['term'],
             'session' => $validated['session'],
         ])
-            ->with('studentscore')
+            ->with('studentScores')
             ->get();
 
         $classResults = Result::with('student')->where([
@@ -170,7 +170,7 @@ class EndTermResultController extends Controller
             ->whereHas('student', function ($query) {
                 $query->where('status', 'active');
             })
-            ->with('studentscore')
+            ->with('studentScores')
             ->get();
 
         $studentCount = Student::where([
@@ -186,7 +186,7 @@ class EndTermResultController extends Controller
         foreach ($classResults as $result) {
             $subjectScores = [];
 
-            foreach ($result->studentscore as $score) {
+            foreach ($result->studentScores as $score) {
                 if (!array_key_exists($score->subject, $subjectScores)) {
                     $subjectScores[$score->subject] = $score->score;
                 }
@@ -205,7 +205,7 @@ class EndTermResultController extends Controller
         $uniqueStudentSubjects = [];
 
         foreach ($results as $result) {
-            foreach ($result->studentscore as $score) {
+            foreach ($result->studentScores as $score) {
                 if ($score->score != 0) {
                     $totalStudentScores += $score->score;
                     $uniqueStudentSubjects[] = $score->subject;

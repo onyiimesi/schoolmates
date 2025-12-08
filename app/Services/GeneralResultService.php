@@ -19,7 +19,7 @@ class GeneralResultService
             return $this->error(null, 'Invalid Period', 400);
         }
 
-        $results = Result::with(['studentscore'])
+        $results = Result::with(['studentScores'])
             ->where([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -61,13 +61,13 @@ class GeneralResultService
 
         $endTermResults = Result::with([
                 'student',
-                'studentscore',
-                'affectivedisposition',
+                'studentScores',
+                'affectiveDispositions',
                 'psychomotorskill',
-                'resultextracurricular',
+                'resultExtraCurriculars',
                 'abacus',
-                'psychomotorperformance',
-                'pupilreport',
+                'psychomotorPerformances',
+                'pupilReports',
             ])
             ->where([
                 'sch_id' => $user->sch_id,
