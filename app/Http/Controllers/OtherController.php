@@ -309,9 +309,9 @@ class OtherController extends Controller
         ]);
 
         try {
-            Mail::raw('This is a test email from Laravel.', function ($message) use ($request) {
+            Mail::raw('This is an email from Schoolmate.', function ($message) use ($request) {
                 $message->to($request->to)
-                        ->subject('Laravel Email Test');
+                        ->subject('Email sent');
             });
 
             return response()->json([
