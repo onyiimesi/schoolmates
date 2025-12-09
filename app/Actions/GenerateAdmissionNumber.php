@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Services;
+namespace App\Actions;
 
 use App\Models\AdmissionNumber;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Date;
 
-class AdmissionNumberService
+final readonly class GenerateAdmissionNumber
 {
-    public function generateUniqueAdmissionNumber($schoolInitial)
+    public function handle(string $schoolInitial): string
     {
-        $monthYear = Carbon::now()->format('mY');
+        $monthYear = Date::now()->format('mY');
 
         $lastNumber = AdmissionNumber::where('admission_number', 'LIKE', "$schoolInitial/$monthYear/%")
                         ->orderBy('admission_number', 'desc')
@@ -25,11 +25,3 @@ class AdmissionNumberService
         return $admissionNumber;
     }
 }
-
-
-
-
-
-
-
-
