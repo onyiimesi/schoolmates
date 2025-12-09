@@ -47,10 +47,10 @@ class StudentBySessionTermClassController extends Controller
             ->where('campus', $user->campus)
             ->where("present_class", $request->present_class)
             ->where('status', StudentStatus::ACTIVE)
-            ->paginate(25);
+            ->get();
 
         $data = StudentResource::collection($searchStud);
 
-        return $this->withPagination($data, "Student list");
+        return $this->success($data, "Student list");
     }
 }
