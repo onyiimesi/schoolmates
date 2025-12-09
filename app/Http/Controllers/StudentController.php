@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\GenerateAdmissionNumber;
 use App\Models\Campus;
 use App\Models\Result;
 use App\Models\Pricing;
@@ -15,7 +16,6 @@ use App\Mail\StudentWelcomeMail;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StudentRequest;
 use App\Http\Resources\StudentResource;
-use App\Services\AdmissionNumberService;
 use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
@@ -59,7 +59,7 @@ class StudentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StudentRequest $request, AdmissionNumberService $admissionNumberService)
+    public function store(StudentRequest $request, GenerateAdmissionNumber $generateAdmissionNumber)
     {
         $user = Auth::user();
 
@@ -98,7 +98,7 @@ class StudentController extends Controller
         }
 
         $admissionNumber = $school->auto_generate
-            ? $admissionNumberService->generateUniqueAdmissionNumber($school->admission_number_initial)
+            ? $generateAdmissionNumber->handle($school->admission_number_initial)
             : $request->admission_number;
 
         $student = Student::create([
@@ -157,7 +157,7 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Student $student, AdmissionNumberService $admissionNumberService)
+    public function update(Request $request, Student $student)
     {
         $user = Auth::user();
 
@@ -167,12 +167,6 @@ class StudentController extends Controller
         if (! $school) {
             return $this->error(null, 'School not found', 404);
         }
-
-        // if(! $school->auto_generate) {
-        //     $request->validate([
-        //         'admission_number' => ['required', 'string', 'max:255', Rule::unique('students', 'admission_number')],
-        //     ]);
-        // }
 
         $campus = Campus::where('sch_id', $user->sch_id)
             ->where('name', $request->campus)
@@ -188,18 +182,12 @@ class StudentController extends Controller
             $imagePath = uploadImage($request->image, 'student', $cleanSchId, $user->file_id);
         }
 
-        $admissionNumber = $school->auto_generate
-            ? $admissionNumberService->generateUniqueAdmissionNumber($school->admission_number_initial)
-            : $request->admission_number;
-
         $student->update([
             'campus' => $request->campus,
             'campus_type' => $campus->campus_type,
             'surname' => $request->surname,
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
-            'admission_number' => $admissionNumber,
-            'username' => $admissionNumber,
             'genotype' => $request->genotype,
             'blood_group' => $request->blood_group,
             'gender' => $request->gender,
