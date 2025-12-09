@@ -7,7 +7,6 @@ use App\Http\Resources\StudentResource;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use ImageKit\ImageKit;
 
 class ProfileController extends Controller
 {
@@ -20,22 +19,8 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        // $stud = Auth::user();
-
-        // if($stud->designation_id){
-
-        //     $staffs = new StaffsResource($stud);
-
-        //     return $this->success($staffs, 'Profile Details');
-
-        // }elseif($stud->designation_id == '7'){
-
-        //     $studs = new StudentResource($stud);
-
-        //     return $this->success($studs, 'Profile Details');
-        // }
-
         $user = Auth::user();
+
         if (!$user) {
             return $this->error(null, 'Unauthenticated.', 401);
         }
@@ -86,30 +71,12 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        $imageKit = new ImageKit(
-            env('IMAGEKIT_PUBLIC_KEY'),
-            env('IMAGEKIT_PRIVATE_KEY'),
-            env('IMAGEKIT_URL_ENDPOINT')
-        );
-
-        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
-
-        $imageUrl = $user->image;
-        $imageFileId = $user->file_id;
-
         if ($request->filled('image')) {
-            $imageUpload = $this->handleImagekitUpload($request->image, $imageKit, $user->file_id, $cleanSchId, $user->designation_id == '7' ? 'student' : 'staff');
-            $imageUrl = $imageUpload['url'];
-            $imageFileId = $imageUpload['fileId'];
+            $imageUpload = $this->handleImagekitUpload($request->image, $user, $user->file_id, $user->designation_id == '7' ? 'student' : 'staff');
         }
 
-        $signatureUrl = $user->signature;
-        $signatureFileId = $user->sig_id;
-
         if ($user->designation_id != '7' && $request->filled('signature')) {
-            $signatureUpload = $this->handleImagekitUpload($request->signature, $imageKit, $user->sig_id, $cleanSchId, 'signature');
-            $signatureUrl = $signatureUpload['url'];
-            $signatureFileId = $signatureUpload['fileId'];
+            $signatureUpload = $this->handleImagekitUpload($request->signature, $user, $user->sig_id, 'signature');
         }
 
         $updateData = [
@@ -118,19 +85,17 @@ class ProfileController extends Controller
             'middlename' => $request->middlename,
             'username' => $request->username,
             'address' => $request->address,
-            'image' => $imageUrl,
-            'file_id' => $imageFileId,
-            'signature' => $user->designation_id != '7' ? $signatureUrl : null,
-            'sig_id' => $user->designation_id != '7' ? $signatureFileId : null,
+            'image' => $imageUpload['url'] ?? $user->image,
+            'file_id' => $imageUpload['fileId'] ?? $user->file_id,
+            'signature' => $signatureUpload['url'] ?? $user->signature,
+            'sig_id' => $signatureUpload['fileId'] ?? $user->sig_id,
         ];
 
         if ($user->designation_id != '7') {
             $updateData['department'] = $request->department;
             $updateData['phoneno'] = $request->phoneno;
             $updateData['email'] = $request->email;
-        }
-
-        if ($user->designation_id == '7') {
+        } else {
             $updateData['phone_number'] = $request->phoneno;
             $updateData['email_address'] = $request->email;
         }
@@ -151,26 +116,9 @@ class ProfileController extends Controller
         //
     }
 
-    private function handleImagekitUpload($base64File, $imageKit, $existingFileId, $schoolId, $folder)
+    private function handleImagekitUpload($file, $user, $fileId, $folder)
     {
-        if ($existingFileId) {
-            $imageKit->deleteFile($existingFileId);
-        }
-
-        $extension = explode('/', explode(':', substr($base64File, 0, strpos($base64File, ';')))[1])[1];
-        $fileName = uniqid() . '.' . $extension;
-        $folderPath = $folder . '/' . $schoolId;
-
-        $upload = $imageKit->uploadFile([
-            'file' => $base64File,
-            'fileName' => $fileName,
-            'folder' => $folderPath
-        ]);
-
-        return [
-            'url' => $upload->result->url,
-            'fileId' => $upload->result->fileId
-        ];
+        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+        return uploadImage($file, $folder, $cleanSchId, $fileId);
     }
-
 }
