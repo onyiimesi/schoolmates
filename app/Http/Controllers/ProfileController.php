@@ -32,7 +32,7 @@ class ProfileController extends Controller
         } elseif ($designationId > 0) {
             $resource = new StaffsResource($user);
         } else {
-            return $this->error('Designation not set for this user.', 422);
+            return $this->error(null, 'Designation not set for this user.', 400);
         }
 
         return $this->success($resource, 'Profile Details');
