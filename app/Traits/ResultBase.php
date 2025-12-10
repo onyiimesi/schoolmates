@@ -155,10 +155,16 @@ trait ResultBase
     protected function saveClassTeacherData($result, $request)
     {
         $this->saveStudentScores($result, $request->results);
-        $this->saveAffectiveDispositions($result, $request->affective_disposition);
-        $this->savePsychomotorSkills($result, $request->psychomotor_skills);
 
-        if ($request->extra_curricular_activities) {
+        if ($request->filled('affective_disposition')) {
+            $this->saveAffectiveDispositions($result, $request->affective_disposition);
+        }
+
+        if ($request->filled('psychomotor_skills')) {
+            $this->savePsychomotorSkills($result, $request->psychomotor_skills);
+        }
+
+        if ($request->filled('extra_curricular_activities')) {
             $this->saveExtraCurricularActivities($result, $request->extra_curricular_activities);
         }
 
@@ -166,8 +172,13 @@ trait ResultBase
             $this->saveAbacus($result, $request->abacus);
         }
 
-        $this->savePsychomotorPerformances($result, $request->psychomotor_performance);
-        $this->savePupilReports($result, $request->pupil_report);
+        if ($request->filled('psychomotor_performance')) {
+            $this->savePsychomotorPerformances($result, $request->psychomotor_performance);
+        }
+
+        if ($request->filled('pupil_report')) {
+            $this->savePupilReports($result, $request->pupil_report);
+        }
     }
 
     protected function saveAffectiveDispositions($result, $affectiveDispositions)
