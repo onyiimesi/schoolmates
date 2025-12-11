@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ClearCacheAction;
 use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
 use App\Http\Requests\MidtermRequest;
@@ -103,14 +104,16 @@ class ResultTwoController extends Controller
         }
     }
 
-    public function release(ReleaseResultRequest $request)
+    public function release(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
     {
         $auth = userAuth();
         $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
         if (empty($studentIds)) {
-            return $this->error(null, "No students selected.", 422);
+            return $this->error(null, "No students selected.", 400);
         }
+
+        $clearCacheAction->handle($request, $studentIds[0]);
 
         Result::where('sch_id', $auth->sch_id)
             ->where('campus', $auth->campus)
@@ -124,14 +127,16 @@ class ResultTwoController extends Controller
         return $this->success(null, "Result released");
     }
 
-    public function hold(ReleaseResultRequest $request)
+    public function hold(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
     {
         $auth = userAuth();
         $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
         if (empty($studentIds)) {
-            return $this->error(null, "No students selected.", 422);
+            return $this->error(null, "No students selected.", 400);
         }
+
+        $clearCacheAction->handle($request, $studentIds[0]);
 
         Result::where('sch_id', $auth->sch_id)
             ->where('campus', $auth->campus)
@@ -187,7 +192,6 @@ class ResultTwoController extends Controller
     {
         return $this->resultService->getSchoolSheetSettings();
     }
-
 }
 
 
