@@ -59,7 +59,12 @@ class StudentLoginResource extends JsonResource
             'home_address' => (string)$this->home_address,
             'status' => (string)$this->status,
             'is_preschool' => (string)$this->is_preschool,
-            'plan' => (string)$getplan->plan
+            'plan' => (string)$getplan->plan,
+            'hos' => (object) [
+                'id' => (int) $this->hos?->id,
+                'name' => "{$this->hos?->surname} {$this->hos?->firstname} {$this->hos?->middlename}",
+                'signature' => (string) $this->hos?->signature,
+            ]
         ];
     }
 }

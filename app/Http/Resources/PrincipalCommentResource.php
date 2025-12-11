@@ -15,12 +15,12 @@ class PrincipalCommentResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => (int)$this->id,
-            'hos_id' => (int)$this->hos_id,
+            'id' => (int) $this->id,
             'attributes' => [
-                'hos_fullname' => (string)$this->hos_fullname,
-                'hos_comment' => (string)$this->hos_comment,
-                'signature' => (string)$this->signature,
+                'hos_id' => (int) $this->hos_id,
+                'hos_fullname' => (string) $this->hos_fullname,
+                'hos_comment' => (string) $this->hos_comment,
+                'signature' => (string) $this->signature,
             ]
         ];
     }
