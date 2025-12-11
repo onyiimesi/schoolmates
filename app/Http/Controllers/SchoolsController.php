@@ -20,51 +20,40 @@ class SchoolsController extends Controller
             ->get()
         );
 
-        return [
-            'status' => 'true',
-            'message' => 'School Details',
-            'data' => $school
-        ];
+        return $this->success($school, 'School detail');
     }
 
     public function dos(Request $request)
     {
         $user = Auth::user();
 
-        if(!$user){
-            return $this->error('', 'Unauthenticated', 401);
-        }
+        $school = Schools::where('sch_id', $user->sch_id)->first();
 
-        $school = Schools::where('sch_id', $user->sch_id)
-        ->first();
+        if (! $school) {
+            return $this->error(null, 'School not found', 404);
+        }
 
         $school->update([
             'dos' => $request->dos
         ]);
 
-        return [
-            'status' => 'true',
-            'message' => 'Added Successfully'
-        ];
+        return $this->success(null, 'Added Successfully');
     }
 
     public function getdos()
     {
         $user = Auth::user();
 
-        if(!$user){
-            return $this->error('', 'Unauthenticated', 401);
+        $school = Schools::where('sch_id', $user->sch_id)->first();
+
+        if (! $school) {
+            return $this->error(null, 'School not found', 404);
         }
 
-        $school = Schools::where('sch_id', $user->sch_id)
-        ->first();
-
-        return [
-            'status' => 'true',
-            'message' => 'Added Successfully',
+        return $this->success([
             'attributes' => [
                 'dos' => $school->dos
             ]
-        ];
+        ], 'School detail');
     }
 }

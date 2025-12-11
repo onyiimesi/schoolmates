@@ -94,6 +94,20 @@ class Staff extends Authenticatable implements Auditable
         return null;
     }
 
+    public function getHosAttribute()
+    {
+        $hos = self::where('sch_id', $this->sch_id)
+            ->where('campus', $this->campus)
+            ->where('designation_id', 3)
+            ->first();
+
+        if (! $hos) {
+            return null;
+        }
+
+        return $hos;
+    }
+
     public static function generateUsername(string $firstname, string $surname): string
     {
         $baseUsername = strtolower($firstname . '.' . $surname);
