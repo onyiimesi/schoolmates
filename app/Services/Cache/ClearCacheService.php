@@ -2,31 +2,11 @@
 
 namespace App\Services\Cache;
 
-use App\Services\GeneralResultService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 
-class FlexibleCacheService extends GeneralResultService
+class ClearCacheService
 {
-    public function firstHalf($user, array $data): JsonResponse
-    {
-        $this->clearResultServiceCache($data);
-
-        $cacheKey = $this->buildCacheKey('first_half',$data);
-
-        return Cache::flexible($cacheKey, [200, 300], fn () => parent::firstHalf($user, $data));
-    }
-
-    public function secondHalf($user, array $data): JsonResponse
-    {
-        $this->clearResultServiceCache($data);
-
-        $cacheKey = $this->buildCacheKey('second_half', $data);
-
-        return Cache::flexible($cacheKey, [200, 300], fn () => parent::secondHalf($user, $data));
-    }
-
-    private function clearResultServiceCache(array $data): void
+    public function clearResultServiceCache(array $data): void
     {
         $firstMemo = $this->buildMemoKey('first_half', $data);
         $secondMemo = $this->buildMemoKey('second_half', $data);
