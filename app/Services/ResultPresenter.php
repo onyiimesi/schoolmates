@@ -107,19 +107,14 @@ class ResultPresenter
             ->where('campus', $result->campus)
             ->where('id', $result->hos_id)
             ->where('designation_id', 3)
-            ->where('status', StaffStatus::ACTIVE);
-
-        if ($class && $class->class_type !== null) {
-            $hodQuery->where('class_type', $class->class_type);
-        }
-
-        $hods = $hodQuery->get();
+            ->where('status', StaffStatus::ACTIVE)
+            ->when($class && $class->class_type !== null, fn($q) => $q->where('class_type', $class->class_type));
 
         $dos = Schools::where('sch_id', $result->sch_id)->value('dos');
 
         return [
             'staff' => $staff,
-            'hods' => $hods,
+            'hods' => $hodQuery->get(),
             'dos' => $dos
         ];
     }
