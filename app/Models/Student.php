@@ -81,7 +81,7 @@ class Student extends Authenticatable implements Auditable
 
     public function getHosAttribute()
     {
-        $hos = self::where('sch_id', $this->sch_id)
+        $hos = Staff::where('sch_id', $this->sch_id)
             ->where('campus', $this->campus)
             ->where('designation_id', 3)
             ->first();
