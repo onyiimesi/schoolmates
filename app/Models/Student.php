@@ -80,9 +80,10 @@ class Student extends Authenticatable implements Auditable
         return $this->hasMany(Result::class, 'student_id');
     }
 
-    public function getHosAttribute()
+    public function getHosAttribute(): ?Staff
     {
-        $hos = Staff::where('sch_id', $this->sch_id)
+        $hos = Staff::select('id', 'surname', 'firstname', 'middlename', 'signature')
+            ->where('sch_id', $this->sch_id)
             ->where('campus', $this->campus)
             ->where('designation_id', 3)
             ->first();
