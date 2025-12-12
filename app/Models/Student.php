@@ -97,7 +97,16 @@ class Student extends Authenticatable implements Auditable
     public function isPreschool(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value == '1' ? 'true' : 'false'
+            get: function ($value) {
+                return in_array($value, [1, '1', true, 'true'], true)
+                    ? 'true'
+                    : 'false';
+            },
+            set: function ($value) {
+                return in_array($value, [1, '1', true, 'true'], true)
+                    ? 'true'
+                    : 'false';
+            }
         );
     }
 }
