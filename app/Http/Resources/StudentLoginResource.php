@@ -58,7 +58,7 @@ class StudentLoginResource extends JsonResource
             'present_class' => (string)$this->present_class,
             'home_address' => (string)$this->home_address,
             'status' => (string)$this->status,
-            'is_preschool' => (string)$this->is_preschool,
+            'is_preschool' => (string) $this->is_preschool,
             'plan' => (string)$getplan->plan,
             'hos' => (object) [
                 'id' => (int) $this->hos?->id,
