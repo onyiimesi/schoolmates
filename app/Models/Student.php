@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -91,5 +92,12 @@ class Student extends Authenticatable implements Auditable
         }
 
         return $hos;
+    }
+
+    public function isPreschool(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value == '1' ? 'true' : 'false'
+        );
     }
 }
