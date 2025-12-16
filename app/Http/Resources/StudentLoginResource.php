@@ -64,7 +64,22 @@ class StudentLoginResource extends JsonResource
                 'id' => (int) $this->hos?->id,
                 'name' => "{$this->hos?->surname} {$this->hos?->firstname} {$this->hos?->middlename}",
                 'signature' => (string) $this->hos?->signature,
-            ]
+            ],
+            'school' => (object) [
+                'schname' => (string) $this->school?->schname,
+                'schaddr' => (string) $this->school?->schaddr,
+                'schphone' => (string) $this->school?->schphone,
+                'schemail' => (string) $this->school?->schemail,
+                'schmotto' => (string) $this->school?->schmotto,
+                'schwebsite' => (string) $this->school?->schwebsite,
+                'schlogo' => (string) $this->school?->schlogo,
+                'country' => (string) $this->school?->country,
+                'dos' => (string) $this->school?->dos,
+                'signed_up' => (string) $this->school?->signed_up,
+                'auto_generate' => $this->school?->auto_generate,
+                'admission_number_initial' => (string) $this->school?->admission_number_initial,
+                'status' => (string) $this->school?->status,
+            ],
         ];
     }
 }

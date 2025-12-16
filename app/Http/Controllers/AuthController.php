@@ -29,7 +29,7 @@ class AuthController extends Controller
             $auth = Auth::guard('staffs')->user();
 
             if(!in_array($auth->status, haystack: ['active'])) {
-                return $this->error('', 'Account is inactive, contact support', 400);
+                return $this->error(null, 'Account is inactive, contact support', 400);
             }
 
             $user = Staff::with(['school', 'subjectteacher'])
@@ -50,10 +50,11 @@ class AuthController extends Controller
             $auth = Auth::guard('studs')->user();
 
             if(!in_array($auth->status, haystack: ['active'])) {
-                return $this->error('', 'Account is inactive, contact support', 400);
+                return $this->error(null, 'Account is inactive, contact support', 400);
             }
 
-            $stud = Student::where('sch_id', $auth->sch_id)
+            $stud = Student::with('school')
+                ->where('sch_id', $auth->sch_id)
                 ->where('username', $auth->username)
                 ->first();
 
@@ -67,7 +68,7 @@ class AuthController extends Controller
             ]);
         }
 
-        return $this->error('', 'Credentials do not match', 401);
+        return $this->error(null, 'Credentials do not match', 401);
     }
 
     public function register(StoreUserRequest $request)
