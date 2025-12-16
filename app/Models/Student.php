@@ -70,6 +70,11 @@ class Student extends Authenticatable implements Auditable
         'in_present_class' => 'boolean',
     ];
 
+    public function school()
+    {
+        return $this->belongsTo(Schools::class, 'sch_id', 'sch_id');
+    }
+
     public function assignmentanswer()
     {
         return $this->hasMany(AssignmentAnswer::class);
