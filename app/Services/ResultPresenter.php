@@ -70,7 +70,16 @@ class ResultPresenter
 
         $classTotalScore = $classResults->flatMap->studentScores->pluck('score')->sum();
         $classCount = $classResults->pluck('student_id')->unique()->count();
-        $classAverage = $classCount > 0 ? round($totalStudentAverages / $classCount, 2) : 0;
+
+        if (in_array($result->term, ['First Term', 'Second Term'])) {
+            $currentScores = $result->studentScores?->pluck('score') ?? collect();
+            $totalSubjects = $currentScores->count();
+            $classAverage = $totalSubjects > 0
+                ? round($currentScores->sum() / $totalSubjects, 2)
+                : 0;
+        } else {
+            $classAverage = $classCount > 0 ? round($totalStudentAverages / $classCount, 2) : 0;
+        }
 
         $classGrade = GradingSystem::where('sch_id', $result->sch_id)
             ->where('campus', $result->campus)
@@ -179,6 +188,7 @@ class ResultPresenter
                 }
 
                 $prevScore = $entry->score;
+                logger()->info("Index: $index");
             }
 
             $positions[$subject] = $positionMap[$result->student_id] ?? null;
