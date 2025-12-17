@@ -19,21 +19,11 @@ class BroadSheetController extends Controller
     {
         $user = Auth::user();
 
-        $scoreSetting = $this->getScoreSetting($user);
-
-        if (! $scoreSetting || ! $scoreSetting->scoreOption) {
-            return $this->error(null, 'Score setting not found', 400);
-        }
-
-        $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
-        $assessmentResultTypes = $this->getAssessmentTypes($assessmentType);
-
         $sheet = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class_name)
             ->where('term', $request->term)
             ->whereIn('period', [PeriodicName::FIRSTHALF, PeriodicName::SECONDHALF])
-            ->whereIn('result_type', $assessmentResultTypes)
             ->where('session', $request->session)
             ->with('studentScores', 'student')
             ->get();
@@ -46,7 +36,7 @@ class BroadSheetController extends Controller
         $data = $this->getBroadsheetData($groupedResults);
 
         return response()->json([
-            'status' => "true",
+            'status' => true,
             'message' => "Broadsheet",
             'class_name' => $request->class_name,
             'data' => $data,
@@ -103,11 +93,12 @@ class BroadSheetController extends Controller
                 return [
                     'subject' => $score->subject,
                     'period' => $result->period,
+                    'result_type' => $result->result_type,
                     'score' => (int) $score->score,
                 ];
             });
         })
-            ->groupBy(fn($item) => $item['subject'] . '|' . $item['period']) // Dedup by subject + period
+            ->groupBy(fn($item) => $item['subject'] . '|' . $item['period'] . '|' . $item['result_type']) // Dedup by subject + period
             ->map(fn($group) => $group->first()) // Take only one per subject+period
             ->groupBy('subject')
             ->map(function ($subjectScores, $subject) {
