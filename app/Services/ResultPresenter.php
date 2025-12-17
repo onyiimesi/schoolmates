@@ -44,14 +44,14 @@ class ResultPresenter
 
     public function getClassStats(Result $result): array
     {
-        $classResults = Result::with('studentScores')
-            ->where([
-                'sch_id' => $result->sch_id,
-                'campus' => $result->campus,
-                'class_name' => $result->class_name,
-                'term' => $result->term,
-                'session' => $result->session,
-            ])
+        $classResults = Result::with(['studentScores' => function ($query) {
+                $query->where('score', '>', 0);
+            }])
+            ->where('sch_id', $result->sch_id)
+            ->where('campus', $result->campus)
+            ->where('class_name', $result->class_name)
+            ->where('term', $result->term)
+            ->where('session', $result->session)
             ->get();
 
         $studentAverages = $classResults->map(function ($r) {
@@ -68,14 +68,14 @@ class ResultPresenter
         // Calculate the sum of all student averages
         $totalStudentAverages = $studentAverages->sum('average');
 
-        $classTotalScore = $classResults->flatMap->studentScores->pluck('score')->sum();
+        $scores = $classResults->flatMap->studentScores;
+        $classTotalScore = $scores->sum('score');
         $classCount = $classResults->pluck('student_id')->unique()->count();
 
         if (in_array($result->term, ['First Term', 'Second Term'])) {
-            $currentScores = $result->studentScores?->pluck('score') ?? collect();
-            $totalSubjects = $currentScores->count();
-            $classAverage = $totalSubjects > 0
-                ? round($currentScores->sum() / $totalSubjects, 2)
+            $subjectCount = $scores->unique('subject')->count();
+            $classAverage = ($classCount > 0 && $subjectCount > 0)
+                ? round($classTotalScore / ($classCount * $subjectCount), 2)
                 : 0;
         } else {
             $classAverage = $classCount > 0 ? round($totalStudentAverages / $classCount, 2) : 0;
