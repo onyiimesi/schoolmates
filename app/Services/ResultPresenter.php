@@ -16,21 +16,21 @@ class ResultPresenter
     public function getGpa(Result $result): array
     {
         $studentResults = Result::with(['studentScores' => function ($query) {
-            $query->where('score', '>', 0);
-        }])
-        ->where([
-            'sch_id' => $result->sch_id,
-            'campus' => $result->campus,
-            'student_id' => $result->student_id,
-            'class_name' => $result->class_name,
-            'term' => $result->term,
-            'session' => $result->session,
-        ])->get();
+                $query->where('score', '>', 0);
+            }])
+            ->where([
+                'sch_id' => $result->sch_id,
+                'campus' => $result->campus,
+                'student_id' => $result->student_id,
+                'class_name' => $result->class_name,
+                'term' => $result->term,
+                'session' => $result->session,
+            ])
+            ->get();
 
-        $scores = $studentResults->pluck('studentScores')->flatten();
+        $scores = $studentResults->flatMap->studentScores;
         $totalScore = $scores->sum('score');
-        $totalSubjects = $scores->unique('subject')->count();
-
+        $totalSubjects = $scores->pluck('subject')->unique()->count();
         $expectedScore = $totalSubjects * 100;
         $gpa = ($expectedScore > 0) ? round(($totalScore / $expectedScore) * 5, 2) : 0;
 
