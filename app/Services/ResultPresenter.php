@@ -30,7 +30,7 @@ class ResultPresenter
 
         $scores = $studentResults->flatMap->studentScores;
         $totalScore = $scores->sum('score');
-        $totalSubjects = $scores->pluck('subject')->unique()->count();
+        $totalSubjects = $scores->unique('subject')->count();
         $expectedScore = $totalSubjects * 100;
         $gpa = ($expectedScore > 0) ? round(($totalScore / $expectedScore) * 5, 2) : 0;
 
