@@ -73,7 +73,11 @@ class ResultPresenter
         $classCount = $classResults->pluck('student_id')->unique()->count();
 
         if (in_array($result->term, ['First Term', 'Second Term'])) {
-            $subjectCount = $scores->unique('subject')->count();
+            $subjectCount = $result->studentScores
+                ->where('score', '>', 0)
+                ->pluck('subject')
+                ->unique()
+                ->count();
             $classAverage = ($classCount > 0 && $subjectCount > 0)
                 ? round($classTotalScore / ($classCount * $subjectCount), 2)
                 : 0;
