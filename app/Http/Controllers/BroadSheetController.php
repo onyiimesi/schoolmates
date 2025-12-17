@@ -2,26 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\PeriodicName;
 use App\Models\GradingSystem;
 use App\Models\Staff;
 use App\Models\Result;
 use App\Traits\HttpResponses;
+use App\Traits\ResultTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BroadSheetController extends Controller
 {
-    use HttpResponses;
+    use HttpResponses, ResultTrait;
 
     public function broadsheet(Request $request)
     {
         $user = Auth::user();
 
+        $scoreSetting = $this->getScoreSetting($user);
+
+        if (! $scoreSetting || ! $scoreSetting->scoreOption) {
+            return $this->error(null, 'Score setting not found', 400);
+        }
+
+        $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
+        $assessmentResultTypes = $this->getAssessmentTypes($assessmentType);
+
         $sheet = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request->class_name)
             ->where('term', $request->term)
-            ->whereIn('period', ['First Half', 'Second Half'])
+            ->whereIn('period', [PeriodicName::FIRSTHALF, PeriodicName::SECONDHALF])
+            ->whereIn('result_type', $assessmentResultTypes)
             ->where('session', $request->session)
             ->with('studentScores', 'student')
             ->get();

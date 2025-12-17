@@ -91,13 +91,7 @@ class GeneralResultService
             'results' => ResultResource::collection($endTermResults),
         ];
 
-        $assessmentTypes = match ($assessmentType) {
-            1 => ['midterm'],
-            2 => ['first_assesment', 'second_assesment'],
-            3 => ['first_assesment', 'second_assesment', 'third_assesment'],
-            4 => ['first_assesment', 'second_assesment', 'third_assesment', 'fourth_assesment'],
-            default => [],
-        };
+        $assessmentTypes = $this->getAssessmentTypes($assessmentType);
 
         foreach ($assessmentTypes as $resultType) {
             $data[$resultType] = $this->getAssessmentResults($user, $params, $resultType);
@@ -105,5 +99,4 @@ class GeneralResultService
 
         return $this->success($data, 'Retrieved successfully');
     }
-
 }

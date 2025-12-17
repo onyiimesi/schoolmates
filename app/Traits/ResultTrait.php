@@ -118,6 +118,17 @@ trait ResultTrait
     {
         return $count > 0 ? $total / $count : 0;
     }
+
+    protected function getAssessmentTypes(int $assessmentType): array
+    {
+        return match ($assessmentType) {
+            1 => ['midterm'],
+            2 => ['first_assesment', 'second_assesment'],
+            3 => ['first_assesment', 'second_assesment', 'third_assesment'],
+            4 => ['first_assesment', 'second_assesment', 'third_assesment', 'fourth_assesment'],
+            default => [],
+        };
+    }
 }
 
 
