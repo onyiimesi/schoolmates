@@ -64,11 +64,7 @@ class ResultTwoController extends Controller
                 return $this->success(null, $message, $result->wasRecentlyCreated ? 201 : 200);
             });
         } catch (\Throwable $th) {
-            return $this->error([
-                'error' => $th->getMessage(),
-                'line' => $th->getLine(),
-                'file' => $th->getFile(),
-            ], "An error occurred: {$th->getMessage()}", 400);
+            return $this->error(null, "An error occurred: {$th->getMessage()}", 400);
         }
     }
 
