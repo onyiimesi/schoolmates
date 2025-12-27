@@ -24,6 +24,11 @@ class ClearCacheService
         Cache::forget("cache:flexible:created:{$secondHalfCacheKey}");
     }
 
+    public function clearAll(): void
+    {
+        Cache::flush();
+    }
+
     private function buildCacheKey(string $type, array $data): string
     {
         return implode(':', [

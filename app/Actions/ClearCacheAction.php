@@ -12,8 +12,13 @@ class ClearCacheAction
     )
     {}
 
-    public function handle($request, $studentId): void
+    public function handle($request, $studentId, ?bool $clearAll = false): void
     {
+        if ($clearAll) {
+            $this->clearCacheService->clearAll();
+            return;
+        }
+
         $studentClass = Student::where('id', $studentId)->value('present_class');
 
         $data = [

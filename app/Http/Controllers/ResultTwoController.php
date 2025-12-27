@@ -109,7 +109,7 @@ class ResultTwoController extends Controller
             return $this->error(null, "No students selected.", 400);
         }
 
-        $clearCacheAction->handle($request, $studentIds[0]);
+        $clearCacheAction->handle($request, $studentIds[0], true);
 
         Result::where('sch_id', $auth->sch_id)
             ->where('campus', $auth->campus)
@@ -132,7 +132,7 @@ class ResultTwoController extends Controller
             return $this->error(null, "No students selected.", 400);
         }
 
-        $clearCacheAction->handle($request, $studentIds[0]);
+        $clearCacheAction->handle($request, $studentIds[0], true);
 
         Result::where('sch_id', $auth->sch_id)
             ->where('campus', $auth->campus)

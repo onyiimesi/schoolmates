@@ -153,7 +153,7 @@ class SubjectByClassController extends Controller
     {
         $subject = StudentExcelImportResource::collection(StudentExcelImport::get());
 
-        return $this->success($subject, "");
+        return $this->success($subject, "Imported successfully.");
 
     }
 
