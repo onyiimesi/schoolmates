@@ -162,11 +162,13 @@ Route::middleware('check.allowed.url')
             Route::post('/studentimport', [StudentImportController::class, 'import']);
 
             Route::controller(AcademicPeriodController::class)->group(function () {
-                Route::post('/academicperiod', 'changePeriod');
+                Route::post('/academicperiod', 'changePeriod')
+                    ->middleware('check.subscription.status');
                 Route::get('/getacademicperiod', 'getPeriod');
                 Route::get('/getacademicsessions', 'getSessions');
 
-                Route::post('/current/academicperiod', 'setCurrentAcademicPeriod');
+                Route::post('/current/academicperiod', 'setCurrentAcademicPeriod')
+                    ->middleware('check.subscription.status');
                 Route::get('/current/academicperiod', 'getCurrentAcademicPeriod');
             });
 
@@ -181,9 +183,9 @@ Route::middleware('check.allowed.url')
             Route::resource('/codeconduct', CodeConductController::class);
             Route::resource('/class', ClassController::class);
             Route::resource('/disciplinary', DisciplinaryController::class);
-            Route::resource('/student', StudentController::class);
+            Route::resource('/student', StudentController::class)->middleware('check.subscription.status');
             Route::resource('/fee', FeeController::class);
-            Route::resource('/invoice', InvoiceController::class);
+            Route::resource('/invoice', InvoiceController::class)->middleware('check.subscription.status');
             Route::resource('/bank', BankController::class);
             Route::resource('/payment', PaymentController::class);
             Route::resource('/chartaccount', ChartAccountController::class);
@@ -211,14 +213,15 @@ Route::middleware('check.allowed.url')
                 //New result form
                 Route::controller(ResultTwoController::class)
                     ->group(function () {
-                        Route::post('midTermResult', 'midTerm');
-                        Route::post('endTermResult', 'endTerm');
-                        Route::patch('release/result', 'release');
-                        Route::patch('withhold/result', 'hold');
+                        Route::post('midTermResult', 'midTerm')->middleware('check.subscription.status');
+                        Route::post('endTermResult', 'endTerm')->middleware('check.subscription.status');
+                        Route::patch('release/result', 'release')->middleware('check.subscription.status');
+                        Route::patch('withhold/result', 'hold')->middleware('check.subscription.status');
                     });
 
                 // New Result API
-                Route::get("/get-result", [EndTermResultController::class, 'getResult']);
+                Route::get("/get-result", [EndTermResultController::class, 'getResult'])
+                    ->middleware('check.subscription.status');
 
                 Route::prefix('staff')
                     ->group(function () {
@@ -229,9 +232,11 @@ Route::middleware('check.allowed.url')
                     });
 
                 Route::get("/cumulativescore/{student_id}/{period}/{term}/{session}", [EndTermResultController::class, 'cummulative'])
-                    ->where('session', '.+');
+                    ->where('session', '.+')
+                    ->middleware('check.subscription.status');
                 Route::get("/end-term-class-average/{student_id}/{class_name}/{session}", [EndTermResultController::class, 'endaverage'])
-                    ->where('session', '.+');
+                    ->where('session', '.+')
+                    ->middleware('check.subscription.status');
 
                 // Deprecating soon
                 Route::get("/midtermresult/{student_id}/{term}/{session}", [MidTermResultController::class, 'midterm'])
@@ -244,7 +249,8 @@ Route::middleware('check.allowed.url')
                     ->where('session', '.+');
 
                 Route::get("/student-average/{student_id}/{class_name}/{term}/{session}", [EndTermResultController::class, 'studentaverage'])
-                    ->where('session', '.+');
+                    ->where('session', '.+')
+                    ->middleware('check.subscription.status');
             });
 
             //PreSchool Subject
@@ -284,8 +290,10 @@ Route::middleware('check.allowed.url')
 
             Route::patch('/withdrawstudent/{id}', [WithdrawStudentController::class, 'withdraw']);
             Route::patch('/acceptstudent/{id}', [WithdrawStudentController::class, 'acceptStudent']);
-            Route::patch('/promotestudent/{id}', [PromoteStudentController::class, 'promote']);
-            Route::patch('/promote-students', [PromoteStudentController::class, 'promotestudents']);
+            Route::patch('/promotestudent/{id}', [PromoteStudentController::class, 'promote'])
+                ->middleware('check.subscription.status');
+            Route::patch('/promote-students', [PromoteStudentController::class, 'promotestudents'])
+                ->middleware('check.subscription.status');
 
             Route::get("/expectedincome", [ExpectedIncomecontroller::class, 'expected']);
             Route::get("/receivedincome", [ReceivedIncomeController::class, 'received']);
