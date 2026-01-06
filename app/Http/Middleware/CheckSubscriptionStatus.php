@@ -3,12 +3,15 @@
 namespace App\Http\Middleware;
 
 use App\Models\Schools;
+use App\Traits\HttpResponses;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckSubscriptionStatus
 {
+    use HttpResponses;
+
     /**
      * Handle an incoming request.
      *
@@ -21,11 +24,11 @@ class CheckSubscriptionStatus
         $school = Schools::with('activeSubscription')->where('sch_id', $user->sch_id)->first();
 
         if (! $school) {
-            return response()->json(['error' => 'School not found'], 404);
+            return $this->error(null, 'School not found', 404);
         }
 
         if (! $school->activeSubscription) {
-            return response()->json(['error' => 'Subscription not active'], 400);
+            return $this->error(null, 'Subscription not active', 400);
         }
 
         return $next($request);
