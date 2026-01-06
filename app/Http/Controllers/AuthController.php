@@ -32,7 +32,7 @@ class AuthController extends Controller
                 return $this->error(null, 'Account is inactive, contact support', 400);
             }
 
-            $user = Staff::with(['school', 'subjectteacher'])
+            $user = Staff::with(['school.activeSubscription', 'school.currentAcademicPeriod', 'subjectteacher'])
                 ->where('sch_id', $auth->sch_id)
                 ->where('username', $auth->username)
                 ->first();
@@ -44,7 +44,7 @@ class AuthController extends Controller
                 'user' => $users,
                 'token' => $token->plainTextToken,
                 'expires_at' => $token->accessToken->expires_at
-            ]);
+            ], 'Login successful');
 
         } elseif ($studGuard->attempt($request->only(['username', 'password']))) {
             $auth = Auth::guard('studs')->user();
@@ -53,7 +53,7 @@ class AuthController extends Controller
                 return $this->error(null, 'Account is inactive, contact support', 400);
             }
 
-            $stud = Student::with('school')
+            $stud = Student::with(['school.activeSubscription', 'school.currentAcademicPeriod'])
                 ->where('sch_id', $auth->sch_id)
                 ->where('username', $auth->username)
                 ->first();
