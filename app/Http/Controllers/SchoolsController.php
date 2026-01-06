@@ -12,11 +12,15 @@ class SchoolsController extends Controller
 {
     use HttpResponses;
 
-    public function schools(){
+    public function schools() {
         $user = Auth::user();
 
         $school = SchoolsResource::collection(
-            Schools::where('sch_id', $user->sch_id)
+            Schools::with([
+                'activeSubscription',
+                'currentAcademicPeriod',
+                'subscriptions',
+            ])->where('sch_id', $user->sch_id)
             ->get()
         );
 

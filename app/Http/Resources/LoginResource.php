@@ -4,9 +4,11 @@ namespace App\Http\Resources;
 
 use App\Models\ClassModel;
 use App\Models\Pricing;
+use App\Models\Result;
 use App\Models\SchoolPayment;
 use App\Models\Schools;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class LoginResource extends JsonResource
 {
@@ -19,12 +21,12 @@ class LoginResource extends JsonResource
     public function toArray($request)
     {
         $plan = SchoolPayment::where('sch_id', $this->sch_id)->first();
-        if($plan){
+
+        if ($plan) {
             $getplan = Pricing::where('id', $plan->pricing_id)->first();
 
         } else {
-            $school = Schools::where('sch_id', $this->sch_id)->first();
-            $getplan = Pricing::where('id', $school->pricing_id)->first();
+            $getplan = Schools::with('pricing')->where('sch_id', $this->sch_id)->first();
         }
 
         $classid = ClassModel::where([
@@ -32,6 +34,23 @@ class LoginResource extends JsonResource
             "campus" => $this->campus,
             "class_name" => $this->class_assigned
         ])->value('id');
+
+        $baseQuery = Result::where('sch_id', $this->sch_id)
+            ->where('term', $this->school->currentAcademicPeriod?->term)
+            ->where('session', $this->school->currentAcademicPeriod ?->session);
+
+        $latestResultIds = $baseQuery
+            ->select(DB::raw('MAX(id) as id'))
+            ->groupBy('student_id')
+            ->pluck('id');
+
+        $totalStudents = $latestResultIds->count();
+        $subAmount = (float) $this->school->amount_per_student * $totalStudents;
+        $invoiceStatus = 'pending';
+
+        if ($this->school->activeSubscription) {
+            $invoiceStatus = $this->school->activeSubscription === 'expired' ? 'pending' : 'paid';
+        }
 
         return [
             'id' => (string)$this->id,
@@ -57,7 +76,7 @@ class LoginResource extends JsonResource
             'subjects' => $this->subjectteacher?->flatMap(function($item){
                 return $item->subject;
             }),
-            'plan' => (string)$getplan->plan,
+            'plan' => (string) $getplan->plan ?? $getplan->pricing->plan,
             'school' => (object) [
                 'schname' => (string) $this->school?->schname,
                 'schaddr' => (string) $this->school?->schaddr,
@@ -72,12 +91,26 @@ class LoginResource extends JsonResource
                 'auto_generate' => $this->school?->auto_generate,
                 'admission_number_initial' => (string) $this->school?->admission_number_initial,
                 'status' => (string) $this->school?->status,
+                'current_subscription' => (object) [
+                    'starts_at' => $this->school->activeSubscription ? $this->school->activeSubscription->starts_at->toDateString() : null,
+                    'ends_at' => $this->school->activeSubscription ? $this->school->activeSubscription->ends_at->toDateString() : null,
+                    'amount' => (string) $this->school->activeSubscription ? $this->school->activeSubscription->amount : $subAmount,
+                    'status' => (string) $this->school->activeSubscription ? $this->school->activeSubscription->status : 'expired',
+                ],
+                'invoice' => (object) [
+                    'term' => $this->school->currentAcademicPeriod?->term,
+                    'session' => $this->school->currentAcademicPeriod?->session,
+                    'total_students' => $totalStudents,
+                    'amount_per_student' => (float) $this->school->amount_per_student,
+                    'total_amount' => $subAmount,
+                    'status' => $invoiceStatus,
+                ],
             ],
             'hos' => (object) [
                 'id' => (int) $this->hos?->id,
                 'name' => "{$this->hos?->surname} {$this->hos?->firstname} {$this->hos?->middlename}",
                 'signature' => (string) $this->hos?->signature,
-            ]
+            ],
         ];
     }
 }

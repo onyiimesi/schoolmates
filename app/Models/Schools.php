@@ -62,4 +62,22 @@ class Schools extends Model implements Auditable
     {
         return $this->belongsTo(Pricing::class, 'pricing_id', 'id');
     }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'school_id', 'id');
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class, 'school_id', 'id')
+            ->where('status', 'active')
+            ->whereDate('ends_at', '>=', now());
+    }
+
+    public function currentAcademicPeriod()
+    {
+        return $this->hasOne(AcademicPeriod::class, 'sch_id', 'sch_id')
+            ->where('is_current_period', true);
+    }
 }
