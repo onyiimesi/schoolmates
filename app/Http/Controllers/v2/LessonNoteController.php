@@ -7,49 +7,48 @@ use App\Http\Requests\v2\LessonNoteRequest;
 use App\Services\LessonNote\LessonNoteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Actions\LessonNote\CreateLessonNoteAction;
 
 class LessonNoteController extends Controller
 {
-    public $service;
+    public function __construct(
+        protected LessonNoteService $lessonNoteService
+    )
+    {}
 
-    public function __construct(LessonNoteService $lessonNoteService)
+    public function addLesson(LessonNoteRequest $request, CreateLessonNoteAction $createLessonNoteAction): JsonResponse
     {
-        $this->service = $lessonNoteService;
-    }
-
-    public function addLesson(LessonNoteRequest $request): JsonResponse
-    {
-        return $this->service->addLessonNote($request);
+        return $this->lessonNoteService->addLessonNote($request, $createLessonNoteAction);
     }
     
     public function getLesson(Request $request): JsonResponse
     {
-        return $this->service->getLessonNote($request);
+        return $this->lessonNoteService->getLessonNote($request);
     }
 
     public function getOneLesson(Request $request): JsonResponse
     {
-        return $this->service->getOneLessonNote($request);
+        return $this->lessonNoteService->getOneLessonNote($request);
     }
 
     public function editLesson(Request $request, $id): JsonResponse
     {
-        return $this->service->editLessonNote($request, $id);
+        return $this->lessonNoteService->editLessonNote($request, $id);
     }
 
     public function deleteLesson($id): JsonResponse
     {
-        return $this->service->deleteLessonNote($id);
+        return $this->lessonNoteService->deleteLessonNote($id);
     }
 
     public function approveLesson($id): JsonResponse
     {
-        return $this->service->approveLessonNote($id);
+        return $this->lessonNoteService->approveLessonNote($id);
     }
 
     public function unapproveLesson($id): JsonResponse
     {
-        return $this->service->unapproveLessonNote($id);
+        return $this->lessonNoteService->unapproveLessonNote($id);
     }
 
 }

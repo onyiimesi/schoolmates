@@ -48,31 +48,36 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
             });
 
         // Lesson note
-        Route::prefix('lessonnote')->group(function () {
-            Route::post('/add', [LessonNoteController::class, 'addLesson']);
-            Route::get('/single/{lesson_id}/{class_id}/{subject_id}/{week}/{term}/{session}', [LessonNoteController::class, 'getOneLesson'])
-            ->where('session', '.+');
-            Route::get('/{class_id}/{subject_id}/{week}/{term}/{session}', [LessonNoteController::class, 'getLesson'])
-            ->where('session', '.+');
-            Route::patch('/edit/{lesson_id}', [LessonNoteController::class, 'editLesson']);
-            Route::delete('/remove/{lesson_id}', [LessonNoteController::class, 'deleteLesson']);
-            Route::patch('/approve/{lesson_id}', [LessonNoteController::class, 'approveLesson']);
-            Route::patch('/unapprove/{lesson_id}', [LessonNoteController::class, 'unapproveLesson']);
-        });
+        Route::prefix('lessonnote')
+            ->controller(LessonNoteController::class)
+            ->group(function () {
+                Route::post('/add', 'addLesson');
+                Route::get('/single/{lesson_id}/{class_id}/{subject_id}/{week}/{term}/{session}', 'getOneLesson')
+                    ->whereNumber('lesson_id')
+                    ->where('session', '.+');
+                Route::get('/{class_id}/{subject_id}/{week}/{term}/{session}', 'getLesson')
+                    ->where('session', '.+');
+                Route::patch('/edit/{lesson_id}', 'editLesson')->whereNumber('lesson_id');
+                Route::delete('/remove/{lesson_id}', 'deleteLesson')->whereNumber('lesson_id');
+                Route::patch('/approve/{lesson_id}', 'approveLesson')->whereNumber('lesson_id');
+                Route::patch('/unapprove/{lesson_id}', 'unapproveLesson')->whereNumber('lesson_id');
+            });
 
         // Communication book
-        Route::prefix('communicationbook')->controller(CommunicationBookController::class)->group(function () {
-            Route::post('/', 'store');
-            Route::get('/{class_id}', 'show');
-            Route::get('/closed/{class_id}', 'closed');
-            Route::post('/{id}/replies', 'replies');
-            Route::get('/replies/{id}', 'getReplies');
-            Route::patch('/close/{id}', 'close');
-            Route::patch('/edit/{id}', 'edit');
-            Route::patch('/reply/edit/{id}', 'editReply');
-            Route::delete('/reply/delete/{id}', 'deleteReply');
-            Route::get('/unread/count', 'unreadCount');
-        });
+        Route::prefix('communicationbook')
+            ->controller(CommunicationBookController::class)
+            ->group(function () {
+                Route::post('/', 'store');
+                Route::get('/{class_id}', 'show');
+                Route::get('/closed/{class_id}', 'closed');
+                Route::post('/{id}/replies', 'replies');
+                Route::get('/replies/{id}', 'getReplies');
+                Route::patch('/close/{id}', 'close');
+                Route::patch('/edit/{id}', 'edit');
+                Route::patch('/reply/edit/{id}', 'editReply');
+                Route::delete('/reply/delete/{id}', 'deleteReply');
+                Route::get('/unread/count', 'unreadCount');
+            });
 
         // Flip class
         Route::prefix('flipclass')->controller(FlipClassController::class)->group(function () {

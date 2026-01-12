@@ -29,7 +29,19 @@ class LessonNote extends Model
         'submitted_by',
         'status',
         'date_submitted',
-        'date_approved'
+        'date_approved',
+        'date',
+        'sub_topic',
+        'specific_objectives',
+        'previous_lesson',
+        'previous_knowledge',
+        'set_induction',
+        'methodology',
+        'teaching_aid',
+    ];
+
+    protected $casts = [
+        'date' => 'date',
     ];
 
     public function staff()
