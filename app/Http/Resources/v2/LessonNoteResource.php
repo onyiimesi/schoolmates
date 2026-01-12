@@ -32,6 +32,7 @@ class LessonNoteResource extends JsonResource
                 'file' => (string)$this->file,
                 'file_name' => (string)$this->file_name,
                 'submitted_by' => (string)$this->submitted_by,
+                'date' => (string)$this->date,
                 'sub_topic' => (string)$this->sub_topic,
                 'specific_objectives' => (string)$this->specific_objectives,
                 'previous_lesson' => (string)$this->previous_lesson,
