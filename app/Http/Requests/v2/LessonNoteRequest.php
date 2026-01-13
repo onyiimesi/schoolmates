@@ -30,7 +30,8 @@ class LessonNoteRequest extends FormRequest
             'description' => ['required', 'string'],
             'file' => ['required'],
             'file_name' => ['required'],
-            'date' => ['required', 'date'],
+            'date_from' => ['required', 'date'],
+            'date_to' => ['required', 'date'],
         ];
     }
 }
