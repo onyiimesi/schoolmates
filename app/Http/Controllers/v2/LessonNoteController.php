@@ -20,7 +20,7 @@ class LessonNoteController extends Controller
     {
         return $this->lessonNoteService->addLessonNote($request, $createLessonNoteAction);
     }
-    
+
     public function getLesson(Request $request): JsonResponse
     {
         return $this->lessonNoteService->getLessonNote($request);
@@ -50,5 +50,4 @@ class LessonNoteController extends Controller
     {
         return $this->lessonNoteService->unapproveLessonNote($id);
     }
-
 }

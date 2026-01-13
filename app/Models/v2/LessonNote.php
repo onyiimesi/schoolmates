@@ -30,7 +30,8 @@ class LessonNote extends Model
         'status',
         'date_submitted',
         'date_approved',
-        'date',
+        'date_from',
+        'date_to',
         'sub_topic',
         'specific_objectives',
         'previous_lesson',
@@ -41,7 +42,8 @@ class LessonNote extends Model
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date_from' => 'date',
+        'date_to' => 'date',
     ];
 
     public function staff()
