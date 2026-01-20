@@ -38,7 +38,7 @@ class AssignmentService
                 'question' => $item['question'],
                 'question_number' => $item['question_number'],
                 'answer' =>  $item['answer'],
-                'subject_id' => $item['subject_id'],
+                'subject_class_id' => $item['subject_id'],
                 'option1' => $item['option1'],
                 'option2' => $item['option2'],
                 'option3' => $item['option3'],
@@ -77,7 +77,7 @@ class AssignmentService
                 'question' => $item['question'],
                 'question_number' => $item['question_number'],
                 'answer' => $item['answer'],
-                'subject_id' => $item['subject_id'],
+                'subject_class_id' => $item['subject_id'],
                 'image' => $imagePath['url'] ?? null,
                 'total_question' => $item['total_question'],
                 'question_mark' => $item['question_mark'],
@@ -118,8 +118,15 @@ class AssignmentService
             ->where('session', $session)
             ->where('question_type', $type)
             ->where('week', $week)
-            ->when($subjectId, function ($query, $subjectId) {
-                return $query->where('subject_id', $subjectId);
+            ->when($subjectId, function ($query) use ($subjectId) {
+                $query->where(function ($q) use ($subjectId) {
+                    $q->whereNotNull('subject_id')
+                      ->where('subject_id', $subjectId)
+                    ->orWhere(function ($q2) use ($subjectId) {
+                        $q2->whereNull('subject_id')
+                           ->where('subject_class_id', $subjectId);
+                    });
+                });
             })
             ->get();
 
@@ -149,7 +156,7 @@ class AssignmentService
                 'session' => $item['session'],
                 'assignment_id' => $item['assignment_id'],
                 'student_id' => $user->id,
-                'subject_id' => $item['subject_id'],
+                'subject_class_id' => $item['subject_id'],
                 'question' => $item['question'],
                 'question_number' => $item['question_number'],
                 'question_type' => $item['question_type'],
@@ -183,7 +190,7 @@ class AssignmentService
                 'session' => $item['session'],
                 'assignment_id' => $item['assignment_id'],
                 'student_id' => $user->id,
-                'subject_id' => $item['subject_id'],
+                'subject_class_id' => $item['subject_id'],
                 'question' => $item['question'],
                 'question_number' => $item['question_number'],
                 'question_type' => $item['question_type'],
@@ -237,7 +244,7 @@ class AssignmentService
                 'session' => $item['session'],
                 'assignment_id' => $item['assignment_id'],
                 'student_id' => $item['student_id'],
-                'subject_id' => $item['subject_id'],
+                'subject_class_id' => $item['subject_id'],
                 'question' => $item['question'],
                 'question_number' => $item['question_number'],
                 'question_type' => $item['question_type'],
@@ -270,7 +277,7 @@ class AssignmentService
                 'session' => $item['session'],
                 'assignment_id' => $item['assignment_id'],
                 'student_id' => $item['student_id'],
-                'subject_id' => $item['subject_id'],
+                'subject_class_id' => $item['subject_id'],
                 'question' => $item['question'],
                 'question_number' => $item['question_number'],
                 'question_type' => $item['question_type'],
@@ -301,7 +308,7 @@ class AssignmentService
                 'session' => $item['session'],
                 'assignment_id' => $item['assignment_id'],
                 'student_id' => $item['student_id'],
-                'subject_id' => $item['subject_id'],
+                'subject_class_id' => $item['subject_id'],
                 'question' => $item['question'],
                 'question_number' => $item['question_number'],
                 'question_type' => $item['question_type'],
@@ -338,7 +345,7 @@ class AssignmentService
                 'session' => $item['session'],
                 'assignment_id' => $item['assignment_id'],
                 'student_id' => $item['student_id'],
-                'subject_id' => $item['subject_id'],
+                'subject_class_id' => $item['subject_id'],
                 'question' => $item['question'],
                 'question_number' => $item['question_number'],
                 'question_type' => $item['question_type'],
@@ -484,7 +491,7 @@ class AssignmentService
                     'session' => $item['session'],
                     'assignment_id' => $item['assignment_id'],
                     'student_id' => $item['student_id'],
-                    'subject_id' => $item['subject_id'],
+                    'subject_class_id' => $item['subject_id'],
                     'question_type' => $item['question_type'],
                     'total_mark' => $item['total_mark'],
                     'score' => $item['score'],
@@ -501,7 +508,7 @@ class AssignmentService
                 'session' => $performanceData['session'],
                 'assignment_id' => $performanceData['assignment_id'],
                 'student_id' => $performanceData['student_id'],
-                'subject_id' => $performanceData['subject_id'],
+                'subject_class_id' => $performanceData['subject_id'],
                 'question_type' => $performanceData['question_type'],
                 'total_mark' => $performanceData['total_mark'],
                 'percentage_score' => $performanceData['percentage_score'],

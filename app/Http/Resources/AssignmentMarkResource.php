@@ -23,7 +23,7 @@ class AssignmentMarkResource extends JsonResource
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,
                 'student_id' => (string)$this->student_id,
-                'subject_id' => (string)$this->subject_id,
+                'subject_id' => $this->subject_class_id,
                 'assignment_id' => (string)$this->assignment_id,
                 'question_type' => (string)$this->question_type,
                 'question' => (string)$this->question,

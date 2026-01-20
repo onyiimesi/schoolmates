@@ -24,4 +24,9 @@ class AssignmentResult extends Model
         'assignment_id',
         'week'
     ];
+
+    public function subjectClass()
+    {
+        return $this->belongsTo(SubjectClass::class);
+    }
 }
