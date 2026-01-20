@@ -14,14 +14,16 @@ use App\Models\AssignmentPerformance;
 use App\Models\AssignmentResult;
 use App\Traits\HttpResponses;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AssignmentService
 {
     use HttpResponses;
 
-    public function objective($request, $user): JsonResponse
+    public function objective($request): JsonResponse
     {
+        $user = Auth::user();
         $data = $request->json()->all();
 
         foreach ($data as $item) {
@@ -51,8 +53,9 @@ class AssignmentService
         return $this->success(null, 'Created Successfully', 201);
     }
 
-    public function theory($request, $user): JsonResponse
+    public function theory($request): JsonResponse
     {
+        $user = Auth::user();
         $data = $request->json()->all();
 
         foreach ($data as $item) {
@@ -86,8 +89,10 @@ class AssignmentService
         return $this->success(null, 'Created Successfully');
     }
 
-    public function assign($request, $user): JsonResponse
+    public function assign($request): JsonResponse
     {
+        $user = Auth::user();
+
         $validated = $request->validate([
             'period' => 'required',
             'term' => 'required',
@@ -125,8 +130,10 @@ class AssignmentService
         return $this->success($assigns, 'List');
     }
 
-    public function objectiveAnswer($request, $user): JsonResponse
+    public function objectiveAnswer($request): JsonResponse
     {
+        $user = Auth::user();
+
         if ($user->designation_id === 3) {
             return $this->error(null, 'Unauthenticated', 401);
         }
@@ -157,8 +164,10 @@ class AssignmentService
         return $this->success(null, 'Submitted Successfully', 201);
     }
 
-    public function theoryAnswer($request, $user): JsonResponse
+    public function theoryAnswer($request): JsonResponse
     {
+        $user = Auth::user();
+
         if ($user->designation_id === 3) {
             return $this->error(null, 'Unauthenticated', 401);
         }
@@ -189,8 +198,10 @@ class AssignmentService
         return $this->success(null, 'Submitted Successfully', 201);
     }
 
-    public function getAnswer($request, $user): JsonResponse
+    public function getAnswer($request): JsonResponse
     {
+        $user = Auth::user();
+
         $assign = AssignmentAnswer::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('period', $request->period)
@@ -211,8 +222,10 @@ class AssignmentService
         return $this->success($assigns, 'List');
     }
 
-    public function objectiveMark($request, $user): JsonResponse
+    public function objectiveMark($request): JsonResponse
     {
+        $user = Auth::user();
+
         $data = $request->json()->all();
 
         foreach ($data as $item) {
@@ -273,8 +286,10 @@ class AssignmentService
         return $this->success(null, 'Assignment Mark updated successfully');
     }
 
-    public function theoryMark($request, $user): JsonResponse
+    public function theoryMark($request): JsonResponse
     {
+        $user = Auth::user();
+
         $data = $request->json()->all();
 
         foreach ($data as $item) {
@@ -302,8 +317,10 @@ class AssignmentService
         return $this->success(null, 'Theory mark created successfully', 201);
     }
 
-    public function updateTheoryMark($request, $user): JsonResponse
+    public function updateTheoryMark($request): JsonResponse
     {
+        $user = Auth::user();
+
         $data = $request->json()->all();
 
         foreach ($data as $item) {
@@ -337,8 +354,10 @@ class AssignmentService
         return $this->success(null, 'Theory mark updated successfully');
     }
 
-    public function marked($request, $user): JsonResponse
+    public function marked($request): JsonResponse
     {
+        $user = Auth::user();
+
         $assign = AssignmentMark::with('assignment')
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
@@ -360,8 +379,10 @@ class AssignmentService
         return $this->success($assigns, 'List');
     }
 
-    public function markedByStudent($request, $user): JsonResponse
+    public function markedByStudent($request): JsonResponse
     {
+        $user = Auth::user();
+
         $assign = AssignmentMark::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
@@ -446,8 +467,9 @@ class AssignmentService
         return $this->success(null, 'Deleted Successfully');
     }
 
-    public function result($request, $user): JsonResponse
+    public function result($request): JsonResponse
     {
+        $user = Auth::user();
         $data = $request->json()->all();
 
         try {
@@ -495,8 +517,10 @@ class AssignmentService
         }
     }
 
-    public function resultAssign($request, $user): JsonResponse
+    public function resultAssign($request): JsonResponse
     {
+        $user = Auth::user();
+
         $assign = AssignmentResult::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('period', $request->period)
@@ -511,8 +535,10 @@ class AssignmentService
         return $this->success($assigns, 'List');
     }
 
-    public function getStudentResult($request, $user): JsonResponse
+    public function getStudentResult($request): JsonResponse
     {
+        $user = Auth::user();
+
         $assign = AssignmentResult::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
@@ -527,8 +553,10 @@ class AssignmentService
         return $this->success($assigns, 'List');
     }
 
-    public function publish($request, $user): JsonResponse
+    public function publish($request): JsonResponse
     {
+        $user = Auth::user();
+
         $assign = Assignment::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('period', $request->period)

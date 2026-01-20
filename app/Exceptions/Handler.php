@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use App\Traits\HttpResponses;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -49,7 +50,15 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            if (config('app.env') === 'production') {
+                Log::channel('slack')->error($e->getMessage(), [
+                    'file' => $e->getFile(),
+                    'Line' => $e->getLine(),
+                    'code' => $e->getCode(),
+                    'url' => request()->fullUrl(),
+                    'input' => request()->all(),
+                ]);
+            }
         });
 
         $this->renderable(function (NotFoundHttpException $e, $request) {
@@ -57,6 +66,10 @@ class Handler extends ExceptionHandler
                 return $this->success(null, "Not Found", 404);
             }
             throw $e;
+        });
+
+        $this->shouldRenderJsonWhen(function ($request) {
+            return $request->is('api/*') || $request->expectsJson();
         });
     }
 
