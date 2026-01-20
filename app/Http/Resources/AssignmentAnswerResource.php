@@ -28,7 +28,7 @@ class AssignmentAnswerResource extends JsonResource
                 'question_number' => (string)$this->question_number,
                 'answer' => (string)$this->answer,
                 'subject' => (string)$this->subject?->subject,
-                'subject_id' => (string)$this->subject_id,
+                'subject_id' => $this->subject_class_id,
                 'correct_answer' => (string)$this->correct_answer,
                 'mark' => (string)$this->mark,
                 'submitted' => (string)$this->submitted,

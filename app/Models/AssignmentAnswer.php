@@ -23,6 +23,11 @@ class AssignmentAnswer extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function subjectClass()
+    {
+        return $this->belongsTo(SubjectClass::class);
+    }
+
     public function assignment()
     {
         return $this->belongsTo(Assignment::class, 'assignment_id');

@@ -29,6 +29,11 @@ class AssignmentMark extends Model
         'week'
     ];
 
+    public function subjectClass()
+    {
+        return $this->belongsTo(SubjectClass::class);
+    }
+
     public function assignment()
     {
         return $this->belongsTo(Assignment::class, 'assignment_id');

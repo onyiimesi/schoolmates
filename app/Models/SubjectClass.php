@@ -35,4 +35,28 @@ class SubjectClass extends Model implements Auditable
         return $this->belongsTo(Subject::class);
     }
 
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
+    public function assignmentResults()
+    {
+        return $this->hasMany(AssignmentResult::class);
+    }
+
+    public function assignmentAnswers()
+    {
+        return $this->hasMany(AssignmentAnswer::class);
+    }
+
+    public function assignmentMarks()
+    {
+        return $this->hasMany(AssignmentMark::class);
+    }
+
+    public function assignmentPerformances()
+    {
+        return $this->hasMany(AssignmentPerformance::class);
+    }
 }

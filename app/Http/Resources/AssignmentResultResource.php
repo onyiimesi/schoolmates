@@ -24,7 +24,7 @@ class AssignmentResultResource extends JsonResource
                 'session' => (string)$this->session,
                 'assignment_id' => (string)$this->assignment_id,
                 'student_id' => (string)$this->student_id,
-                'subject_id' => (string)$this->subject_id,
+                'subject_id' => $this->subject_class_id,
                 'question_type' => (string)$this->question_type,
                 'student_mark' => (string)$this->student_mark,
                 'total_mark' => (string)$this->total_mark,

@@ -14,6 +14,7 @@ class Assignment extends Model
         'question',
         'answer',
         'subject_id',
+        'subject_class_id',
         'option1',
         'option2',
         'option3',
@@ -36,6 +37,11 @@ class Assignment extends Model
     public function subject()
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function subjectClass()
+    {
+        return $this->belongsTo(SubjectClass::class);
     }
 
     public function staff()
