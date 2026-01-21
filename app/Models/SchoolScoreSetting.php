@@ -11,6 +11,8 @@ class SchoolScoreSetting extends Model
         'campus',
         'score_option_id',
         'value_score',
+        'previous_score_option_id',
+        'previous_value_score',
     ];
 
     public function scoreOption()
