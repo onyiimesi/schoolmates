@@ -84,7 +84,6 @@ class ProfileController extends Controller
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
             'username' => $request->username,
-            'address' => $request->address,
             'image' => $imageUpload['url'] ?? $user->image,
             'file_id' => $imageUpload['fileId'] ?? $user->file_id,
             'signature' => $signatureUpload['url'] ?? $user->signature,
@@ -95,9 +94,11 @@ class ProfileController extends Controller
             $updateData['department'] = $request->department;
             $updateData['phoneno'] = $request->phoneno;
             $updateData['email'] = $request->email;
+            $updataData['address'] = $request->address;
         } else {
             $updateData['phone_number'] = $request->phoneno;
             $updateData['email_address'] = $request->email;
+            $updateData['home_address'] = $request->address;
         }
 
         $user->update($updateData);
