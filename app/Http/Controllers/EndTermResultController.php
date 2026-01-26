@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
-use App\Http\Requests\GetResultRequest;
 use App\Http\Resources\CummulativeScoreResource;
 use App\Http\Resources\ResultResource;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Student;
-use App\Services\Cache\MemoizedCacheService;
 use App\Traits\CummulativeResult;
 use App\Traits\HttpResponses;
 use App\Traits\ResultTrait;
@@ -131,14 +129,14 @@ class EndTermResultController extends Controller
         $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
 
         return [
-            "status" => "true",
+            "status" => true,
             "Class Average" => $classAverage,
             "Student Average" => $studentAverage,
             "Grade" => $grade ? $grade->remark : 'No grade',
         ];
     }
 
-    public function studentaverage(Request $request)
+    public function studentaverage(Request $request): array
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
@@ -149,72 +147,11 @@ class EndTermResultController extends Controller
 
         $user = Auth::user();
 
-        $results = Result::where([
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'student_id' => $validated['student_id'],
-            'class_name' => $validated['class_name'],
-            'term' => $validated['term'],
-            'session' => $validated['session'],
-        ])
-            ->with('studentScores')
-            ->get();
-
-        $classResults = Result::with('student')->where([
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'class_name' => $validated['class_name'],
-            'term' => $validated['term'],
-            'session' => $validated['session'],
-        ])
-            ->whereHas('student', function ($query) {
-                $query->where('status', 'active');
-            })
-            ->with('studentScores')
-            ->get();
-
-        $studentCount = Student::where([
-            'sch_id' => $user->sch_id,
-            'campus' => $user->campus,
-            'present_class' => $validated['class_name'],
-        ])
-            ->count();
-
-        $totalClassScores = 0;
-        $allSubjects = [];
-
-        foreach ($classResults as $result) {
-            $subjectScores = [];
-
-            foreach ($result->studentScores as $score) {
-                if (!array_key_exists($score->subject, $subjectScores)) {
-                    $subjectScores[$score->subject] = $score->score;
-                }
-            }
-
-            foreach ($subjectScores as $subject => $subjectScore) {
-                $totalClassScores += $subjectScore;
-                $allSubjects[] = $subject;
-            }
-        }
-
-        $totalSubjects = count(array_unique($allSubjects)) * $studentCount;
-        $classAverage = ($totalSubjects > 0) ? $totalClassScores / $totalSubjects : 0;
-
-        $totalStudentScores = 0;
-        $uniqueStudentSubjects = [];
-
-        foreach ($results as $result) {
-            foreach ($result->studentScores as $score) {
-                if ($score->score != 0) {
-                    $totalStudentScores += $score->score;
-                    $uniqueStudentSubjects[] = $score->subject;
-                }
-            }
-        }
-
-        $totalStudentSubjects = count(array_unique($uniqueStudentSubjects));
-        $studentAverage = $totalStudentSubjects > 0 ? $totalStudentScores / $totalStudentSubjects : 0;
+        $results = $this->getResult($user, $validated);
+        $classResults = $this->getClassResult($user, $validated);
+        $studentCount = Student::studentCountByClass($user, $validated['class_name']);
+        $classAverage = $this->getClassAverage($classResults, $studentCount);
+        $studentAverage = $this->getStudentAverage($results);
 
         $grade = GradingSystem::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
@@ -224,28 +161,10 @@ class EndTermResultController extends Controller
         $grades = $studentAverage > 90 ? "EXCELLENT" : ($grade->remark ?? "");
 
         return [
-            "status" => "true",
+            "status" => true,
             "Student Average" => $studentAverage,
             "Class Average" => number_format($classAverage, 2),
             "Grade" => $grades,
         ];
-    }
-
-    public function getResult(GetResultRequest $request, MemoizedCacheService $generalResultService)
-    {
-        $user = userAuth();
-
-        $validated = $request->validated();
-
-        return $this->getStudentResults($user, $validated, $generalResultService);
-    }
-
-    private function getStudentResults($user, array $params, MemoizedCacheService $generalResultService)
-    {
-        return match ($params['period']) {
-            PeriodicName::FIRSTHALF => $generalResultService->firstHalf($user, $params),
-            PeriodicName::SECONDHALF => $generalResultService->secondHalf($user, $params),
-            default => $this->error(null, 'Invalid result type', 400),
-        };
     }
 }

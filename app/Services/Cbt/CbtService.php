@@ -150,11 +150,11 @@ class CbtService {
     {
         try {
             $data = CbtQuestion::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('id', $id)
-            ->first();
+                ->where('campus', $user->campus)
+                ->where('id', $id)
+                ->first();
 
-            if(!$data){
+            if(! $data) {
                 return $this->error(null, "Not found", 404);
             }
 
