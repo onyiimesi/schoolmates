@@ -2,239 +2,200 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ClearCacheAction;
+use App\Enum\PeriodicName;
+use App\Enum\ResultStatus;
+use App\Http\Requests\GetResultRequest;
+use App\Http\Requests\MidtermRequest;
+use App\Http\Requests\ReleaseResultRequest;
 use App\Http\Requests\ResultRequest;
-use App\Models\AffectiveDisposition;
-use App\Models\PsychomotorSkill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Result;
 use App\Models\Staff;
-use App\Models\StudentScore;
+use App\Services\Cache\MemoizedCacheService;
+use App\Services\ResultService;
+use App\Traits\HttpResponses;
+use App\Traits\ResultBase;
+use Illuminate\Support\Facades\DB;
 
 class ResultController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
+    use HttpResponses, ResultBase;
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(ResultRequest $request)
-    {
-        $request->validated($request->all());
+    public function __construct(
+        protected ResultService $resultService
+    )
+    {}
 
+    public function midTerm(MidtermRequest $request)
+    {
         $teacher = Auth::user();
 
-        if($request->period == 'First Half'){
+        if ($request->period !== PeriodicName::FIRSTHALF) {
+            return $this->error(null, "Unsupported period value: {$request->period}", 400);
+        }
 
-            $getresult = Result::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where("student_id", $request->student_id)
-            ->where("period", 'First Half')
-            ->where("term", $request->term)
-            ->where("session", $request->session)->first();
-
-            if(empty($getresult)){
-
-                $compute = Result::create([
+        try {
+            return DB::transaction(function () use ($teacher, $request) {
+                $match = [
                     'sch_id' => $teacher->sch_id,
                     'campus' => $teacher->campus,
-                    'campus_type' => $teacher->campus_type,
                     'student_id' => $request->student_id,
+                    'period' => $request->period,
+                    'term' => $request->term,
+                    'session' => $request->input('session'),
+                    'result_type' => $request->result_type,
+                ];
+
+                $data = [
+                    'campus_type' => $teacher->campus_type,
                     'teacher_id' => $teacher->id,
                     'student_fullname' => $request->student_fullname,
                     'admission_number' => $request->admission_number,
                     'class_name' => $request->class_name,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'computed_midterm' => 'true'
-                ]);
-
-                foreach ($request->results as $result) {
-                    $question = new StudentScore($result);
-                    $compute->studentScores()->save($question);
-                }
-
-                return [
-                    "status" => 'true',
-                    "message" => 'Computed Successfully',
-                ];
-
-            }else if(!empty($getresult)){
-
-                $getresult->update([
-                    'student_id' => $request->student_id,
-                    'student_fullname' => $request->student_fullname,
-                    'admission_number' => $request->admission_number,
-                    'class_name' => $request->class_name,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'computed_midterm' => 'true'
-                ]);
-
-                $getresult->studentScores()->delete();
-                foreach ($request->results as $result) {
-                    $question = new StudentScore($result);
-                    $getresult->studentScores()->save($question);
-                }
-
-                return [
-                    "status" => 'true',
-                    "message" => 'Result Updated Successfully'
-                ];
-
-            }
-
-        }else if($request->period == 'Second Half'){
-
-            $getsecondresult = Result::where('sch_id', $teacher->sch_id)
-            ->where('campus', $teacher->campus)
-            ->where("student_id", $request->student_id)
-            ->where("period", 'Second Half')
-            ->where("term", $request->term)
-            ->where("session", $request->session)->first();
-
-
-            $hosId = Staff::find($request->hos_id);
-
-            if(empty($getsecondresult)){
-
-                $compute = Result::create([
-                    'sch_id' => $teacher->sch_id,
-                    'campus' => $teacher->campus,
-                    'campus_type' => $teacher->campus_type,
-                    'student_id' => $request->student_id,
-                    'student_fullname' => $request->student_fullname,
-                    'admission_number' => $request->admission_number,
-                    'class_name' => $request->class_name,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'school_opened' => $request->school_opened,
-                    'times_present' => $request->times_present,
-                    'times_absent' => $request->times_absent,
+                    'computed_midterm' => true,
                     'teacher_comment' => $request->teacher_comment,
-                    'teacher_id' => $request->teacher_id,
-                    'teacher_fullname' => $teacher->surname . ' '. $teacher->firstname,
-                    'hos_comment' => $request->hos_comment,
-                    'hos_id' => $request->hos_id,
-                    'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
-                    'computed_endterm' => 'true',
-                ]);
-
-                foreach ($request->results as $result) {
-                    $question = new StudentScore($result);
-                    $compute->studentScores()->save($question);
-                }
-
-                $compute->affectiveDispositions()->createMany($request->affective_disposition);
-
-                foreach ($request->psychomotor_skills as $skills) {
-                    $psy = new PsychomotorSkill($skills);
-                    $compute->psychomotorskill()->save($psy);
-                }
-
-                return [
-                    "status" => 'true',
-                    "message" => 'Computed Successfully',
+                    'status' => ResultStatus::NOTRELEASED->value,
                 ];
 
-            }else if(!empty($getsecondresult)){
+                $result = Result::updateOrCreate($match, $data);
+                $this->saveStudentScores($result, $request->results);
 
-                $getsecondresult->update([
-                    'student_id' => $request->student_id,
-                    'student_fullname' => $request->student_fullname,
-                    'admission_number' => $request->admission_number,
-                    'class_name' => $request->class_name,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->session,
-                    'school_opened' => $request->school_opened,
-                    'times_present' => $request->times_present,
-                    'times_absent' => $request->times_absent,
-                    'teacher_comment' => $request->teacher_comment,
-                    'teacher_id' => $request->teacher_id,
-                    'teacher_fullname' => $teacher->surname . ' '. $teacher->firstname,
-                    'hos_comment' => $request->hos_comment,
-                    'hos_id' => $request->hos_id,
-                    'hos_fullname' => $hosId->surname . ' '. $hosId->firstname,
-                    'computed_endterm' => 'true'
-                ]);
+                $message = $result->wasRecentlyCreated ? 'Computed Successfully' : 'Updated Successfully';
+                return $this->success(null, $message, $result->wasRecentlyCreated ? 201 : 200);
+            });
+        } catch (\Throwable $th) {
+            return $this->error(null, "An error occurred: {$th->getMessage()}", 400);
+        }
+    }
 
+    public function endTerm(ResultRequest $request)
+    {
+        $this->validateRequest($request);
 
-                $getsecondresult->studentScores()->delete();
-                foreach ($request->results as $result) {
-                    $question = new StudentScore($result);
-                    $getsecondresult->studentScores()->save($question);
-                }
+        if ($request->period !== PeriodicName::SECONDHALF) {
+            return $this->error(null, "Bad Request", 400);
+        }
 
-                $getsecondresult->affectiveDispositions()->delete();
-                foreach ($request->affective_disposition as $affective) {
-                    $disposition = new AffectiveDisposition($affective);
-                    $getsecondresult->affectiveDispositions()->save($disposition);
-                }
+        $teacher = Auth::user();
 
-                $getsecondresult->psychomotorskill()->delete();
-                foreach ($request->psychomotor_skills as $skills) {
-                    $psy = new PsychomotorSkill($skills);
-                    $getsecondresult->psychomotorskill()->save($psy);
-                }
-
-                return [
-                    "status" => 'true',
-                    "message" => 'Updated Successfully'
-                ];
-
+        // Only check HOS if no comment was provided directly
+        $hos = null;
+        if (empty($request->hos_comment)) {
+            $hos = Staff::find($request->hos_id);
+            if (! $hos) {
+                return $this->error(null, "HOS needs to add comments", 400);
             }
         }
 
+        try {
+            return DB::transaction(function () use ($request, $teacher, $hos) {
+                $existingResult = $this->getSecondResult($request, $teacher);
 
+                return $existingResult === null
+                    ? $this->handleNewResult($request, $teacher, $hos)
+                    : $this->handleExistingResult($request, $teacher, $hos, $existingResult);
+            });
+        } catch (\Throwable $th) {
+            return $this->error(null, "An error occurred: {$th->getMessage()}", 400);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function release(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
     {
+        $auth = userAuth();
+        $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
+        if (empty($studentIds)) {
+            return $this->error(null, "No students selected.", 400);
+        }
+
+        $clearCacheAction->handle($request, $studentIds[0], true);
+
+        Result::where('sch_id', $auth->sch_id)
+            ->where('campus', $auth->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->input('session'))
+            ->where('result_type', $request->result_type)
+            ->whereIn('student_id', $studentIds)
+            ->update(['status' => ResultStatus::RELEASED->value]);
+
+        return $this->success(null, "Result released");
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function hold(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
     {
-        //
+        $auth = userAuth();
+        $studentIds = collect($request->students)->pluck('student_id')->toArray();
+
+        if (empty($studentIds)) {
+            return $this->error(null, "No students selected.", 400);
+        }
+
+        $clearCacheAction->handle($request, $studentIds[0], true);
+
+        Result::where('sch_id', $auth->sch_id)
+            ->where('campus', $auth->campus)
+            ->where('period', $request->period)
+            ->where('term', $request->term)
+            ->where('session', $request->input('session'))
+            ->where('result_type', $request->result_type)
+            ->whereIn('student_id', $studentIds)
+            ->update(['status' => ResultStatus::WITHELD->value]);
+
+        return $this->success(null, "Result withheld");
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function getSettings()
     {
-        //
+        return $this->resultService->getSettings();
+    }
+
+    public function storeSettings(Request $request)
+    {
+        $request->validate([
+            'campus' => ['required', 'string', 'max:255'],
+            'score_option_id' => ['required', 'integer', 'exists:score_options,id']
+        ]);
+
+        return $this->resultService->storeSettings($request);
+    }
+
+    public function getSchoolScoreSettings()
+    {
+        return $this->resultService->getSchoolScoreSettings();
+    }
+
+    public function getSheetSections()
+    {
+        return $this->resultService->getSheetSections();
+    }
+
+    public function saveSheetSections(Request $request)
+    {
+        $request->validate([
+            'campus' => 'required|string',
+            'period' => 'required|string',
+            'term' => 'required|string',
+            'sheet_ids' => 'required|array',
+            'sheet_ids.*' => 'required|integer|exists:sheets,id',
+        ]);
+
+        return $this->resultService->saveSheetSections($request);
+    }
+
+    public function getSchoolSheetSettings()
+    {
+        return $this->resultService->getSchoolSheetSettings();
+    }
+
+    public function getResult(GetResultRequest $request, MemoizedCacheService $generalResultService)
+    {
+        $user = userAuth();
+        $validated = $request->validated();
+
+        return $this->getStudentResults($user, $validated, $generalResultService);
     }
 }
