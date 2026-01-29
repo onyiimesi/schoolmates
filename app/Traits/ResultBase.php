@@ -5,10 +5,12 @@ namespace App\Traits;
 use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
 use App\Models\Result;
+use App\Services\Cache\MemoizedCacheService;
 
 trait ResultBase
 {
     use HttpResponses;
+
     protected function getResult($teacher, $request)
     {
         return Result::where([
@@ -217,5 +219,14 @@ trait ResultBase
     {
         $result->pupilReports()->delete();
         $result->pupilReports()->createMany($pupilReports);
+    }
+
+    protected function getStudentResults($user, array $params, MemoizedCacheService $generalResultService)
+    {
+        return match ($params['period']) {
+            PeriodicName::FIRSTHALF => $generalResultService->firstHalf($user, $params),
+            PeriodicName::SECONDHALF => $generalResultService->secondHalf($user, $params),
+            default => $this->error(null, 'Invalid result type', 400),
+        };
     }
 }

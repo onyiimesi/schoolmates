@@ -45,10 +45,10 @@ class CbtController extends Controller
         return $this->cbt->getAllQuestions($user, $request);
     }
 
-    public function editQuestion(Request $request, $id)
+    public function editQuestion(Request $request)
     {
         $user = Auth::user();
-        return $this->cbt->updateQuestion($user, $request, $id);
+        return $this->cbt->updateQuestion($user, $request);
     }
 
     public function deleteQuestion($id)

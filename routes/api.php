@@ -30,7 +30,6 @@ use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\DressCodeController;
 use App\Http\Controllers\PreSchoolController;
-use App\Http\Controllers\ResultTwoController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\BroadSheetController;
@@ -195,7 +194,6 @@ Route::middleware('check.allowed.url')
             Route::resource('/department', DepartmentController::class);
             Route::resource('/grading', GradingSystemController::class);
             Route::resource('/gpa', GpaController::class);
-            Route::resource('/result', ResultController::class);
             Route::resource('/subjects', SubjectController::class);
             Route::resource('/studentsubjects', RegisterSubjectController::class);
             Route::resource('/dresscode', DressCodeController::class);
@@ -211,17 +209,16 @@ Route::middleware('check.allowed.url')
 
             Route::middleware(['throttle:apis'])->group(function () {
                 //New result form
-                Route::controller(ResultTwoController::class)
+                Route::middleware('check.subscription.status')
+                    ->controller(ResultController::class)
                     ->group(function () {
-                        Route::post('midTermResult', 'midTerm')->middleware('check.subscription.status');
-                        Route::post('endTermResult', 'endTerm')->middleware('check.subscription.status');
-                        Route::patch('release/result', 'release')->middleware('check.subscription.status');
-                        Route::patch('withhold/result', 'hold')->middleware('check.subscription.status');
+                        Route::post('midTermResult', 'midTerm');
+                        Route::post('endTermResult', 'endTerm');
+                        Route::patch('release/result', 'release');
+                        Route::patch('withhold/result', 'hold');
+                        // New Get Result API
+                        Route::get("/get-result", 'getResult');
                     });
-
-                // New Result API
-                Route::get("/get-result", [EndTermResultController::class, 'getResult'])
-                    ->middleware('check.subscription.status');
 
                 Route::prefix('staff')
                     ->group(function () {

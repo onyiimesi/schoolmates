@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\ResultTwoController;
+use App\Http\Controllers\ResultController;
 use App\Http\Controllers\v2\CbtController;
 use App\Http\Controllers\v2\CommunicationBookController;
 use App\Http\Controllers\v2\FlipClassController;
@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
                 Route::post('/add/question', 'addQuestion');
                 Route::get('/questions/{period}/{term}/{session}/{subject_id}/{question_type}/get', 'getQuestions')
                     ->where('session', '.+');
-                Route::patch('/update/question/{id}', 'editQuestion');
+                Route::patch('/update/question', 'editQuestion');
                 Route::delete('/delete/question/{id}', 'deleteQuestion');
                 Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}/{student_id}/student', 'getStudentAnswer')
                     ->where('session', '.+');
@@ -130,7 +130,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
         // Result
         Route::prefix('result')
-            ->controller(ResultTwoController::class)
+            ->controller(ResultController::class)
             ->group(function () {
                 Route::get('/settings', 'getSettings');
                 Route::post('/settings/store', 'storeSettings');

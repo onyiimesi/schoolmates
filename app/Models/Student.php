@@ -115,4 +115,14 @@ class Student extends Authenticatable implements Auditable
             }
         );
     }
+
+    protected static function studentCountByClass(User $user, string $class)
+    {
+        return self::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'present_class' => $class,
+            ])
+            ->count();
+    }
 }

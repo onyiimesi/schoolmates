@@ -13,6 +13,8 @@ use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\SchoolScoreSetting;
 use App\Models\Student;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
 trait ResultTrait
 {
@@ -97,7 +99,7 @@ trait ResultTrait
             ->get();
     }
 
-    protected function calculateTotalScore($results, $studentSubjectCount = false)
+    protected function calculateTotalScore($results, $studentSubjectCount = false): array
     {
         $total = 0;
         $count = 0;
@@ -128,6 +130,90 @@ trait ResultTrait
             4 => ['first_assesment', 'second_assesment', 'third_assesment', 'fourth_assesment'],
             default => [],
         };
+    }
+
+    /**
+     * Get the students results used in studentaverage function (EndTermResultController).
+    */
+    protected function getResult(User $user, $validated): Collection
+    {
+        return Result::where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $validated['student_id'],
+                'class_name' => $validated['class_name'],
+                'term' => $validated['term'],
+                'session' => $validated['session'],
+            ])
+            ->with('studentScores')
+            ->get();
+    }
+
+    /**
+     * Get the class results used in studentaverage function (EndTermResultController).
+    */
+    protected function getClassResult(User $user, $validated): Collection
+    {
+        return Result::with('student')->where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'class_name' => $validated['class_name'],
+                'term' => $validated['term'],
+                'session' => $validated['session'],
+            ])
+            ->whereHas('student', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->with('studentScores')
+            ->get();
+    }
+
+    /**
+     * Get the class average used in studentaverage function (EndTermResultController).
+    */
+    protected function getClassAverage(Collection $classResults, int $studentCount): float
+    {
+        $totalClassScores = 0;
+        $allSubjects = [];
+
+        foreach ($classResults as $result) {
+            $subjectScores = [];
+
+            foreach ($result->studentScores as $score) {
+                if (!array_key_exists($score->subject, $subjectScores)) {
+                    $subjectScores[$score->subject] = $score->score;
+                }
+            }
+
+            foreach ($subjectScores as $subject => $subjectScore) {
+                $totalClassScores += $subjectScore;
+                $allSubjects[] = $subject;
+            }
+        }
+
+        $totalSubjects = count(array_unique($allSubjects)) * $studentCount;
+        return ($totalSubjects > 0) ? $totalClassScores / $totalSubjects : 0;
+    }
+
+    /**
+     * Get the student average used in studentaverage function (EndTermResultController).
+    */
+    protected function getStudentAverage(Collection $results): float
+    {
+        $totalStudentScores = 0;
+        $uniqueStudentSubjects = [];
+
+        foreach ($results as $result) {
+            foreach ($result->studentScores as $score) {
+                if ($score->score != 0) {
+                    $totalStudentScores += $score->score;
+                    $uniqueStudentSubjects[] = $score->subject;
+                }
+            }
+        }
+
+        $totalStudentSubjects = count(array_unique($uniqueStudentSubjects));
+        return $totalStudentSubjects > 0 ? $totalStudentScores / $totalStudentSubjects : 0;
     }
 }
 
