@@ -146,29 +146,33 @@ class CbtService {
     }
 
 
-    public function updateQuestion($user, $request, $id)
+    public function updateQuestion($user, $request)
     {
+        $data = $request->json()->all();
+
         try {
-            $data = CbtQuestion::where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->where('id', $id)
-                ->first();
+            foreach ($data as $item) {
+                $data = CbtQuestion::where('sch_id', $user->sch_id)
+                    ->where('campus', $user->campus)
+                    ->where('id', $item['id'])
+                    ->first();
 
-            if(! $data) {
-                return $this->error(null, "Not found", 404);
+                if(! $data) {
+                    return $this->error(null, "Not found", 404);
+                }
+
+                $data->update([
+                    'question' => $item['question'],
+                    'option1' => $item['option1'],
+                    'option2' => $item['option2'],
+                    'option3' => $item['option3'],
+                    'option4' => $item['option4'],
+                    'answer' => $item['answer'],
+                    'question_mark' => $item['question_mark'],
+                    'question_number' => $item['question_number'],
+                    'status' => $item['status']
+                ]);
             }
-
-            $data->update([
-                'question' => $request->question,
-                'option1' => $request->option1,
-                'option2' => $request->option2,
-                'option3' => $request->option3,
-                'option4' => $request->option4,
-                'answer' => $request->answer,
-                'question_mark' => $request->question_mark,
-                'question_number' => $request->question_number,
-                'status' => $request->status
-            ]);
 
             return $this->success(null, "Updated Successful");
         } catch (\Throwable $th) {
