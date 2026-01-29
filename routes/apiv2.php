@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
                 Route::post('/add/question', 'addQuestion');
                 Route::get('/questions/{period}/{term}/{session}/{subject_id}/{question_type}/get', 'getQuestions')
                     ->where('session', '.+');
-                Route::patch('/update/question', 'editQuestion');
+                Route::patch('/update/questions', 'editQuestion');
                 Route::delete('/delete/question/{id}', 'deleteQuestion');
                 Route::get('/{period}/{term}/{session}/{question_type}/{subject_id}/{student_id}/student', 'getStudentAnswer')
                     ->where('session', '.+');
