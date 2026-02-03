@@ -23,6 +23,7 @@ class CbtAddQuestionRequest extends FormRequest
     {
         return [
             'subject_id' => ['required'],
+            'question' => ['required', 'string'],
             'question_type' => ['required', 'string'],
             'option1' => ['required', 'string'],
             'option2' => ['required', 'string'],
