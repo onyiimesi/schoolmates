@@ -18,6 +18,7 @@ class LoginDetailsController extends Controller
     {
         $user = Auth::user();
         $search = $request->query('search');
+        $class = $request->query('class');
 
         $students = Student::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
@@ -28,6 +29,7 @@ class LoginDetailsController extends Controller
                     "%{$search}%"
                 )
             )
+            ->when($class, fn($query) => $query->where('present_class', $class))
             ->latest()
             ->paginate(25);
 
