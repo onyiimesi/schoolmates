@@ -19,6 +19,14 @@ class GeneralResultService
             return $this->error(null, 'Invalid Period', 400);
         }
 
+        $scoreSetting = $this->getScoreSetting($user);
+
+        if (!$scoreSetting || !$scoreSetting->scoreOption) {
+            return $this->error(null, 'Score setting not found', 400);
+        }
+
+        $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
+
         $results = Result::with(['studentScores'])
             ->where([
                 'sch_id' => $user->sch_id,
@@ -34,13 +42,16 @@ class GeneralResultService
             })
             ->get();
 
-        $getMidtermResults = MidTermResultResource::collection($results);
-
         $data = [
             'students' => $this->getStudentsByClass($user, $params['class']),
             'subjects' => $this->getSubjects($user, $params),
-            'results' => $getMidtermResults,
         ];
+
+        $assessmentTypes = $this->getAssessmentTypes($assessmentType);
+
+        foreach ($assessmentTypes as $resultType) {
+            $data[$resultType] = $this->getAssessmentResults($user, $params, $resultType);
+        }
 
         return $this->success($data, 'Mid term result');
     }
@@ -53,22 +64,22 @@ class GeneralResultService
 
         $scoreSetting = $this->getScoreSetting($user);
 
-        if (! $scoreSetting || ! $scoreSetting->scoreOption) {
+        if (!$scoreSetting || !$scoreSetting->scoreOption) {
             return $this->error(null, 'Score setting not found', 400);
         }
 
         $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
 
         $endTermResults = Result::with([
-                'student',
-                'studentScores',
-                'affectiveDispositions',
-                'psychomotorskill',
-                'resultExtraCurriculars',
-                'abacus',
-                'psychomotorPerformances',
-                'pupilReports',
-            ])
+            'student',
+            'studentScores',
+            'affectiveDispositions',
+            'psychomotorskill',
+            'resultExtraCurriculars',
+            'abacus',
+            'psychomotorPerformances',
+            'pupilReports',
+        ])
             ->where([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,

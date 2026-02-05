@@ -31,9 +31,11 @@ trait ResultTrait
 
     public function getSubjects($user, $request)
     {
-        $data = ClassModel::with(['subjects' => function ($query) use($request) {
+        $data = ClassModel::with([
+            'subjects' => function ($query) use ($request) {
                 $query->where('session', $request['session']);
-            }])
+            }
+        ])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_name', $request['class'])
@@ -46,8 +48,8 @@ trait ResultTrait
     {
         return GradingSystemResource::collection(
             GradingSystem::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->get()
+                ->where('campus', $user->campus)
+                ->get()
         );
     }
 
@@ -134,33 +136,33 @@ trait ResultTrait
 
     /**
      * Get the students results used in studentaverage function (EndTermResultController).
-    */
+     */
     protected function getResult(User $user, $validated): Collection
     {
         return Result::where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'student_id' => $validated['student_id'],
-                'class_name' => $validated['class_name'],
-                'term' => $validated['term'],
-                'session' => $validated['session'],
-            ])
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'student_id' => $validated['student_id'],
+            'class_name' => $validated['class_name'],
+            'term' => $validated['term'],
+            'session' => $validated['session'],
+        ])
             ->with('studentScores')
             ->get();
     }
 
     /**
      * Get the class results used in studentaverage function (EndTermResultController).
-    */
+     */
     protected function getClassResult(User $user, $validated): Collection
     {
         return Result::with('student')->where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'class_name' => $validated['class_name'],
-                'term' => $validated['term'],
-                'session' => $validated['session'],
-            ])
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'class_name' => $validated['class_name'],
+            'term' => $validated['term'],
+            'session' => $validated['session'],
+        ])
             ->whereHas('student', function ($query) {
                 $query->where('status', 'active');
             })
@@ -170,7 +172,7 @@ trait ResultTrait
 
     /**
      * Get the class average used in studentaverage function (EndTermResultController).
-    */
+     */
     protected function getClassAverage(Collection $classResults, int $studentCount): float
     {
         $totalClassScores = 0;
@@ -197,7 +199,7 @@ trait ResultTrait
 
     /**
      * Get the student average used in studentaverage function (EndTermResultController).
-    */
+     */
     protected function getStudentAverage(Collection $results): float
     {
         $totalStudentScores = 0;

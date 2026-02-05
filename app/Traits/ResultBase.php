@@ -14,13 +14,13 @@ trait ResultBase
     protected function getResult($teacher, $request)
     {
         return Result::where([
-                'sch_id' => $teacher->sch_id,
-                'campus' => $teacher->campus,
-                'student_id' => $request->student_id,
-                'period' => PeriodicName::FIRSTHALF,
-                'term' => $request->term,
-                'session' => $request->session,
-            ])
+            'sch_id' => $teacher->sch_id,
+            'campus' => $teacher->campus,
+            'student_id' => $request->student_id,
+            'period' => PeriodicName::FIRSTHALF,
+            'term' => $request->term,
+            'session' => $request->session,
+        ])
             ->first();
     }
 
@@ -221,11 +221,11 @@ trait ResultBase
         $result->pupilReports()->createMany($pupilReports);
     }
 
-    protected function getStudentResults($user, array $params, MemoizedCacheService $generalResultService)
+    protected function getStudentResults($user, array $params, MemoizedCacheService $memoizedCacheService)
     {
         return match ($params['period']) {
-            PeriodicName::FIRSTHALF => $generalResultService->firstHalf($user, $params),
-            PeriodicName::SECONDHALF => $generalResultService->secondHalf($user, $params),
+            PeriodicName::FIRSTHALF => $memoizedCacheService->firstHalf($user, $params),
+            PeriodicName::SECONDHALF => $memoizedCacheService->secondHalf($user, $params),
             default => $this->error(null, 'Invalid result type', 400),
         };
     }

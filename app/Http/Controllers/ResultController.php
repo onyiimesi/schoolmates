@@ -25,8 +25,8 @@ class ResultController extends Controller
 
     public function __construct(
         protected ResultService $resultService
-    )
-    {}
+    ) {
+    }
 
     public function midTerm(MidtermRequest $request)
     {
@@ -84,7 +84,7 @@ class ResultController extends Controller
         $hos = null;
         if (empty($request->hos_comment)) {
             $hos = Staff::find($request->hos_id);
-            if (! $hos) {
+            if (!$hos) {
                 return $this->error(null, "HOS needs to add comments", 400);
             }
         }
