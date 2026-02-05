@@ -138,7 +138,7 @@ Route::middleware('check.allowed.url')
         Route::post('/upload-campus-image', [CampusController::class, 'uploadImage']);
         Route::post('/storage-link', [OtherController::class, 'storageLink']);
 
-        Route::group(['middleware' => ['auth:sanctum']], function(){
+        Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::resource('/designation', DesignationController::class);
             Route::resource('/staff', StaffController::class);
             Route::resource('/campus', CampusController::class);
@@ -173,7 +173,7 @@ Route::middleware('check.allowed.url')
 
             // Route::post('/communicationbook', [CommunicationBookController::class, 'communicate']);
             // Route::get('/communicationbook', [CommunicationBookController::class, 'getmessage']);
-
+    
             Route::get('/payment/{invoice_id}/get', [OtherController::class, 'paymentinvoice']);
 
             Route::resource('/vehicle', VehicleController::class);
@@ -212,13 +212,13 @@ Route::middleware('check.allowed.url')
                 Route::middleware('check.subscription.status')
                     ->controller(ResultController::class)
                     ->group(function () {
-                        Route::post('midTermResult', 'midTerm');
-                        Route::post('endTermResult', 'endTerm');
-                        Route::patch('release/result', 'release');
-                        Route::patch('withhold/result', 'hold');
-                        // New Get Result API
-                        Route::get("/get-result", 'getResult');
-                    });
+                    Route::post('midTermResult', 'midTerm');
+                    Route::post('endTermResult', 'endTerm');
+                    Route::patch('release/result', 'release');
+                    Route::patch('withhold/result', 'hold');
+                    // New Get Result API
+                    Route::get("/get-result", 'getResult');
+                });
 
                 Route::prefix('staff')
                     ->group(function () {
@@ -253,26 +253,26 @@ Route::middleware('check.allowed.url')
             //PreSchool Subject
             Route::controller(PreSchoolSubjectController::class)
                 ->group(function () {
-                    Route::post('/preschoolsubject', 'addSubject');
-                    Route::get('/preschoolsubject/{period}/{term}/{session}', 'getSubject')->where('session', '.+');
-                    Route::get('/preschoolsubject/{id}', 'getSubjectID');
-                    Route::patch('/preschoolsubject/{id}', 'editSubject');
-                    Route::delete('/preschoolsubject/{id}', 'deleteSubject');
-                    Route::post('/preschoolsubjectclass', 'addSubjectClass');
-                    Route::get('/preschoolsubjectclass/{period}/{term}/{session}', 'getSubjectClass')->where('session', '.+');
-                    Route::get('/preschoolsubjects/{period}/{term}/{session}/{class}', 'getSubjectByClass')->where('session', '.+');
-                });
+                Route::post('/preschoolsubject', 'addSubject');
+                Route::get('/preschoolsubject/{period}/{term}/{session}', 'getSubject')->where('session', '.+');
+                Route::get('/preschoolsubject/{id}', 'getSubjectID');
+                Route::patch('/preschoolsubject/{id}', 'editSubject');
+                Route::delete('/preschoolsubject/{id}', 'deleteSubject');
+                Route::post('/preschoolsubjectclass', 'addSubjectClass');
+                Route::get('/preschoolsubjectclass/{period}/{term}/{session}', 'getSubjectClass')->where('session', '.+');
+                Route::get('/preschoolsubjects/{period}/{term}/{session}/{class}', 'getSubjectByClass')->where('session', '.+');
+            });
 
             //Search Routes
             Route::get("/studentsessionsearch/{session}", [SessionSearchController::class, 'sessionsearch'])
-            ->where('session', '.+');
+                ->where('session', '.+');
             Route::get("/admissionnumbersearch/{admissionnumber}", [AdmissionNumSearchController::class, 'admissionsearch'])
-            ->where('admissionnumber', '.+');
+                ->where('admissionnumber', '.+');
 
             Route::get("/incomereport/{term}/{session}", [IncomeReportController::class, 'incomesearch'])
-            ->where('session', '.+');
+                ->where('session', '.+');
             Route::get("/expensesreport/{term}/{session}", [ExpensesReportController::class, 'expensesearch'])
-            ->where('session', '.+');
+                ->where('session', '.+');
 
             Route::get("/graduatedstudent", [GraduatedStudentController::class, 'graduate']);
             Route::patch("/graduatestudent/{id}", [GraduatedStudentController::class, 'graduatestudent']);
@@ -281,9 +281,9 @@ Route::middleware('check.allowed.url')
             Route::get("/studentdebtors", [StudentDebtorController::class, 'debtors']);
 
             Route::get("/creditors/{term}/{session}", [StudentCreditorsController::class, 'creditorsByTermSession'])
-            ->where('session', '.+');
+                ->where('session', '.+');
             Route::get("/debtors/{term}/{session}", [StudentDebtorController::class, 'debtorsByTermSession'])
-            ->where('session', '.+');
+                ->where('session', '.+');
 
             Route::patch('/withdrawstudent/{id}', [WithdrawStudentController::class, 'withdraw']);
             Route::patch('/acceptstudent/{id}', [WithdrawStudentController::class, 'acceptStudent']);
@@ -303,15 +303,15 @@ Route::middleware('check.allowed.url')
             Route::get("/studentpreviousinvoice", [StudentInvoiceController::class, 'studentprevinvoices']);
             Route::get("/school", [SchoolsController::class, 'schools']);
             Route::get("/student/{session}/{class}", [StudentBySessionTermClassController::class, 'studentsessionclassterm'])
-            ->where('session', '.+');
+                ->where('session', '.+');
 
             Route::get("/studentlogindetails", [LoginDetailsController::class, 'loginDetails']);
             Route::get("/stafflogindetails", [LoginDetailsController::class, 'staffloginDetails']); // Deprecated
-
+    
             // Student By Class (Principal)
             Route::get("/studentbyclass/{present_class}", [StudentBySessionTermClassController::class, 'studentbyclass']);
             Route::get("/attendance/{date}", [StudentAttendanceDateController::class, 'attendancedate'])
-            ->where('date', '.+');
+                ->where('date', '.+');
 
             Route::controller(SubjectByClassController::class)
                 ->group(function () {
@@ -323,7 +323,7 @@ Route::middleware('check.allowed.url')
                 });
         });
 
-        Route::group(['middleware' => ['auth:sanctum']], function(){
+        Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::controller(ClassPopulationController::class)
                 ->group(function () {
                     Route::get('/classpopulation', 'getClassPopulation');
@@ -367,34 +367,34 @@ Route::middleware('check.allowed.url')
             // Assignment
             Route::controller(AssignmentController::class)
                 ->group(function () {
-                    Route::get('/assignment', 'assign');
-                    Route::post('/objective-assignment', 'objective');
-                    Route::post('/theory-assignment', 'theory');
-                    Route::patch("/edit-obj-assignment", 'editObjectiveAssign');
-                    Route::patch("/edit-thoery-assignment", 'editTheoryAssign');
-                    Route::delete("/assignment/{id}", 'delAssign');
+                Route::get('/assignment', 'assign');
+                Route::post('/objective-assignment', 'objective');
+                Route::post('/theory-assignment', 'theory');
+                Route::patch("/edit-obj-assignment", 'editObjectiveAssign');
+                Route::patch("/edit-thoery-assignment", 'editTheoryAssign');
+                Route::delete("/assignment/{id}", 'delAssign');
 
-                    Route::post('/objective-assignment-answer', 'objectiveAnswer');
-                    Route::post('/theory-assignment-answer', 'theoryAnswer');
-                    Route::get('/assignment-answer/{period}/{term}/{session}/{type}/{week}', 'getAnswer')
-                        ->where('session', '.+');
-
-                    Route::post('/objective-assignment-mark', 'objectiveMark');
-                    Route::patch('/update/objective/assignment/mark', 'updateObjectiveMark');
-                    Route::post('/theory-assignment-mark', 'theoryMark');
-                    Route::patch('/update/theory/assignment/mark', 'updateTheoryMark');
-                    Route::get('/marked-assignment/{period}/{term}/{session}/{type}/{week}', 'marked')
-                    ->where('session', '.+');
-                    Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}/{week}', 'markedByStudent')
+                Route::post('/objective-assignment-answer', 'objectiveAnswer');
+                Route::post('/theory-assignment-answer', 'theoryAnswer');
+                Route::get('/assignment-answer/{period}/{term}/{session}/{type}/{week}', 'getAnswer')
                     ->where('session', '.+');
 
-                    Route::post('/assignment-result', 'result');
-                    Route::get('/get-assignment-result/{period}/{term}/{session}/{type}/{week}', 'resultAssign')
+                Route::post('/objective-assignment-mark', 'objectiveMark');
+                Route::patch('/update/objective/assignment/mark', 'updateObjectiveMark');
+                Route::post('/theory-assignment-mark', 'theoryMark');
+                Route::patch('/update/theory/assignment/mark', 'updateTheoryMark');
+                Route::get('/marked-assignment/{period}/{term}/{session}/{type}/{week}', 'marked')
                     ->where('session', '.+');
-                    Route::patch("/publish/assignment", 'publish');
-                    Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', 'getStudentResult')
+                Route::get('/marked-assignments/{student_id}/{period}/{term}/{session}/{type}/{week}', 'markedByStudent')
                     ->where('session', '.+');
-                });
+
+                Route::post('/assignment-result', 'result');
+                Route::get('/get-assignment-result/{period}/{term}/{session}/{type}/{week}', 'resultAssign')
+                    ->where('session', '.+');
+                Route::patch("/publish/assignment", 'publish');
+                Route::get('/get-student-result/{student_id}/{period}/{term}/{session}/{type}', 'getStudentResult')
+                    ->where('session', '.+');
+            });
 
             Route::get('/assignment/performance', [AssignmentPerformanceController::class, 'chart']);
 
@@ -426,8 +426,8 @@ Route::middleware('check.allowed.url')
             Route::prefix('scan/attendance')
                 ->controller(ScanAttendanceController::class)
                 ->group(function () {
-                    Route::post("/staff", 'staffAttendance');
-                });
+                Route::post("/staff", 'staffAttendance');
+            });
 
             // Announcments
             Route::get('/announcements', [GeneralController::class, 'getAnnouncements']);
