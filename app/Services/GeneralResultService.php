@@ -34,8 +34,7 @@ class GeneralResultService
                 'student_id' => $params['student_id'],
                 'period' => $params['period'],
                 'term' => $params['term'],
-                'session' => $params['session'],
-                'result_type' => $params['result_type'],
+                'session' => $params['session']
             ])
             ->when(!empty($params['status']), function ($query) use ($params) {
                 $query->where('status', $params['status']);
