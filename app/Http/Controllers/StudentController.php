@@ -22,6 +22,8 @@ class StudentController extends Controller
 {
     use HttpResponses;
 
+    private const string COUNT_MESSAGE = "Maximum count reached. Upgrade account to continue";
+
     /**
      * Display a listing of the resource.
      *
@@ -231,15 +233,15 @@ class StudentController extends Controller
     private function handleCount($count, $getplan)
     {
         if ($count >= 150 && $getplan->id == 1) {
-            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+            return $this->error(null, self::COUNT_MESSAGE, 400);
         }
 
         if ($count >= 350 && $getplan->id == 2) {
-            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+            return $this->error(null, self::COUNT_MESSAGE, 400);
         }
 
         if ($count >= 1000 && $getplan->id == 3) {
-            return $this->error(null, "Maximum count reached. Upgrade account to continue", 400);
+            return $this->error(null, self::COUNT_MESSAGE, 400);
         }
     }
 }
