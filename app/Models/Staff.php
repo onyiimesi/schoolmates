@@ -11,6 +11,32 @@ use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 
+/**
+ * @property string $sch_id
+ * @property string $campus
+ * @property int $designation_id
+ * @property string $department
+ * @property string $surname
+ * @property string $firstname
+ * @property string $middlename
+ * @property string $username
+ * @property string $email
+ * @property string $gender
+ * @property string $phoneno
+ * @property string $address
+ * @property string $image
+ * @property string $password
+ * @property string $pass_word
+ * @property string $class_assigned
+ * @property string $sub_class
+ * @property string $signature
+ * @property string $status
+ * @property string $teacher_type
+ * @property string $campus_type
+ * @property string $is_preschool
+ * @property string $file_id
+ * @property string $sig_id
+ */
 class Staff extends Authenticatable implements Auditable
 {
     use HasApiTokens, HasFactory;
@@ -86,13 +112,7 @@ class Staff extends Authenticatable implements Auditable
 
     public function getCampus()
     {
-        $campus = Campus::where('name', $this->campus)->first();
-
-        if ($campus) {
-            return $campus;
-        }
-
-        return null;
+        return Campus::where('name', $this->campus)->first() ?? null;
     }
 
     public function getHosAttribute()
