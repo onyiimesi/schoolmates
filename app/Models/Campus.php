@@ -38,8 +38,8 @@ class Campus extends Model implements Auditable
     protected function isPreschool(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
-            set: fn ($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN)
+            get: fn($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+            set: fn($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN)
         );
     }
 
