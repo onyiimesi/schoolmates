@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Result;
 use App\Models\Staff;
 use App\Services\Cache\MemoizedCacheService;
+use App\Services\GeneralResultService;
 use App\Services\ResultService;
 use App\Traits\HttpResponses;
 use App\Traits\ResultBase;
@@ -72,21 +73,11 @@ class ResultController extends Controller
 
     public function endTerm(ResultRequest $request)
     {
-        $this->validateRequest($request);
-
-        if ($request->period !== PeriodicName::SECONDHALF) {
-            return $this->error(null, "Bad Request", 400);
-        }
-
+        $hos = null;
         $teacher = Auth::user();
 
-        // Only check HOS if no comment was provided directly
-        $hos = null;
-        if (empty($request->hos_comment)) {
-            $hos = Staff::find($request->hos_id);
-            if (!$hos) {
-                return $this->error(null, "HOS needs to add comments", 400);
-            }
+        if ($validate = $this->validateRequest($request)) {
+            return $validate;
         }
 
         try {
@@ -191,7 +182,7 @@ class ResultController extends Controller
         return $this->resultService->getSchoolSheetSettings();
     }
 
-    public function getResult(GetResultRequest $request, MemoizedCacheService $generalResultService)
+    public function getResult(GetResultRequest $request, GeneralResultService $generalResultService)
     {
         $user = userAuth();
         $validated = $request->validated();
