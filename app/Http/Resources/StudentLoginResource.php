@@ -21,9 +21,9 @@ class StudentLoginResource extends JsonResource
     public function toArray($request)
     {
         $plan = SchoolPayment::where('sch_id', $this->sch_id)->first();
-        if($plan){
-            $getplan = Pricing::where('id', $plan->pricing_id)->first();
 
+        if ($plan) {
+            $getplan = Pricing::where('id', $plan->pricing_id)->first();
         } else {
             $school = Schools::where('sch_id', $this->sch_id)->first();
             $getplan = Pricing::where('id', $school->pricing_id)->first();
@@ -37,7 +37,7 @@ class StudentLoginResource extends JsonResource
 
         $baseQuery = Result::where('sch_id', $this->sch_id)
             ->where('term', $this->school->currentAcademicPeriod?->term)
-            ->where('session', $this->school->currentAcademicPeriod ?->session);
+            ->where('session', $this->school->currentAcademicPeriod?->session);
 
         $latestResultIds = $baseQuery
             ->select(DB::raw('MAX(id) as id'))
@@ -56,6 +56,7 @@ class StudentLoginResource extends JsonResource
             'id' => (string)$this->id,
             'sch_id' => (string)$this->sch_id,
             'campus' => (string)$this->campus,
+            'campus_type' => $this->getCampus()?->campus_type,
             'designation_id' => (string)$this->designation_id,
             'surname' => (string)$this->surname,
             'firstname' => (string)$this->firstname,
