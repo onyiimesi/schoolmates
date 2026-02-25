@@ -85,19 +85,18 @@ class Student extends Authenticatable implements Auditable
         return $this->hasMany(Result::class, 'student_id');
     }
 
+    public function getCampus()
+    {
+        return Campus::where('name', $this->campus)->first() ?? null;
+    }
+
     public function getHosAttribute(): ?Staff
     {
-        $hos = Staff::select('id', 'surname', 'firstname', 'middlename', 'signature')
+        return Staff::select('id', 'surname', 'firstname', 'middlename', 'signature')
             ->where('sch_id', $this->sch_id)
             ->where('campus', $this->campus)
             ->where('designation_id', 3)
-            ->first();
-
-        if (! $hos) {
-            return null;
-        }
-
-        return $hos;
+            ->first() ?? null;
     }
 
     public function isPreschool(): Attribute
@@ -119,10 +118,9 @@ class Student extends Authenticatable implements Auditable
     protected static function studentCountByClass(User $user, string $class)
     {
         return self::where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'present_class' => $class,
-            ])
-            ->count();
+            'sch_id' => $user->sch_id,
+            'campus' => $user->campus,
+            'present_class' => $class,
+        ])->count();
     }
 }
