@@ -5,7 +5,8 @@ namespace App\Traits;
 use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
 use App\Models\Result;
-use App\Services\Cache\MemoizedCacheService;
+use App\Models\Staff;
+use App\Services\GeneralResultService;
 
 trait ResultBase
 {
@@ -72,7 +73,17 @@ trait ResultBase
 
     protected function validateRequest($request)
     {
-        $request->validated($request->all());
+        if ($request->period !== PeriodicName::SECONDHALF) {
+            return $this->error(null, "Bad Request", 400);
+        }
+
+        // Only check HOS if no comment was provided directly
+        if (empty($request->hos_comment)) {
+            $hos = Staff::find($request->hos_id);
+            if (!$hos) {
+                return $this->error(null, "HOS needs to add comments", 400);
+            }
+        }
     }
 
     protected function getSecondResult($request, $teacher)
@@ -221,11 +232,11 @@ trait ResultBase
         $result->pupilReports()->createMany($pupilReports);
     }
 
-    protected function getStudentResults($user, array $params, MemoizedCacheService $memoizedCacheService)
+    protected function getStudentResults($user, array $params, GeneralResultService $generalResultService)
     {
         return match ($params['period']) {
-            PeriodicName::FIRSTHALF => $memoizedCacheService->firstHalf($user, $params),
-            PeriodicName::SECONDHALF => $memoizedCacheService->secondHalf($user, $params),
+            PeriodicName::FIRSTHALF => $generalResultService->firstHalf($user, $params),
+            PeriodicName::SECONDHALF => $generalResultService->secondHalf($user, $params),
             default => $this->error(null, 'Invalid result type', 400),
         };
     }
