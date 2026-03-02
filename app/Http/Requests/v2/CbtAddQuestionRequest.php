@@ -24,11 +24,11 @@ class CbtAddQuestionRequest extends FormRequest
         return [
             'subject_id' => ['required'],
             'question' => ['required', 'string'],
-            'question_type' => ['required', 'string'],
-            'option1' => ['required', 'string'],
-            'option2' => ['required', 'string'],
-            'option3' => ['required', 'string'],
-            'option4' => ['required', 'string'],
+            'question_type' => ['required', 'string', 'max:255'],
+            'option1' => ['required', 'string', 'max:255'],
+            'option2' => ['required', 'string', 'max:255'],
+            'option3' => ['required', 'string', 'max:255'],
+            'option4' => ['required', 'string', 'max:255'],
             'answer' => ['required', 'string'],
             'cbt_setting_id' => ['required', 'exists:cbt_settings,id'],
             'question_mark' => ['required', 'string']
