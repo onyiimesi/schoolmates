@@ -37,20 +37,20 @@ class CommunicationBookReplyResource extends JsonResource
             'message' => $this->message,
             'status' => $this->status,
             'sender' => [
-                'id' => $this->sender->id,
-                'campus' => $this->sender->campus,
-                'first_name' => $this->sender->firstname,
-                'last_name' => $this->sender->surname,
-                'email' => $this->sender->email,
-                'designation' => $this->sender->designation_id,
+                'id' => $this->sender?->id,
+                'campus' => $this->sender?->campus,
+                'first_name' => $this->sender?->firstname,
+                'last_name' => $this->sender?->surname,
+                'email' => $this->sender?->email,
+                'designation' => $this->sender?->designation_id,
             ],
             'receiver' => [
-                'id' => $this->receiver->id,
-                'campus' => $this->receiver->campus,
-                'first_name' => $this->receiver->firstname,
-                'last_name' => $this->receiver->surname,
-                'email' => $this->receiver->email_address,
-                'designation' => (int)$this->receiver->designation_id,
+                'id' => $this->receiver?->id,
+                'campus' => $this->receiver?->campus,
+                'first_name' => $this->receiver?->firstname,
+                'last_name' => $this->receiver?->surname,
+                'email' => $this->receiver?->email_address,
+                'designation' => (int)$this->receiver?->designation_id,
             ],
             'date' => Carbon::parse($this->created_at)->format('d M Y h:i A'),
         ];
@@ -59,6 +59,6 @@ class CommunicationBookReplyResource extends JsonResource
     private function updateRead($id)
     {
         CommunicationBookReply::where('communication_book_id', $id)
-        ->update(['status' => "read"]);
+            ->update(['status' => "read"]);
     }
 }
