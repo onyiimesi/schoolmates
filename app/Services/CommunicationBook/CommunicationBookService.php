@@ -26,8 +26,8 @@ class CommunicationBookService extends Controller
                 $auth = $this->auth();
 
                 $user = Staff::where('id', $auth->id)
-                ->where('sch_id', $auth->sch_id)
-                ->where('campus', $auth->campus)->first();
+                    ->where('sch_id', $auth->sch_id)
+                    ->where('campus', $auth->campus)->first();
 
                 if (!$user) {
                     $user = Student::where('id', $auth->id)
@@ -84,10 +84,10 @@ class CommunicationBookService extends Controller
         $user = $this->auth();
 
         $info = CommunicationBook::with(['staff', 'student', 'replies', 'messages'])
-        ->where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('class_id', $classId)
-        ->where('status', 'active')->get();
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('class_id', $classId)
+            ->where('status', 'active')->get();
 
 
         $data = CommunicationBookResource::collection($info);
@@ -131,8 +131,9 @@ class CommunicationBookService extends Controller
     public function getReplies($id)
     {
         $info = CommunicationBookReply::with(['communicationBook', 'sender', 'receiver'])
-        ->where('communication_book_id', $id)
-        ->get();
+            ->where('communication_book_id', $id)
+            ->get();
+
         $data = CommunicationBookReplyResource::collection($info);
 
         return $this->success($data, "Detail");
@@ -154,11 +155,11 @@ class CommunicationBookService extends Controller
         $user = $this->auth();
 
         $info = CommunicationBook::with(['staff', 'student', 'replies'])
-        ->where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->where('class_id', $classId)
-        ->where('status', 'closed')
-        ->get();
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('class_id', $classId)
+            ->where('status', 'closed')
+            ->get();
 
         $data = CommunicationBookResource::collection($info);
 
@@ -174,7 +175,7 @@ class CommunicationBookService extends Controller
             if (!empty($request->file)) {
                 $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
                 $dataFile = (new UploadService($request->file, 'communicationbook', $cleanSchId))->run();
-            }else {
+            } else {
                 $dataFile = [
                     'url' => $info->file,
                     'file_id' => $info->file_id
@@ -233,13 +234,3 @@ class CommunicationBookService extends Controller
         return $this->success($totalCount, "Unread message count");
     }
 }
-
-
-
-
-
-
-
-
-
-
