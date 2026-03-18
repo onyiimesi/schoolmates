@@ -79,15 +79,38 @@ class CommunicationBookService extends Controller
         }
     }
 
-    public function show($classId)
+    public function show($request, $classId)
     {
         $user = $this->auth();
+        $targetUserId = $request->query('user_id');
 
-        $info = CommunicationBook::with(['staff', 'student', 'replies', 'messages'])
+        $info = CommunicationBook::with([
+            'staff',
+            'student',
+            'replies',
+            'messages.student',
+            'messages.staff'
+        ])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_id', $classId)
-            ->where('status', 'active')->get();
+            ->where('status', 'active')
+            ->when($targetUserId, function ($query, $userId) {
+                $query->where(function ($q) use ($userId) {
+                    $q->where('sender_id', $userId)
+                        ->orWhereHas('messages', function ($q2) use ($userId) {
+                            $q2->where('receiver_id', $userId);
+                        });
+                });
+            })
+            ->get();
+
+        if ($info->isNotEmpty()) {
+            CommunicationBookMessage::whereIn('communication_book_id', $info->pluck('id'))
+                ->where('receiver_id', $user->id)
+                ->where('status', '!=', 'read')
+                ->update(['status' => 'read']);
+        }
 
 
         $data = CommunicationBookResource::collection($info);

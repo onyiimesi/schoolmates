@@ -17,10 +17,6 @@ class CommunicationBookResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $userId = Auth::user()->id;
-
-        $this->updateRead($userId, $this->id);
-
         return [
             'id' => (string)$this->id,
             'attributes' => [
@@ -95,22 +91,11 @@ class CommunicationBookResource extends JsonResource
 
     private function getRecipients(): array
     {
-        return $this->messages->map(function ($reply) {
+        return $this->messages->map(function ($message) {
             return [
                 'sender' => $this->getSenderAttributes(),
-                'receivers' => $reply->communicationbook->messages->map(function ($message) {
-                    return $this->getReceiverAttributes($message);
-                })->toArray(),
+                'receivers' => $this->getReceiverAttributes($message),
             ];
-        })->flatMap(function ($reply) {
-            return $reply;
         })->toArray();
-    }
-
-    private function updateRead($userId, $id)
-    {
-        CommunicationBookMessage::where('receiver_id', $userId)
-        ->where('communication_book_id', $id)
-        ->update(['status' => "read"]);
     }
 }
