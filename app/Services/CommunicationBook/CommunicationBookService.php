@@ -12,6 +12,7 @@ use App\Models\v2\CommunicationBookMessage;
 use App\Models\v2\CommunicationBookReply;
 use App\Services\Upload\UploadService;
 use App\Traits\HttpResponses;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CommunicationBookService extends Controller
@@ -124,8 +125,8 @@ class CommunicationBookService extends Controller
 
             $data = CommunicationBook::with(['staff', 'student', 'replies'])->findOrFail($id);
 
-            $senderType = auth()->user() instanceof Student ? Student::class : Staff::class;
-            $senderId = auth()->user()->id;
+            $senderType = Auth::user() instanceof Student ? Student::class : Staff::class;
+            $senderId = Auth::user()->id;
 
             if ($senderType === Student::class) {
                 $receiverType = Staff::class;
@@ -173,15 +174,31 @@ class CommunicationBookService extends Controller
         return $this->success(null, "Updated successfully");
     }
 
-    public function closed($classId)
+    public function closed($request, $classId)
     {
         $user = $this->auth();
+        $targetUserId = $request->query('user_id');
 
-        $info = CommunicationBook::with(['staff', 'student', 'replies'])
+
+        $info = CommunicationBook::with([
+            'staff',
+            'student',
+            'replies',
+            'messages.student',
+            'messages.staff'
+        ])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_id', $classId)
             ->where('status', 'closed')
+            ->when($targetUserId, function ($query, $userId) {
+                $query->where(function ($q) use ($userId) {
+                    $q->where('sender_id', $userId)
+                        ->orWhereHas('messages', function ($q2) use ($userId) {
+                            $q2->where('receiver_id', $userId);
+                        });
+                });
+            })
             ->get();
 
         $data = CommunicationBookResource::collection($info);
