@@ -12,7 +12,8 @@ class SchoolsController extends Controller
 {
     use HttpResponses;
 
-    public function schools() {
+    public function schools()
+    {
         $user = Auth::user();
 
         $school = SchoolsResource::collection(
@@ -21,7 +22,7 @@ class SchoolsController extends Controller
                 'currentAcademicPeriod',
                 'subscriptions',
             ])->where('sch_id', $user->sch_id)
-            ->get()
+                ->get()
         );
 
         return $this->success($school, 'School detail');

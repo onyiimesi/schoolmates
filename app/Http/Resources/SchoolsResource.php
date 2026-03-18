@@ -17,16 +17,16 @@ class SchoolsResource extends JsonResource
     public function toArray($request)
     {
         $baseQuery = Result::where('sch_id', $this->sch_id)
-            ->where('term', $this->currentAcademicPeriod->term)
-            ->where('session', $this->currentAcademicPeriod->session);
+            ->where('term', $this->currentAcademicPeriod?->term)
+            ->where('session', $this->currentAcademicPeriod?->session);
 
         $latestResultIds = $baseQuery
             ->select(DB::raw('MAX(id) as id'))
             ->groupBy('student_id')
             ->pluck('id');
 
-        $totalStudents = $latestResultIds->count();
-        $subAmount = (float) $this->amount_per_student * $totalStudents;
+        $totalStudents = $latestResultIds?->count();
+        $subAmount = (float) $this->amount_per_student * $totalStudents ?? 0;
         $invoiceStatus = 'pending';
 
         if ($this->activeSubscription) {
@@ -44,7 +44,7 @@ class SchoolsResource extends JsonResource
                 'schmotto' => (string)$this->schmotto,
                 'schwebsite' => (string)$this->schwebsite,
                 'schlogo' => (string)$this->schlogo,
-                'subscriptions' => $this->subscriptions ? $this->subscriptions->map(fn ($subscription) => [
+                'subscriptions' => $this->subscriptions ? $this->subscriptions->map(fn($subscription) => [
                     'id' => $subscription->id,
                     'term' => $subscription->term,
                     'session' => $subscription->session,
