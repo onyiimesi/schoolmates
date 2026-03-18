@@ -68,9 +68,15 @@ class CommunicationBookResource extends JsonResource
 
     private function getReceiverAttributes($message): array
     {
+        $data = [
+            'id' => $message->receiver_id,
+            'status' => $message->status,
+            'read_at' => $message->updated_at,
+        ];
+
         if ($message->receiver_type === "student") {
             return [
-                'id' => $message->student->id,
+                ...$data,
                 'campus' => $message->student->campus,
                 'first_name' => $message->student->firstname,
                 'last_name' => $message->student->surname,
@@ -79,7 +85,7 @@ class CommunicationBookResource extends JsonResource
             ];
         } else {
             return [
-                'id' => $message->staff->id,
+                ...$data,
                 'campus' => $message->staff->campus,
                 'first_name' => $message->staff->firstname,
                 'last_name' => $message->staff->surname,

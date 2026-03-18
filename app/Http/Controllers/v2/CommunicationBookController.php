@@ -37,9 +37,9 @@ class CommunicationBookController extends Controller
         return $this->service->getReplies($id);
     }
 
-    public function closed($classId)
+    public function closed(Request $request, $classId)
     {
-        return $this->service->closed($classId);
+        return $this->service->closed($request, $classId);
     }
 
     public function close($id)
