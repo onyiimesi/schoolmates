@@ -204,6 +204,9 @@ class StudentController extends Controller
             'admission_number' => $school->auto_generate
                 ? $student->admission_number
                 : $request->admission_number,
+            'username' => $school->auto_generate
+                ? $student->admission_number
+                : $request->admission_number,
             'genotype' => $request->genotype,
             'blood_group' => $request->blood_group,
             'gender' => $request->gender,
