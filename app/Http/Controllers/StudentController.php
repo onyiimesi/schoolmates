@@ -37,10 +37,12 @@ class StudentController extends Controller
         $status = $request->query('status');
 
         $students = Student::where('sch_id', $user->sch_id)
-            ->when($user->designation_id != 6, fn ($query) => $query->where('campus', $user->campus))
+            ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
             ->when($class, fn($query) => $query->where('present_class', $class))
             ->when($status, fn($query) => $query->where('status', $status))
-            ->when($search, fn($query) =>
+            ->when(
+                $search,
+                fn($query) =>
                 $query->whereAny(
                     ['firstname', 'surname', 'email_address', 'username', 'admission_number', 'present_class'],
                     'like',
@@ -72,7 +74,7 @@ class StudentController extends Controller
             return $this->error(null, 'School not found', 404);
         }
 
-        if(! $school->auto_generate) {
+        if (! $school->auto_generate) {
             $request->validate([
                 'admission_number' => ['required', 'string', 'max:255', Rule::unique('students', 'admission_number')],
             ]);
@@ -163,19 +165,28 @@ class StudentController extends Controller
     {
         $user = Auth::user();
 
-        $school = Schools::where('sch_id', $user->sch_id)
-            ->first();
-
-        if (! $school) {
-            return $this->error(null, 'School not found', 404);
-        }
-
+        $school = Schools::where('sch_id', $user->sch_id)->first();
         $campus = Campus::where('sch_id', $user->sch_id)
             ->where('name', $request->campus)
             ->first();
 
-        if (! $campus) {
-            return $this->error(null, 'Campus not found', 404);
+        if (! $school) {
+            $error = ['message' => 'School not found', 'code' => 404];
+        } elseif (
+            $school->auto_generate &&
+            $request->filled('admission_number') &&
+            $request->admission_number !== $student->admission_number
+        ) {
+            $error = [
+                'message' => 'Admission number cannot be modified because auto-generation is enabled for this school.',
+                'code' => 403
+            ];
+        } elseif (! $campus) {
+            $error = ['message' => 'Campus not found', 'code' => 404];
+        }
+
+        if (isset($error)) {
+            return $this->error(null, $error['message'], $error['code']);
         }
 
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
@@ -190,6 +201,9 @@ class StudentController extends Controller
             'surname' => $request->surname,
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
+            'admission_number' => $school->auto_generate
+                ? $student->admission_number
+                : $request->admission_number,
             'genotype' => $request->genotype,
             'blood_group' => $request->blood_group,
             'gender' => $request->gender,
@@ -207,14 +221,14 @@ class StudentController extends Controller
             'file_id' => $imagePath['file_id'] ?? $student->file_id,
         ]);
 
+        $student->refresh();
+
         $studentFullname = trim("{$student->surname} {$student->firstname} {$student->middlename}");
 
         Result::where('student_id', $student->id)
             ->update(['student_fullname' => $studentFullname]);
 
-        $studentDetail = new StudentResource($student);
-
-        return $this->success($studentDetail, 'Student Updated Successfully');
+        return $this->success(new StudentResource($student), 'Student Updated Successfully');
     }
 
     /**
