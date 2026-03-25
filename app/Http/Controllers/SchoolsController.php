@@ -61,4 +61,23 @@ class SchoolsController extends Controller
             ]
         ], 'School detail');
     }
+
+    public function schoolDetail($id)
+    {
+        $school = Schools::with([
+            'activeSubscription',
+            'currentAcademicPeriod',
+            'subscriptions',
+        ])
+            ->where('sch_id', $id)
+            ->first();
+
+        if (! $school) {
+            return $this->error(null, 'School not found', 404);
+        }
+
+        $data = new SchoolsResource($school);
+
+        return $this->success($data, 'School detail');
+    }
 }
