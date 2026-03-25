@@ -98,13 +98,24 @@ class BroadSheetController extends Controller
                 ];
             });
         })
-            ->groupBy(fn($item) => $item['subject'] . '|' . $item['period'] . '|' . $item['result_type']) // Dedup by subject + period
-            ->map(fn($group) => $group->first()) // Take only one per subject+period
             ->groupBy('subject')
             ->map(function ($subjectScores, $subject) {
+
+                // Sum all assessments
+                $assessmentScore = collect($subjectScores)
+                    ->whereIn('result_type', ['first_assessment', 'second_assessment', 'third_assessment', 'midterm'])
+                    ->sum('score');
+
+                // Sum exam (endterm)
+                $examScore = collect($subjectScores)
+                    ->where('result_type', 'endterm')
+                    ->sum('score');
+
                 return [
                     'subject' => $subject,
-                    'total_score' => collect($subjectScores)->sum('score'),
+                    'assessment_score' => $assessmentScore,
+                    'exam_score' => $examScore,
+                    'total_score' => $assessmentScore + $examScore,
                 ];
             })
             ->values()
