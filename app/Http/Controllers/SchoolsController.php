@@ -62,14 +62,14 @@ class SchoolsController extends Controller
         ], 'School detail');
     }
 
-    public function schoolDetail($id)
+    public function schoolDetail($schoolId)
     {
         $school = Schools::with([
             'activeSubscription',
             'currentAcademicPeriod',
             'subscriptions',
         ])
-            ->where('sch_id', $id)
+            ->where('sch_id', $schoolId)
             ->first();
 
         if (! $school) {
