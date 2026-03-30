@@ -16,8 +16,13 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('sanctum:prune-expired --hours24')->daily();
-        $schedule->command('queue:work --stop-when-empty')->everyMinute();
-        $schedule->command('unsubscribe:school')->daily();
+        $schedule->command('queue:work --once --sleep=3 --tries=3')
+            ->everyMinute()
+            ->withoutOverlapping();
+
+        $schedule->command('unsubscribe:school')
+            ->daily()
+            ->withoutOverlapping();
     }
 
     /**
@@ -27,7 +32,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }
