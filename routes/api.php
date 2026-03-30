@@ -137,7 +137,8 @@ Route::middleware('check.allowed.url')
 
         Route::post('/upload-campus-image', [CampusController::class, 'uploadImage']);
         Route::post('/storage-link', [OtherController::class, 'storageLink']);
-        Route::get("/school/detail/{school_id}", [SchoolsController::class, 'schoolDetail']);
+        Route::get("/school/detail/{school_id}", [SchoolsController::class, 'schoolDetail'])
+            ->where('school_id', '.+');
 
         Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::resource('/designation', DesignationController::class);
