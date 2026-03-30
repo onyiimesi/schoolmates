@@ -15,18 +15,13 @@ class AssignmentController extends Controller
 {
     use HttpResponses;
 
-    protected $assignmentService;
-
-    public function __construct(AssignmentService $assignmentService)
-    {
-        $this->assignmentService = $assignmentService;
-    }
-
+    public function __construct(
+        protected AssignmentService $assignmentService
+    ) {}
     public function objective(CreateObjectiveRequest $request): JsonResponse
     {
         return $this->assignmentService->objective($request);
     }
-
     public function theory(Request $request): JsonResponse
     {
         $request->validate([
