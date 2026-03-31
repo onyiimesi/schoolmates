@@ -86,8 +86,6 @@ class ProfileController extends Controller
             'username' => $request->username,
             'image' => $imageUpload['url'] ?? $user->image,
             'file_id' => $imageUpload['fileId'] ?? $user->file_id,
-            'signature' => $signatureUpload['url'] ?? $user->signature,
-            'sig_id' => $signatureUpload['fileId'] ?? $user->sig_id,
         ];
 
         if ($user->designation_id != '7') {
@@ -99,6 +97,8 @@ class ProfileController extends Controller
             $updateData['phone_number'] = $request->phoneno;
             $updateData['email_address'] = $request->email;
             $updateData['home_address'] = $request->address;
+            $updateData['signature'] = $signatureUpload['url'] ?? $user->signature;
+            $updateData['sig_id'] = $signatureUpload['fileId'] ?? $user->sig_id;
         }
 
         $user->update($updateData);
