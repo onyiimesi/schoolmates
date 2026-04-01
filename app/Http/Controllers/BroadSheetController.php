@@ -103,7 +103,7 @@ class BroadSheetController extends Controller
 
                 // Sum all assessments
                 $assessmentScore = collect($subjectScores)
-                    ->whereIn('result_type', ['first_assessment', 'second_assessment', 'third_assessment', 'midterm'])
+                    ->whereIn('result_type', ['first_assesment', 'second_assesment', 'third_assesment', 'midterm'])
                     ->sum('score');
 
                 // Sum exam (endterm)
