@@ -20,11 +20,6 @@ class ClassController extends Controller
 {
     use HttpResponses;
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $user = Auth::user();
@@ -44,13 +39,13 @@ class ClassController extends Controller
         }
 
         if (! $campus->is_preschool) {
-            $query = ClassModel::where('sch_id', $user->sch_id);
+            $query = ClassModel::where('sch_id', $user->sch_id)
+                ->when($user->designation_id != 6, function ($q) use ($campus) {
+                    $q->where('campus', $campus->name);
+                })
+                ->get();
 
-            if ($user->designation_id != 6) {
-                $query->where('campus', $campus->name);
-            }
-
-            $classes = ClassResource::collection($query->get());
+            $classes = ClassResource::collection($query);
         } else {
             $classData = PreSchool::where('sch_id', $user->sch_id)
                 ->where('campus', $campus->name)
@@ -74,7 +69,6 @@ class ClassController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(ClassRequest $request)
     {
@@ -87,9 +81,9 @@ class ClassController extends Controller
 
         if (
             ClassModel::where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->where('class_name', $request->class_name)
-                ->exists()
+            ->where('campus', $user->campus)
+            ->where('class_name', $request->class_name)
+            ->exists()
         ) {
             return $this->error(null, 'Class already exists', 409);
         }
@@ -106,22 +100,10 @@ class ClassController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function update(Request $request, ClassModel $class)
     {
@@ -133,9 +115,9 @@ class ClassController extends Controller
 
         if (
             ClassModel::where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->where('class_name', $validated['class_name'])
-                ->exists()
+            ->where('campus', $user->campus)
+            ->where('class_name', $validated['class_name'])
+            ->exists()
         ) {
             return $this->error(null, 'Class already exists', 409);
         }
@@ -159,7 +141,6 @@ class ClassController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function destroy(ClassModel $class)
     {
