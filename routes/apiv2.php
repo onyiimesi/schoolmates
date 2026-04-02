@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\StationaryController;
 use App\Http\Controllers\v2\CbtController;
 use App\Http\Controllers\v2\CommunicationBookController;
 use App\Http\Controllers\v2\FlipClassController;
@@ -140,5 +141,44 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
             Route::get('/settings/sheet-sections', 'getSheetSections');
             Route::post('/settings/save-sheet-sections', 'saveSheetSections');
             Route::get('/sheet/school-settings', 'getSchoolSheetSettings');
+        });
+
+    // Stationary
+    Route::prefix('stationary')
+        ->controller(StationaryController::class)
+        ->group(function () {
+            Route::get('/report', 'getReport');
+
+            Route::get('/', 'index');
+            Route::post('/', 'create');
+            Route::get('/{id}', 'show');
+            Route::post('/{id}', 'update');
+            Route::delete('/{id}', 'delete');
+
+            Route::prefix('sales')
+                ->group(function () {
+                    Route::get('/get', 'getStationarySales');
+                    Route::post('/create', 'createStationarySale');
+                    Route::get('/{id}', 'getSingleSale');
+                    Route::delete('/{id}', 'deleteSale');
+                });
+
+            Route::prefix('supplier')
+                ->group(function () {
+                    Route::get('/get', 'getStationarySuppliers');
+                    Route::post('/create', 'addStationarySupplier');
+                    Route::get('/{id}', 'getSingleSupplier');
+                    Route::patch('/{id}/update', 'updateSupplier');
+                    Route::delete('/{id}/delete', 'deleteSupplier');
+                });
+
+            Route::prefix('purchase')
+                ->group(function () {
+                    Route::get('/get', 'getStationaryPurchases');
+                    Route::post('/create', 'addStationaryPurchase');
+                    Route::get('/{id}', 'getSinglePurchase');
+                    Route::patch('/{id}/update', 'updatePurchase');
+                    Route::delete('/{id}/delete', 'deletePurchase');
+                });
         });
 });

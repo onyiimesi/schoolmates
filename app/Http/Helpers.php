@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Stationary;
 use GuzzleHttp\Client;
 use Illuminate\Database\Events\QueryExecuted;
 use ImageKit\ImageKit;
@@ -7,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Services\ImageKit\ImageKitService;
+use Illuminate\Http\UploadedFile;
 
 if (!function_exists('defer_email')) {
     function defer_email($email, $action)
@@ -101,18 +103,38 @@ if (!function_exists('parseDataImage')) {
 }
 
 if (!function_exists('uploadImage')) {
-    function uploadImage($file, $folder, $schId, $fileId = null)
+    function uploadImage($file, $folder, $schId, $fileId = null): ?array
     {
-        $parsed = is_string($file) ? parseDataImage($file) : null;
-        if (!$parsed) {
-            return null;
+        $result = null;
+        $folderName = "{$folder}/{$schId}";
+        $folderPath = null;
+        $payload = null;
+
+        // Base64 Image
+        if (is_string($file) && Str::startsWith($file, 'data:image')) {
+            $parsed = parseDataImage($file);
+
+            if ($parsed) {
+                $folderPath = time() . '.' . $parsed['ext'];
+                $payload = $file;
+            }
         }
 
-        $file_name = time().'.'.$parsed['ext'];
-        $folderPath = $file_name;
-        $folderName = "{$folder}/{$schId}";
+        // Uploaded File
+        elseif ($file instanceof UploadedFile && $file->isValid()) {
+            if (Str::startsWith($file->getMimeType(), 'image/')) {
+                $extension = $file->getClientOriginalExtension() ?: $file->extension();
+                $folderPath = time() . '.' . $extension;
+                $payload = $file;
+            }
+        }
 
-        return (new ImageKitService($file, $folderPath, $folderName, $fileId))->run();
+        // Process if valid
+        if ($payload && $folderPath) {
+            $result = (new ImageKitService($payload, $folderPath, $folderName, $fileId))->run();
+        }
+
+        return $result;
     }
 }
 
@@ -124,7 +146,7 @@ if (!function_exists('uploadSignature')) {
             return null;
         }
 
-        $file_name = uniqid().'.'.$parsed['ext'];
+        $file_name = uniqid() . '.' . $parsed['ext'];
         $folderPath = $file_name;
         $folderName = "{$folder}/{$schId}";
 
@@ -132,3 +154,13 @@ if (!function_exists('uploadSignature')) {
     }
 }
 
+if (!function_exists('generateUniqueId')) {
+    function generateUniqueId()
+    {
+        do {
+            $id = 'STA' . strtoupper(Str::random(8));
+        } while (Stationary::where('unique_id', $id)->exists());
+
+        return $id;
+    }
+}
