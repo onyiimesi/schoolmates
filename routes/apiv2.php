@@ -151,34 +151,34 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
 
             Route::get('/', 'index');
             Route::post('/', 'create');
-            Route::get('/{id}', 'show');
-            Route::post('/{id}', 'update');
-            Route::delete('/{id}', 'delete');
+            Route::get('/{id}', 'show')->whereNumber('id');
+            Route::post('/{id}', 'update')->whereNumber('id');
+            Route::delete('/{id}', 'delete')->whereNumber('id');
 
             Route::prefix('sales')
                 ->group(function () {
                     Route::get('/get', 'getStationarySales');
                     Route::post('/create', 'createStationarySale');
-                    Route::get('/{id}', 'getSingleSale');
-                    Route::delete('/{id}', 'deleteSale');
+                    Route::get('/{id}', 'getSingleSale')->whereNumber('id');
+                    Route::delete('/{id}', 'deleteSale')->whereNumber('id');
                 });
 
             Route::prefix('supplier')
                 ->group(function () {
                     Route::get('/get', 'getStationarySuppliers');
                     Route::post('/create', 'addStationarySupplier');
-                    Route::get('/{id}', 'getSingleSupplier');
-                    Route::patch('/{id}/update', 'updateSupplier');
-                    Route::delete('/{id}/delete', 'deleteSupplier');
+                    Route::get('/{id}', 'getSingleSupplier')->whereNumber('id');
+                    Route::patch('/{id}/update', 'updateSupplier')->whereNumber('id');
+                    Route::delete('/{id}/delete', 'deleteSupplier')->whereNumber('id');
                 });
 
             Route::prefix('purchase')
                 ->group(function () {
                     Route::get('/get', 'getStationaryPurchases');
                     Route::post('/create', 'addStationaryPurchase');
-                    Route::get('/{id}', 'getSinglePurchase');
-                    Route::patch('/{id}/update', 'updatePurchase');
-                    Route::delete('/{id}/delete', 'deletePurchase');
+                    Route::get('/{id}', 'getSinglePurchase')->whereNumber('id');
+                    Route::patch('/{id}/update', 'updatePurchase')->whereNumber('id');
+                    Route::delete('/{id}/delete', 'deletePurchase')->whereNumber('id');
                 });
         });
 });

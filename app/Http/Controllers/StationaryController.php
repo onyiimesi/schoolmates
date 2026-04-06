@@ -23,17 +23,17 @@ class StationaryController extends Controller
         return $this->stationaryService->create($createStationaryRequest);
     }
 
-    public function show(int $id)
+    public function show($id)
     {
         return $this->stationaryService->show($id);
     }
 
-    public function update(int $id, Request $request)
+    public function update($id, Request $request)
     {
         return $this->stationaryService->update($id, $request);
     }
 
-    public function delete(int $id)
+    public function delete($id)
     {
         return $this->stationaryService->delete($id);
     }
@@ -49,12 +49,12 @@ class StationaryController extends Controller
         return $this->stationaryService->createStationarySale($createStationarySaleRequest);
     }
 
-    public function getSingleSale(int $id)
+    public function getSingleSale($id)
     {
         return $this->stationaryService->getSingleSale($id);
     }
 
-    public function deleteSale(int $id)
+    public function deleteSale($id)
     {
         return $this->stationaryService->deleteSale($id);
     }
@@ -70,17 +70,17 @@ class StationaryController extends Controller
         return $this->stationaryService->getStationarySuppliers($request);
     }
 
-    public function getSingleSupplier(int $id)
+    public function getSingleSupplier($id)
     {
         return $this->stationaryService->getSingleSupplier($id);
     }
 
-    public function updateSupplier(int $id, Request $request)
+    public function updateSupplier($id, Request $request)
     {
         return $this->stationaryService->updateSupplier($id, $request);
     }
 
-    public function deleteSupplier(int $id)
+    public function deleteSupplier($id)
     {
         return $this->stationaryService->deleteSupplier($id);
     }
@@ -96,17 +96,17 @@ class StationaryController extends Controller
         return $this->stationaryService->getStationaryPurchases($request);
     }
 
-    public function getSinglePurchase(int $id)
+    public function getSinglePurchase($id)
     {
         return $this->stationaryService->getSinglePurchase($id);
     }
 
-    public function updatePurchase(int $id, Request $request)
+    public function updatePurchase($id, Request $request)
     {
         return $this->stationaryService->updatePurchase($id, $request);
     }
 
-    public function deletePurchase(int $id)
+    public function deletePurchase($id)
     {
         return $this->stationaryService->deletePurchase($id);
     }
