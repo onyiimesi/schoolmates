@@ -362,28 +362,46 @@ class StationaryService
     {
         $user = userAuth();
 
-        $stationary = Stationary::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('id', $request->stationary_id)
-            ->first();
+        $items = $request->items;
 
-        if (! $stationary) {
-            return $this->error(null, 'Stationary not found', 404);
+        $stationaryIds = collect($items)->pluck('stationary_id')->unique();
+
+        $stationaryItems = Stationary::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->whereIn('id', $stationaryIds)
+            ->get()
+            ->keyBy('id');
+
+        foreach ($stationaryIds as $id) {
+            if (! $stationaryItems->has($id)) {
+                return $this->error(null, "Stationary with ID {$id} not found", 404);
+            }
         }
 
         try {
-            return DB::transaction(function () use ($user, $request, $stationary) {
-                StationaryPurchase::create([
-                    'sch_id' => $user->sch_id,
-                    'campus' => $user->campus,
-                    'stationary_supplier_id' => $request->stationary_supplier_id,
-                    'date_supplied' => $request->date_supplied,
-                    'stationary_id' => $request->stationary_id,
-                    'quantity' => $request->quantity,
-                    'price' => $request->price,
-                ]);
+            return DB::transaction(function () use ($user, $items, $stationaryItems) {
+                $now = now();
+                $purchases = [];
 
-                $stationary->increment('quantity', $request->quantity);
+                foreach ($items as $item) {
+                    $purchases[] = [
+                        'sch_id' => $user->sch_id,
+                        'campus' => $user->campus,
+                        'stationary_supplier_id' => $item['stationary_supplier_id'],
+                        'date_supplied' => $item['date_supplied'],
+                        'stationary_id' => $item['stationary_id'],
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'],
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+
+                StationaryPurchase::insert($purchases);
+
+                foreach ($items as $item) {
+                    $stationaryItems[$item['stationary_id']]->increment('quantity', $item['quantity']);
+                }
 
                 return $this->success(null, 'Created successfully', 201);
             });
