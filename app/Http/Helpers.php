@@ -125,7 +125,7 @@ if (!function_exists('uploadImage')) {
             if (Str::startsWith($file->getMimeType(), 'image/')) {
                 $extension = $file->getClientOriginalExtension() ?: $file->extension();
                 $folderPath = time() . '.' . $extension;
-                $payload = $file;
+                $payload = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
             }
         }
 
