@@ -24,6 +24,7 @@ class StationaryPurchaseResource extends JsonResource
                 'quantity' => $this->quantity,
                 'price' => $this->price,
                 'stationary_id' => $this->stationary_id,
+                'stationary_name' => $this->stationary?->name,
                 'created_at' => $this->created_at->toDateString()
             ],
             'relationships' => [

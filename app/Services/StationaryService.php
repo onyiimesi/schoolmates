@@ -25,7 +25,11 @@ class StationaryService
             return $this->error(null, 'School id & Campus not found', 404);
         }
 
-        $stationaries = Stationary::with(['stationarySales', 'stationaryPurchases'])
+        $stationaries = Stationary::with([
+            'stationarySales.class',
+            'stationarySales.student',
+            'stationaryPurchases.stationarySupplier'
+        ])
             ->where('sch_id', $schId)
             ->where('campus', $campus)
             ->paginate(25);
@@ -65,7 +69,11 @@ class StationaryService
     {
         $user = userAuth();
 
-        $stationary = Stationary::with(['stationarySales', 'stationaryPurchases'])
+        $stationary = Stationary::with([
+            'stationarySales.class',
+            'stationarySales.student',
+            'stationaryPurchases.stationarySupplier'
+        ])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('id', $id)
@@ -136,7 +144,7 @@ class StationaryService
             return $this->error(null, 'School id & Campus not found', 404);
         }
 
-        $stationarySales = StationarySale::with(['class', 'student'])
+        $stationarySales = StationarySale::with(['class', 'student', 'stationary'])
             ->where('sch_id', $schId)
             ->where('campus', $campus)
             ->paginate(25);
@@ -196,7 +204,7 @@ class StationaryService
     {
         $user = userAuth();
 
-        $stationarySale = StationarySale::with(['class', 'student'])
+        $stationarySale = StationarySale::with(['class', 'student', 'stationary'])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('id', $id)
@@ -419,7 +427,7 @@ class StationaryService
             return $this->error(null, 'School id & Campus not found', 404);
         }
 
-        $stationaryPurchases = StationaryPurchase::with(['stationarySupplier'])
+        $stationaryPurchases = StationaryPurchase::with(['stationarySupplier', 'stationary'])
             ->where('sch_id', $schId)
             ->where('campus', $campus)
             ->paginate(25);
@@ -433,7 +441,7 @@ class StationaryService
     {
         $user = userAuth();
 
-        $purchase = StationaryPurchase::with(['stationarySupplier'])
+        $purchase = StationaryPurchase::with(['stationarySupplier', 'stationary'])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('id', $id)
