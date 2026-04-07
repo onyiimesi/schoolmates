@@ -21,6 +21,8 @@ class StationarySaleResource extends JsonResource
             'attributes' => [
                 'class_id' => $this->class_id,
                 'student_id' => $this->student_id,
+                'stationary_id' => $this->stationary?->id,
+                'stationary_name' => $this->stationary?->name,
                 'date' => $this->date,
                 'quantity' => $this->quantity,
                 'created_at' => $this->created_at->toDateString()
