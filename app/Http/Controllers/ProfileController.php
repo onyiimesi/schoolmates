@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\StaffsResource;
 use App\Http\Resources\StudentResource;
+use App\Models\Staff;
+use App\Models\Student;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -71,39 +73,81 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
+        $imageUpload = null;
+        $signatureUpload = null;
+
         if ($request->filled('image')) {
-            $imageUpload = $this->handleImagekitUpload($request->image, $user, $user->file_id, $user->designation_id == '7' ? 'student' : 'staff');
+            $imageUpload = $this->handleImagekitUpload(
+                $request->image,
+                $user,
+                $user->file_id,
+                $user->designation_id == 7 ? 'student' : 'staff'
+            );
         }
 
-        if ($user->designation_id != '7' && $request->filled('signature')) {
-            $signatureUpload = $this->handleImagekitUpload($request->signature, $user, $user->sig_id, 'signature');
+        if ($request->filled('signature') && $user->designation_id != 7) {
+            $signatureUpload = $this->handleImagekitUpload(
+                $request->signature,
+                $user,
+                $user->sig_id,
+                'signature'
+            );
         }
 
-        $updateData = [
-            'surname' => $request->surname,
-            'firstname' => $request->firstname,
-            'middlename' => $request->middlename,
-            'username' => $request->username,
-            'image' => $imageUpload['url'] ?? $user->image,
-            'file_id' => $imageUpload['fileId'] ?? $user->file_id,
-        ];
+        $designationId = (int) ($user->designation_id ?? 0);
 
-        if ($user->designation_id != '7') {
-            $updateData['department'] = $request->department;
-            $updateData['phoneno'] = $request->phoneno;
-            $updateData['email'] = $request->email;
-            $updataData['address'] = $request->address;
+        if ($designationId === 7) {
+            // Student update
+            $updateData = [
+                'surname' => $request->surname,
+                'firstname' => $request->firstname,
+                'middlename' => $request->middlename,
+                'username' => $request->username,
+                'phone_number' => $request->phoneno,
+                'email_address' => $request->email,
+                'home_address' => $request->address,
+                'image' => $imageUpload['url'] ?? $user->image,
+                'file_id' => $imageUpload['fileId'] ?? $user->file_id,
+            ];
+
+            Student::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('username', $user->username)
+                ->update($updateData);
         } else {
-            $updateData['phone_number'] = $request->phoneno;
-            $updateData['email_address'] = $request->email;
-            $updateData['home_address'] = $request->address;
-            $updateData['signature'] = $signatureUpload['url'] ?? $user->signature;
-            $updateData['sig_id'] = $signatureUpload['fileId'] ?? $user->sig_id;
+            // Staff update
+            $updateData = [
+                'surname' => $request->surname,
+                'firstname' => $request->firstname,
+                'middlename' => $request->middlename,
+                'username' => $request->username,
+                'department' => $request->department,
+                'phoneno' => $request->phoneno,
+                'email' => $request->email,
+                'address' => $request->address,
+                'image' => $imageUpload['url'] ?? $user->image,
+                'file_id' => $imageUpload['fileId'] ?? $user->file_id,
+                'signature' => $signatureUpload['url'] ?? $user->signature,
+                'sig_id' => $signatureUpload['fileId'] ?? $user->sig_id,
+            ];
+
+            Staff::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->where('username', $user->username)
+                ->update($updateData);
         }
 
-        $user->update($updateData);
+        $updatedUser = $designationId === 7
+            ? Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('username', $user->username)
+            ->first()
+            : Staff::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('username', $user->username)
+            ->first();
 
-        return $this->success($updateData, 'Profile updated successfully');
+        return $this->success($updatedUser, 'Profile updated successfully');
     }
 
     /**
