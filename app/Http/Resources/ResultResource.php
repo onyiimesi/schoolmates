@@ -61,12 +61,12 @@ class ResultResource extends JsonResource
             'number_in_class' => $classStats['class_count'],
             'class_total' => $classStats['class_total_score'],
             'results' => $this->studentScores?->filter(fn($s) => $s->score != 0)
-            ->map(fn($s) => [
-                "subject" => $s->subject,
-                "score" => $s->score,
-                "subject_average" => $subjectAverages[$s->subject] ?? null,
-                "subject_position" => $subjectPositions[$s->subject] ?? null,
-            ])->values() ?? [],
+                ->map(fn($s) => [
+                    "subject" => $s->subject,
+                    "score" => $s->score,
+                    "subject_average" => $subjectAverages[$s->subject] ?? null,
+                    "subject_position" => $subjectPositions[$s->subject] ?? null,
+                ])->values() ?? [],
             'total_subjects' => $gpaData['total_subjects'],
             'total_score' => $gpaData['total_score'],
             'student_average' => $gpaData['student_average'],

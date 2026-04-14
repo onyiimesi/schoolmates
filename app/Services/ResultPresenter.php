@@ -16,8 +16,8 @@ class ResultPresenter
     public function getGpa(Result $result): array
     {
         $studentResults = Result::with(['studentScores' => function ($query) {
-                $query->where('score', '>', 0);
-            }])
+            $query->where('score', '>', 0);
+        }])
             ->where([
                 'sch_id' => $result->sch_id,
                 'campus' => $result->campus,
@@ -45,8 +45,8 @@ class ResultPresenter
     public function getClassStats(Result $result): array
     {
         $classResults = Result::with(['studentScores' => function ($query) {
-                $query->where('score', '>', 0);
-            }])
+            $query->where('score', '>', 0);
+        }])
             ->where('sch_id', $result->sch_id)
             ->where('campus', $result->campus)
             ->where('class_name', $result->class_name)
@@ -135,7 +135,7 @@ class ResultPresenter
     public function getSubjectAverages(Result $result): array
     {
         return StudentScore::query()
-            ->whereHas('result', fn ($q) => $q->where([
+            ->whereHas('result', fn($q) => $q->where([
                 'sch_id'     => $result->sch_id,
                 'campus'     => $result->campus,
                 'class_name' => $result->class_name,
@@ -146,7 +146,7 @@ class ResultPresenter
             ->selectRaw('subject, ROUND(AVG(score), 2) as avg_score')
             ->groupBy('subject')
             ->pluck('avg_score', 'subject')
-            ->map(fn ($v) => (float) $v)
+            ->map(fn($v) => (float) $v)
             ->toArray();
     }
 

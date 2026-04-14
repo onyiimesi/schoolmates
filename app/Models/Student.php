@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\StaffStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -96,6 +97,7 @@ class Student extends Authenticatable implements Auditable
             ->where('sch_id', $this->sch_id)
             ->where('campus', $this->campus)
             ->where('designation_id', 3)
+            ->where('status', StaffStatus::ACTIVE)
             ->first() ?? null;
     }
 
