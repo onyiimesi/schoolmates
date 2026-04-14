@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\StaffStatus;
 use App\Models\v2\LessonNote;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -121,6 +122,7 @@ class Staff extends Authenticatable implements Auditable
             ->where('sch_id', $this->sch_id)
             ->where('campus', $this->campus)
             ->where('designation_id', 3)
+            ->where('status', StaffStatus::ACTIVE)
             ->first();
 
         if (! $hos) {
