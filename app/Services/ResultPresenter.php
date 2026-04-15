@@ -192,7 +192,6 @@ class ResultPresenter
                 }
 
                 $prevScore = $entry->score;
-                logger()->info("Index: $index");
             }
 
             $positions[$subject] = $positionMap[$result->student_id] ?? null;
