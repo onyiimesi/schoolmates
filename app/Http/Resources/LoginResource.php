@@ -71,7 +71,7 @@ class LoginResource extends JsonResource
             'signature' => (string)$this->signature,
             'is_preschool' => (string)$this->is_preschool,
             'status' => (string)$this->status,
-            'subjects' => $this->subjectteacher?->flatMap(function ($item) {
+            'subjects' => $this->subjectTeachers?->flatMap(function ($item) {
                 return $item->subject;
             }),
             'plan' => (string) $getplan->plan ?? $getplan->pricing->plan,

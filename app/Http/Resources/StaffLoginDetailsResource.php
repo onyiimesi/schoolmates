@@ -25,7 +25,7 @@ class StaffLoginDetailsResource extends JsonResource
                 'pass_word' => (string)$this->pass_word,
                 'class_assigned' => (string)$this->class_assigned,
                 'teacher_type' => (string)$this->teacher_type,
-                'subjects' => $this->subjectteacher->flatMap(function($item){
+                'subjects' => $this->subjectTeachers->flatMap(function ($item) {
                     return $item->subject;
                 })
             ]

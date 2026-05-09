@@ -40,6 +40,11 @@ class ClassController extends Controller
 
         if (! $campus->is_preschool) {
             $query = ClassModel::where('sch_id', $user->sch_id)
+                ->with([
+                    'classTeacher',
+                    'subjectTeachers.staff',
+                    'subjectTeachers.subjects',
+                ])
                 ->when($user->designation_id != 6, function ($q) use ($campus) {
                     $q->where('campus', $campus->name);
                 })
@@ -57,6 +62,8 @@ class ClassController extends Controller
                     'attributes' => [
                         'campus' => (string)$class->campus,
                         'class_name' => (string)$class->name,
+                        'teachers' => [],
+                        'subjects' => [],
                     ]
                 ];
             });
