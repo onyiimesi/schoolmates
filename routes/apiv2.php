@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\v2\StaffController;
 use App\Http\Controllers\StationaryController;
 use App\Http\Controllers\v2\CbtController;
 use App\Http\Controllers\v2\CommunicationBookController;
@@ -13,9 +14,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-// Route::middleware(['throttle:apis'])->group(function () {
-// });
 Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function () {
     // CBT
     Route::prefix('cbt')
@@ -180,5 +178,13 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
                     Route::patch('/{id}/update', 'updatePurchase')->whereNumber('id');
                     Route::delete('/{id}/delete', 'deletePurchase')->whereNumber('id');
                 });
+        });
+
+    // Staff
+    Route::prefix('staff')
+        ->controller(StaffController::class)
+        ->group(function () {
+            Route::post('/', 'addStaff');
+            Route::patch('/update/{id}', 'updateStaff');
         });
 });

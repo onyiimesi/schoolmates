@@ -28,11 +28,11 @@ class AuthController extends Controller
         if ($staffGuard->attempt($request->only(['username', 'password']))) {
             $auth = Auth::guard('staffs')->user();
 
-            if(!in_array($auth->status, haystack: ['active'])) {
+            if (!in_array($auth->status, haystack: ['active'])) {
                 return $this->error(null, 'Account is inactive, contact support', 400);
             }
 
-            $user = Staff::with(['school.activeSubscription', 'school.currentAcademicPeriod', 'subjectteacher'])
+            $user = Staff::with(['school.activeSubscription', 'school.currentAcademicPeriod', 'subjectTeachers'])
                 ->where('sch_id', $auth->sch_id)
                 ->where('username', $auth->username)
                 ->first();
@@ -45,11 +45,10 @@ class AuthController extends Controller
                 'token' => $token->plainTextToken,
                 'expires_at' => $token->accessToken->expires_at
             ], 'Login successful');
-
         } elseif ($studGuard->attempt($request->only(['username', 'password']))) {
             $auth = Auth::guard('studs')->user();
 
-            if(!in_array($auth->status, haystack: ['active'])) {
+            if (!in_array($auth->status, haystack: ['active'])) {
                 return $this->error(null, 'Account is inactive, contact support', 400);
             }
 
@@ -83,7 +82,7 @@ class AuthController extends Controller
 
         return $this->success([
             'data' => $user,
-            'token' =>$user->createToken('API Token of '. $user->name)->plainTextToken
+            'token' => $user->createToken('API Token of ' . $user->name)->plainTextToken
         ]);
     }
 
@@ -108,14 +107,13 @@ class AuthController extends Controller
         if (Hash::check($request->old_password, $user->password)) {
 
             $user->update([
-              'password' => Hash::make($request->new_password),
-              'pass_word' => $request->new_password,
+                'password' => Hash::make($request->new_password),
+                'pass_word' => $request->new_password,
             ]);
 
             return $this->success(null, 'Password changed successfully');
-
         } else {
-          return $this->error(null, 'Old Password did not match', 422);
+            return $this->error(null, 'Old Password did not match', 422);
         }
     }
 }

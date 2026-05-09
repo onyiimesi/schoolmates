@@ -58,11 +58,11 @@ class GeneralService
             'session' => $period->session,
             'class_id' => $request->class_id,
             'staff_id' => $staff->id,
-            'class_name'=> $class->class_name,
+            'class_name' => $class->class_name,
             'subject' => $request->subjects,
         ];
 
-        if($staff->teacher_type == "subject teacher") {
+        if ($staff->teacher_type == "subject teacher") {
 
             $subjectTeacher = SubjectTeacher::where('staff_id', $staff->id)->first();
 
@@ -89,9 +89,9 @@ class GeneralService
 
         $data = BusRoutingResource::collection(
             BusRouting::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('student_id', $student->id)
-            ->get()
+                ->where('campus', $user->campus)
+                ->where('student_id', $student->id)
+                ->get()
         );
 
         return $this->success($data, "Your Assigned Bus");
@@ -103,8 +103,8 @@ class GeneralService
 
         $data = BusRoutingResource::collection(
             BusRouting::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->get()
+                ->where('campus', $user->campus)
+                ->get()
         );
 
         return $this->success($data, "Assigned Bus");

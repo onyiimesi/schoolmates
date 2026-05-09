@@ -96,7 +96,7 @@ class Staff extends Authenticatable implements Auditable
         return $this->hasMany(Result::class, 'teacher_id');
     }
 
-    public function subjectteacher()
+    public function subjectTeachers()
     {
         return $this->hasMany(SubjectTeacher::class, 'staff_id');
     }
@@ -160,5 +160,10 @@ class Staff extends Authenticatable implements Auditable
         }
 
         return $username;
+    }
+
+    public function fullName(): string
+    {
+        return trim("{$this->firstname} {$this->middlename} {$this->surname}");
     }
 }

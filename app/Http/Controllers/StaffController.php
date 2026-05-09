@@ -26,14 +26,16 @@ class StaffController extends Controller
         $search = request()->query('search');
 
         $staff = Staff::with([
-                'school.schoolPayment',
-                'school.pricing',
-                'designation',
-                'subjectteacher',
-            ])
+            'school.schoolPayment',
+            'school.pricing',
+            'designation',
+            'subjectTeachers',
+        ])
             ->where('sch_id', $user->sch_id)
             ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
-            ->when($search, fn($query) =>
+            ->when(
+                $search,
+                fn($query) =>
                 $query->whereAny(
                     ['firstname', 'surname', 'email', 'username', 'class_assigned'],
                     'like',
@@ -76,8 +78,6 @@ class StaffController extends Controller
             $signaturePath = uploadSignature($request->signature, 'signature', $cleanSchId);
         }
 
-        $type = !empty($request->teacher_type) ? $request->teacher_type : null;
-
         $username = Staff::generateUsername($request->firstname, $request->surname);
 
         $staff = Staff::create([
@@ -97,7 +97,7 @@ class StaffController extends Controller
             'class_assigned' => $request->class_assigned,
             'image' => $imagePath['url'] ?? null,
             'signature' => $signaturePath['url'] ?? null,
-            'teacher_type' => $type,
+            'teacher_type' => $request->teacher_type,
             'is_preschool' => $campus->is_preschool ? 'true' : 'false',
             'file_id' => $imagePath['file_id'] ?? null,
             'sig_id' => $signaturePath['file_id'] ?? null,
@@ -119,8 +119,12 @@ class StaffController extends Controller
      */
     public function show(Staff $staff)
     {
-        $staffs = new StaffsResource($staff);
-        return $this->success($staffs, 'Staff Details');
+        $staff->loadMissing([
+            'subjectTeachers.subjects',
+            'subjectTeachers.class',
+        ]);
+
+        return $this->success(new StaffsResource($staff), 'Staff Details');
     }
 
     /**
@@ -156,7 +160,7 @@ class StaffController extends Controller
             'gender' => $request->gender,
             'address' => $request->address,
             'class_assigned' => $request->class_assigned,
-            'is_preschool' => $campus->is_preschool,
+            'is_preschool' => $campus->is_preschool ? 'true' : 'false',
             'image' => $imagePath['url'] ?? ($request->image ?: $staff->image),
             'signature' => $signaturePath['url'] ?? ($request->signature ?: $staff->signature),
             'teacher_type' => $type,
