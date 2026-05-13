@@ -20,8 +20,14 @@ class StaffController extends Controller
         return $this->staffService->addStaff($request);
     }
 
-    public function updateStaff(UpdateStaffRequest $request, Staff $staff)
+    public function updateStaff(UpdateStaffRequest $request, int $id)
     {
+        $staff = Staff::find($id);
+
+        if (! $staff) {
+            return $this->error(null, "Staff not found", 404);
+        }
+
         return $this->staffService->updateStaff($request, $staff);
     }
 }

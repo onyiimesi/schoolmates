@@ -47,7 +47,7 @@ class UpdateStaffRequest extends FormRequest
                 'min:1',
                 Rule::requiredIf(fn() => $this->teacher_type === 'subject teacher'),
             ],
-            'subject_assignments.*.class_id' => ['required_with:subject_assignments', 'string', 'exists:classes,id'],
+            'subject_assignments.*.class_id' => ['required_with:subject_assignments', 'string', 'exists:class_models,id'],
             'subject_assignments.*.subjects' => ['required_with:subject_assignments', 'array', 'min:1'],
             'subject_assignments.*.subjects.*.name' => ['required', 'string', 'max:255'],
         ];
