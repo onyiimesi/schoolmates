@@ -98,8 +98,11 @@ class BroadSheetController extends Controller
                 ];
             });
         })
-            ->groupBy('subject')
-            ->map(function ($subjectScores, $subject) {
+            ->groupBy(function ($score) {
+                return strtolower($score['subject']);
+            })
+            ->map(function ($subjectScores) {
+                $subjectName = $subjectScores->first()['subject'];
 
                 // Sum all assessments
                 $assessmentScore = collect($subjectScores)
@@ -109,11 +112,10 @@ class BroadSheetController extends Controller
                 // Sum exam (endterm)
                 $examScore = collect($subjectScores)
                     ->where('result_type', 'endterm')
-                    ->filter(fn($item) => !is_null($item['score']) && $item['score'] != 0)
                     ->sum('score');
 
                 return [
-                    'subject' => $subject,
+                    'subject' => $subjectName,
                     'assessment_score' => $assessmentScore,
                     'exam_score' => $examScore,
                     'total_score' => $assessmentScore + $examScore,
