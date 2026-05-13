@@ -42,7 +42,7 @@ class BroadSheetController extends Controller
             'data' => $data,
             'teacher' => $signatures->map(function ($teacher) {
                 return [
-                    "name" => $teacher->surname . ' ' . $teacher->firstname,
+                    "name" => "{$teacher->surname} {$teacher->firstname}",
                     "signature" => $teacher->signature
                 ];
             })->toArray()
@@ -109,6 +109,7 @@ class BroadSheetController extends Controller
                 // Sum exam (endterm)
                 $examScore = collect($subjectScores)
                     ->where('result_type', 'endterm')
+                    ->filter(fn($item) => !is_null($item['score']) && $item['score'] != 0)
                     ->sum('score');
 
                 return [
