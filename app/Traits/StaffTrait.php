@@ -383,7 +383,9 @@ trait StaffTrait
             );
 
             // Sync relational rows: delete removed subjects, insert new ones
-            $existing = $subjectTeacher->subjects()->pluck('subject_name')->toArray();
+            $existing = collect($subjectTeacher->subjects()->pluck('subject_name'))
+                ->map(fn($s) => strtoupper(trim($s)))
+                ->toArray();
             $toAdd = array_diff($subjectNames, $existing);
             $toRemove = array_diff($existing, $subjectNames);
 
