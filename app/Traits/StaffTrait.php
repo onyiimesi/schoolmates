@@ -319,7 +319,7 @@ trait StaffTrait
         if ($teacherType === 'subject teacher') {
             $this->clearClassTeacherAssignment($staff);
 
-            if ($request->has('subject_assignments')) {
+            if ($request->filled('subject_assignments')) {
                 $this->syncSubjectTeacherAssignments($staff, $request->subject_assignments);
             }
         }
