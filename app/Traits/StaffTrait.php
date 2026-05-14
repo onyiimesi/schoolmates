@@ -141,7 +141,7 @@ trait StaffTrait
         }
 
         foreach ($subjectAssignments as $assignment) {
-            $classId = $assignment['class_id'];
+            $classId = (int) $assignment['class_id'];
             $class = ClassModel::find($classId);
             $className = $class?->class_name ?? $classId;
             $subjectNames = collect($assignment['subjects'])
@@ -155,7 +155,7 @@ trait StaffTrait
 
             // On update: ignore the current staff's own existing assignments
             if ($excludeStaffId) {
-                $query->where('staff_id', '!=', $excludeStaffId);
+                $query->where('staff_id', '!=', (int) $excludeStaffId);
             }
 
             $taken = $query->pluck('subject_name')->toArray();
@@ -277,6 +277,14 @@ trait StaffTrait
 
         $campus = Campus::where('name', $request->campus)->first();
 
+        if ($campus && $campus->is_preschool) {
+            $isPreschool = 'true';
+        } elseif ($campus) {
+            $isPreschool = 'false';
+        } else {
+            $isPreschool = null;
+        }
+
         $staff->update(array_filter([
             'campus' => $request->campus,
             'campus_type' => $campus->campus_type ?? null,
@@ -291,7 +299,7 @@ trait StaffTrait
             'address' => $request->address,
             'teacher_type' => $request->teacher_type,
             'class_assigned' => $this->resolveClassAssigned($request, $staff),
-            'is_preschool' => $campus->is_preschool ? 'true' : 'false',
+            'is_preschool' => $isPreschool,
             'image' => $imagePath['url'] ?? $staff->image,
             'signature' => $signaturePath['url'] ?? $staff->signature,
             'file_id' => $imagePath['file_id']  ?? $staff->file_id,
@@ -313,13 +321,17 @@ trait StaffTrait
         if ($teacherType === 'class teacher') {
             $this->clearSubjectTeacherAssignments($staff);
             $this->updateStudentTeacherInfo($staff, $request->class_assigned ?? $staff->class_assigned);
+            return;
         }
 
         // Switching TO subject teacher — clear class assignment, sync subjects
         if ($teacherType === 'subject teacher') {
-            $this->clearClassTeacherAssignment($staff);
+            // Only clear class assignment if they previously were a class teacher
+            if ($staff->getOriginal('teacher_type') === 'class teacher') {
+                $this->clearClassTeacherAssignment($staff);
+            }
 
-            if ($request->filled('subject_assignments')) {
+            if ($request->has('subject_assignments')) { // ← has() not filled()
                 $this->syncSubjectTeacherAssignments($staff, $request->subject_assignments);
             }
         }
@@ -337,7 +349,7 @@ trait StaffTrait
             ->where('campus', $staff->campus)
             ->first();
 
-        $incomingClassIds = array_column($subjectAssignments, 'class_id');
+        $incomingClassIds = array_map('intval', array_column($subjectAssignments, 'class_id'));
 
         // Remove SubjectTeacher records for classes no longer in the new list
         SubjectTeacher::where('staff_id', $staff->id)
