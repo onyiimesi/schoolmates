@@ -352,7 +352,9 @@ trait StaffTrait
         $incomingClassIds = array_map('intval', array_column($subjectAssignments, 'class_id'));
 
         // Remove SubjectTeacher records for classes no longer in the new list
-        SubjectTeacher::where('staff_id', $staff->id)
+        SubjectTeacher::where('sch_id', $staff->sch_id)
+            ->where('campus', $staff->campus)
+            ->where('staff_id', $staff->id)
             ->whereNotIn('class_id', $incomingClassIds)
             ->each(function (SubjectTeacher $record) {
                 $record->subjects()->delete(); // relational rows
@@ -371,7 +373,10 @@ trait StaffTrait
 
             // Update existing or create new SubjectTeacher record for this class
             $subjectTeacher = SubjectTeacher::updateOrCreate(
-                ['staff_id' => $staff->id, 'class_id' => $class->id],
+                [
+                    'staff_id' => $staff->id,
+                    'class_id' => $class->id
+                ],
                 [
                     'sch_id' => $staff->sch_id,
                     'campus' => $staff->campus,
@@ -398,12 +403,12 @@ trait StaffTrait
             if (!empty($toAdd)) {
                 SubjectTeacherSubject::insert(
                     collect($toAdd)->map(fn($name) => [
+                        'sch_id' => $staff->sch_id,
+                        'campus' => $staff->campus,
                         'subject_teacher_id' => $subjectTeacher->id,
                         'subject_name' => $name,
                         'staff_id' => $staff->id,
                         'class_id' => $class->id,
-                        'sch_id' => $staff->sch_id,
-                        'campus' => $staff->campus,
                         'term' => $period->term ?? null,
                         'session' => $period->session ?? null,
                         'created_at' => now(),
@@ -428,7 +433,9 @@ trait StaffTrait
 
     protected function clearSubjectTeacherAssignments(Staff $staff): void
     {
-        SubjectTeacher::where('staff_id', $staff->id)
+        SubjectTeacher::where('sch_id', $staff->sch_id)
+            ->where('campus', $staff->campus)
+            ->where('staff_id', $staff->id)
             ->each(function (SubjectTeacher $record) {
                 $record->subjects()->delete();
                 $record->delete();
