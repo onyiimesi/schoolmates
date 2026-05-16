@@ -24,7 +24,7 @@ class ClosingResumptionController extends Controller
             ->where('campus', $user->campus)
             ->first();
 
-        if(!$academic) {
+        if (!$academic) {
             return $this->error(null, 'Academic period not found', 404);
         }
 
@@ -48,20 +48,13 @@ class ClosingResumptionController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        $academic = AcademicPeriod::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->first();
-
-        if(!$academic) {
-            return $this->error(null, 'Academic period not found', 404);
-        }
 
         $clos = ClosingResumption::updateOrCreate(
             [
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
-                'term' => $academic->term,
-                'session' => $academic->session,
+                'term' => $request->term,
+                'session' => $request->session,
             ],
             [
                 'session_ends' => $request->session_ends,

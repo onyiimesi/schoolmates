@@ -4,14 +4,14 @@ namespace App\Services\ImageKit;
 
 use ImageKit\ImageKit;
 
-class ImageKitService {
+class ImageKitService
+{
     public function __construct(
         public $file,
         public $folderPath,
         public $folderName,
         public $fileId = null
-    )
-    {}
+    ) {}
 
     public function run(): array
     {
@@ -40,4 +40,3 @@ class ImageKitService {
         ];
     }
 }
-
