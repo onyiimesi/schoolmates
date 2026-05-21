@@ -185,6 +185,6 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
         ->controller(StaffController::class)
         ->group(function () {
             Route::post('/', 'addStaff');
-            Route::patch('/update/{id}', 'updateStaff');
+            Route::patch('/{id}', 'updateStaff');
         });
 });
