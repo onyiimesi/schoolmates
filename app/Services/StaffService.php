@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 class StaffService
 {
     use StaffTrait;
+    
     public function addStaff($request)
     {
         $user = userAuth();

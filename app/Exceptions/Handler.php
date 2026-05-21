@@ -63,7 +63,7 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (NotFoundHttpException $e, $request) {
             if ($request->json()) {
-                return $this->success(null, "Not Found", 404);
+                return $this->error(null, "The requested data could not be found.", 404);
             }
             throw $e;
         });
