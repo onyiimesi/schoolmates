@@ -17,11 +17,20 @@ class ClosingResumptionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $term = $request->query('term');
+        $session = $request->query('session');
+
+        if (!$term || !$session) {
+            return $this->error(null, 'Term and session are required', 422);
+        }
+
         $academic = AcademicPeriod::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
+            ->where('term', $term)
+            ->where('session', $session)
             ->first();
 
         if (!$academic) {
@@ -30,13 +39,17 @@ class ClosingResumptionController extends Controller
 
         $closingResumption = ClosingResumption::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('term', $academic->term)
-            ->where('session', $academic->session)
-            ->firstOrFail();
+            ->where('term', $term)
+            ->where('session', $session)
+            ->first();
 
-        $clos = new ClosingResumptionResource($closingResumption);
+        if (!$closingResumption) {
+            return $this->error(null, 'Closing resumption not found', 404);
+        }
 
-        return $this->success($clos, 'Closing resumption fetched successfully');
+        $closRes = new ClosingResumptionResource($closingResumption);
+
+        return $this->success($closRes, 'Closing resumption fetched successfully');
     }
 
     /**
