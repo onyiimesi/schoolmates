@@ -6,6 +6,7 @@ use App\Actions\GetCampusAction;
 use App\Http\Requests\ClassRequest;
 use App\Http\Resources\ClassResource;
 use App\Http\Resources\PreSchoolResource;
+use App\Models\AcademicPeriod;
 use App\Models\Campus;
 use App\Models\ClassModel;
 use App\Models\PreSchool;
@@ -39,11 +40,27 @@ class ClassController extends Controller
         }
 
         if (! $campus->is_preschool) {
+            $academicPeriod = AcademicPeriod::where('sch_id', $user->sch_id)
+                ->where('campus', $campus->name)
+                ->where('is_current_period', true)
+                ->first();
+
             $query = ClassModel::where('sch_id', $user->sch_id)
                 ->with([
                     'classTeacher',
+                    'subjectTeachers' => function ($q) use ($academicPeriod) {
+                        if ($academicPeriod) {
+                            $q->where('term', $academicPeriod->term)
+                            ->where('session', $academicPeriod->session);
+                        }
+                    },
                     'subjectTeachers.staff',
-                    'subjectTeachers.subjects',
+                    'subjectTeachers.subjects' => function ($q) use ($academicPeriod) {
+                        if ($academicPeriod) {
+                            $q->where('term', $academicPeriod->term)
+                            ->where('session', $academicPeriod->session);
+                        }
+                    },
                 ])
                 ->when($user->designation_id != 6, function ($q) use ($campus) {
                     $q->where('campus', $campus->name);
