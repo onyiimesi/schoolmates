@@ -360,6 +360,7 @@ trait StaffTrait
     {
         $period = AcademicPeriod::where('sch_id', $staff->sch_id)
             ->where('campus', $staff->campus)
+            ->where('is_current_period', true)
             ->first();
 
         $incomingClassIds = array_map('intval', array_column($subjectAssignments, 'class_id'));
@@ -368,9 +369,14 @@ trait StaffTrait
         SubjectTeacher::where('sch_id', $staff->sch_id)
             ->where('campus', $staff->campus)
             ->where('staff_id', $staff->id)
+            ->where('term', $period->term ?? null)
+            ->where('session', $period->session ?? null)
             ->whereNotIn('class_id', $incomingClassIds)
-            ->each(function (SubjectTeacher $record) {
-                $record->subjects()->delete(); // relational rows
+            ->each(function (SubjectTeacher $record) use ($period) {
+                $record->subjects()
+                    ->where('term', $period->term ?? null)
+                    ->where('session', $period->session ?? null)
+                    ->delete();
                 $record->delete();
             });
 
@@ -389,26 +395,32 @@ trait StaffTrait
                 [
                     'staff_id' => $staff->id,
                     'class_id' => $class->id,
+                    'term' => $period->term ?? null, 
+                    'session' => $period->session ?? null,
                 ],
                 [
                     'sch_id' => $staff->sch_id,
                     'campus' => $staff->campus,
-                    'term' => $period->term ?? null,
-                    'session' => $period->session ?? null,
                     'class_name' => $class->class_name,
                     'subject' => $subjectJson, // keep JSON in sync
                 ]
             );
 
             // Sync relational rows: delete removed subjects, insert new ones
-            $existing = collect($subjectTeacher->subjects()->pluck('subject_name'))
+            $existing = SubjectTeacherSubject::where('subject_teacher_id', $subjectTeacher->id)
+                ->where('term', $period->term ?? null)
+                ->where('session', $period->session ?? null)
+                ->pluck('subject_name')
                 ->map(fn ($s) => strtoupper(trim($s)))
                 ->toArray();
+
             $toAdd = array_diff($subjectNames, $existing);
             $toRemove = array_diff($existing, $subjectNames);
 
             if (! empty($toRemove)) {
-                $subjectTeacher->subjects()
+               SubjectTeacherSubject::where('subject_teacher_id', $subjectTeacher->id)
+                    ->where('term', $period->term ?? null)
+                    ->where('session', $period->session ?? null)
                     ->whereIn('subject_name', $toRemove)
                     ->delete();
             }
