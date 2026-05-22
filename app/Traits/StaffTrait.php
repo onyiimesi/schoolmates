@@ -17,7 +17,7 @@ trait StaffTrait
 
     protected function validatePreCreationConstraints($user, ?Campus $campus, $request)
     {
-        if (!$campus) {
+        if (! $campus) {
             return $this->error(null, 'Campus does not exist', 404);
         }
 
@@ -62,14 +62,14 @@ trait StaffTrait
             $request->subject_assignments
         );
 
-        return !empty($conflicts)
+        return ! empty($conflicts)
             ? $this->error(['conflicts' => $conflicts], 'Some subjects are already assigned.', 409)
             : null;
     }
 
     protected function performStaffCreation($request, $user, Campus $campus)
     {
-        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+        $cleanSchId = preg_replace('/[^a-zA-Z0-9]/', '', $user->sch_id);
         $imagePath = $request->image ? uploadImage($request->image, 'staff', $cleanSchId) : [];
         $signaturePath = $request->signature ? uploadSignature($request->signature, 'signature', $cleanSchId) : [];
 
@@ -137,7 +137,17 @@ trait StaffTrait
         $classIds = array_column($subjectAssignments, 'class_id');
         if (count($classIds) !== count(array_unique($classIds))) {
             $conflicts[] = 'Duplicate classes found in your subject assignments.';
+
             return $conflicts;
+        }
+
+        $academicPeriod = AcademicPeriod::where('sch_id', $schId)
+            ->where('campus', $campus)
+            ->where('is_current_period', true)
+            ->first();
+
+        if (! $academicPeriod) {
+            return ['Academic period does not exist'];
         }
 
         foreach ($subjectAssignments as $assignment) {
@@ -145,12 +155,14 @@ trait StaffTrait
             $class = ClassModel::find($classId);
             $className = $class?->class_name ?? $classId;
             $subjectNames = collect($assignment['subjects'])
-                ->map(fn($s) => strtoupper(trim($s['name'])))
+                ->map(fn ($s) => strtoupper(trim($s['name'])))
                 ->toArray();
 
             $query = SubjectTeacherSubject::where('sch_id', $schId)
                 ->where('campus', $campus)
                 ->where('class_id', $classId)
+                ->where('term', $academicPeriod->term)
+                ->where('session', $academicPeriod->session)
                 ->whereIn('subject_name', $subjectNames);
 
             // On update: ignore the current staff's own existing assignments
@@ -180,12 +192,12 @@ trait StaffTrait
         foreach ($subjectAssignments as $assignment) {
             $class = ClassModel::findOrFail($assignment['class_id']);
             $subjectNames = collect($assignment['subjects'])
-                ->map(fn($s) => strtoupper(trim($s['name'])))
+                ->map(fn ($s) => strtoupper(trim($s['name'])))
                 ->toArray();
 
             // Legacy JSON format — kept for backward compatibility
             $subjectJson = collect($subjectNames)
-                ->map(fn($name) => ['name' => $name])
+                ->map(fn ($name) => ['name' => $name])
                 ->toArray();
 
             $subjectTeacher = SubjectTeacher::create([
@@ -200,7 +212,7 @@ trait StaffTrait
             ]);
 
             // Relational rows — the flexible, queryable source of truth
-            $relationalRows = collect($subjectNames)->map(fn($name) => [
+            $relationalRows = collect($subjectNames)->map(fn ($name) => [
                 'sch_id' => $staff->sch_id,
                 'campus' => $staff->campus,
                 'term' => $period->term ?? null,
@@ -264,14 +276,14 @@ trait StaffTrait
             $staff->id // exclude current staff's own assignments
         );
 
-        return !empty($conflicts)
+        return ! empty($conflicts)
             ? $this->error(['conflicts' => $conflicts], 'Some subjects are already assigned.', 409)
             : null;
     }
 
     protected function performStaffUpdate($request, $user, Staff $staff)
     {
-        $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
+        $cleanSchId = preg_replace('/[^a-zA-Z0-9]/', '', $user->sch_id);
         $imagePath = $request->image ? uploadImage($request->image, 'staff', $cleanSchId) : null;
         $signaturePath = $request->signature ? uploadSignature($request->signature, 'signature', $cleanSchId) : null;
 
@@ -302,9 +314,9 @@ trait StaffTrait
             'is_preschool' => $isPreschool,
             'image' => $imagePath['url'] ?? $staff->image,
             'signature' => $signaturePath['url'] ?? $staff->signature,
-            'file_id' => $imagePath['file_id']  ?? $staff->file_id,
+            'file_id' => $imagePath['file_id'] ?? $staff->file_id,
             'sig_id' => $signaturePath['file_id'] ?? $staff->sig_id,
-        ], fn($value) => !is_null($value)));
+        ], fn ($value) => ! is_null($value)));
 
         $staff->refresh();
 
@@ -321,6 +333,7 @@ trait StaffTrait
         if ($teacherType === 'class teacher') {
             $this->clearSubjectTeacherAssignments($staff);
             $this->updateStudentTeacherInfo($staff, $request->class_assigned ?? $staff->class_assigned);
+
             return;
         }
 
@@ -364,24 +377,24 @@ trait StaffTrait
         foreach ($subjectAssignments as $assignment) {
             $class = ClassModel::findOrFail($assignment['class_id']);
             $subjectNames = collect($assignment['subjects'])
-                ->map(fn($s) => strtoupper(trim($s['name'])))
+                ->map(fn ($s) => strtoupper(trim($s['name'])))
                 ->toArray();
 
             $subjectJson = collect($subjectNames)
-                ->map(fn($name) => ['name' => $name])
+                ->map(fn ($name) => ['name' => $name])
                 ->toArray();
 
             // Update existing or create new SubjectTeacher record for this class
             $subjectTeacher = SubjectTeacher::updateOrCreate(
                 [
                     'staff_id' => $staff->id,
-                    'class_id' => $class->id
+                    'class_id' => $class->id,
                 ],
                 [
                     'sch_id' => $staff->sch_id,
                     'campus' => $staff->campus,
-                    'term' => $period->term    ?? null,
-                    'session' => $period->session  ?? null,
+                    'term' => $period->term ?? null,
+                    'session' => $period->session ?? null,
                     'class_name' => $class->class_name,
                     'subject' => $subjectJson, // keep JSON in sync
                 ]
@@ -389,20 +402,20 @@ trait StaffTrait
 
             // Sync relational rows: delete removed subjects, insert new ones
             $existing = collect($subjectTeacher->subjects()->pluck('subject_name'))
-                ->map(fn($s) => strtoupper(trim($s)))
+                ->map(fn ($s) => strtoupper(trim($s)))
                 ->toArray();
             $toAdd = array_diff($subjectNames, $existing);
             $toRemove = array_diff($existing, $subjectNames);
 
-            if (!empty($toRemove)) {
+            if (! empty($toRemove)) {
                 $subjectTeacher->subjects()
                     ->whereIn('subject_name', $toRemove)
                     ->delete();
             }
 
-            if (!empty($toAdd)) {
+            if (! empty($toAdd)) {
                 SubjectTeacherSubject::insert(
-                    collect($toAdd)->map(fn($name) => [
+                    collect($toAdd)->map(fn ($name) => [
                         'sch_id' => $staff->sch_id,
                         'campus' => $staff->campus,
                         'subject_teacher_id' => $subjectTeacher->id,
