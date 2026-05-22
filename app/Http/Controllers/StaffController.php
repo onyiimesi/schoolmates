@@ -6,6 +6,7 @@ use App\Enum\StaffStatus;
 use App\Http\Requests\StaffRequest;
 use App\Http\Resources\StaffsResource;
 use App\Mail\StaffWelcomeMail;
+use App\Models\AcademicPeriod;
 use App\Models\Campus;
 use App\Models\Staff;
 use App\Traits\HttpResponses;
@@ -20,17 +21,14 @@ class StaffController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = userAuth();
-        $search = request()->query('search');
+        $search = $request->query('search');
 
-        $staff = Staff::with([
-            'school.schoolPayment',
-            'school.pricing',
-            'designation',
-            'subjectTeachers',
-        ])
+        $period = $this->currentPeriod($user->sch_id, $user->campus);
+
+        $staff = Staff::with($this->staffEagerLoads($period))
             ->where('sch_id', $user->sch_id)
             ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
             ->when(
@@ -119,10 +117,12 @@ class StaffController extends Controller
      */
     public function show(Staff $staff)
     {
-        $staff->loadMissing([
-            'subjectTeachers.subjects',
-            'subjectTeachers.class',
-        ]);
+        $period = $this->currentPeriod($staff->sch_id, $staff->campus);
+
+        $staff->loadMissing(array_merge(
+            $this->staffEagerLoads($period),
+            ['subjectTeachers.class'] // show() also needs class relation
+        ));
 
         return $this->success(new StaffsResource($staff), 'Staff Details');
     }
@@ -176,5 +176,34 @@ class StaffController extends Controller
         $staff->delete();
 
         return $this->success(null, 'Deleted Successfully');
+    }
+
+    private function currentPeriod(string $schId, string $campus): ?AcademicPeriod
+    {
+        return AcademicPeriod::where('sch_id', $schId)
+            ->where('campus', $campus)
+            ->where('is_current_period', true)
+            ->first();
+    }
+
+    private function staffEagerLoads(?AcademicPeriod $period): array
+    {
+        return [
+            'school.schoolPayment',
+            'school.pricing',
+            'designation',
+            'subjectTeachers' => function ($q) use ($period) {
+                if ($period) {
+                    $q->where('term', $period->term)
+                      ->where('session', $period->session);
+                }
+            },
+            'subjectTeachers.subjects' => function ($q) use ($period) {
+                if ($period) {
+                    $q->where('term', $period->term)
+                      ->where('session', $period->session);
+                }
+            },
+        ];
     }
 }
