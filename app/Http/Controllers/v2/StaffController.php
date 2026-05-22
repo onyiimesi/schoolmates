@@ -7,7 +7,6 @@ use App\Http\Requests\v2\AddStaffRequest;
 use App\Http\Requests\v2\UpdateStaffRequest;
 use App\Models\Staff;
 use App\Services\StaffService;
-use Illuminate\Http\Request;
 
 class StaffController extends Controller
 {
@@ -25,7 +24,7 @@ class StaffController extends Controller
         $staff = Staff::find($id);
 
         if (! $staff) {
-            return $this->error(null, "Staff not found", 404);
+            return $this->error(null, 'Staff not found', 404);
         }
 
         return $this->staffService->updateStaff($request, $staff);

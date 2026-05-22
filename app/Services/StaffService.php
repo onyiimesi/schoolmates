@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class StaffService
 {
     use StaffTrait;
-    
+
     public function addStaff($request)
     {
         $user = userAuth();
@@ -23,7 +23,7 @@ class StaffService
             return $validationError;
         }
 
-        return DB::transaction(fn() => $this->performStaffCreation($request, $user, $campus));
+        return DB::transaction(fn () => $this->performStaffCreation($request, $user, $campus));
     }
 
     public function updateStaff($request, $staff)
@@ -36,6 +36,6 @@ class StaffService
             return $validationError;
         }
 
-        return DB::transaction(fn() => $this->performStaffUpdate($request, $user, $staff));
+        return DB::transaction(fn () => $this->performStaffUpdate($request, $user, $staff));
     }
 }
