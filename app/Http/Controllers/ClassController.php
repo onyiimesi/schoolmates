@@ -48,16 +48,20 @@ class ClassController extends Controller
             $query = ClassModel::where('sch_id', $user->sch_id)
                 ->with([
                     'classTeacher',
-                    'subjectTeachers' => function ($q) use ($academicPeriod) {
+                    'subjectTeachers' => function ($q) use ($academicPeriod, $user) {
                         if ($academicPeriod) {
-                            $q->where('term', $academicPeriod->term)
+                            $q->where('sch_id', $user->sch_id)
+                            ->where('campus', $user->campus)
+                            ->where('term', $academicPeriod->term)
                             ->where('session', $academicPeriod->session);
                         }
                     },
                     'subjectTeachers.staff',
-                    'subjectTeachers.subjects' => function ($q) use ($academicPeriod) {
+                    'subjectTeachers.subjects' => function ($q) use ($academicPeriod, $user) {
                         if ($academicPeriod) {
-                            $q->where('term', $academicPeriod->term)
+                            $q->where('sch_id', $user->sch_id)
+                            ->where('campus', $user->campus)
+                            ->where('term', $academicPeriod->term)
                             ->where('session', $academicPeriod->session);
                         }
                     },
