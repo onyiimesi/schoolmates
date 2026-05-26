@@ -47,7 +47,11 @@ class ClassModel extends Model implements Auditable
      */
     public function classTeacher(): HasOne
     {
+        $user = userAuth();
+
         return $this->hasOne(Staff::class, 'class_assigned', 'class_name')
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
             ->where('teacher_type', 'class teacher')
             ->where('status', StaffStatus::ACTIVE);
     }
