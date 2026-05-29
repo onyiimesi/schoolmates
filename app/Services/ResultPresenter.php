@@ -15,20 +15,7 @@ class ResultPresenter
 {
     public function getGpa(Result $result): array
     {
-        $studentResults = Result::with(['studentScores' => function ($query) {
-            $query->where('score', '>', 0);
-        }])
-            ->where([
-                'sch_id' => $result->sch_id,
-                'campus' => $result->campus,
-                'student_id' => $result->student_id,
-                'class_name' => $result->class_name,
-                'term' => $result->term,
-                'session' => $result->session,
-            ])
-            ->get();
-
-        $scores = $studentResults->flatMap->studentScores->filter(fn ($score) => $score->score > 0);
+        $scores = $result->studentScores?->filter(fn($s) => $s->score > 0) ?? collect();
         $totalScore = $scores->sum('score');
         $totalSubjects = $scores->unique('subject')->count();
         $expectedScore = $totalSubjects * 100;
@@ -50,8 +37,10 @@ class ResultPresenter
             ->where('sch_id', $result->sch_id)
             ->where('campus', $result->campus)
             ->where('class_name', $result->class_name)
+            ->where('period', $result->period)
             ->where('term', $result->term)
             ->where('session', $result->session)
+            ->where('result_type', $result->result_type)
             ->get();
 
         $studentAverages = $classResults->map(function ($r) {
@@ -136,11 +125,13 @@ class ResultPresenter
     {
         return StudentScore::query()
             ->whereHas('result', fn($q) => $q->where([
-                'sch_id'     => $result->sch_id,
-                'campus'     => $result->campus,
+                'sch_id' => $result->sch_id,
+                'campus' => $result->campus,
                 'class_name' => $result->class_name,
-                'term'       => $result->term,
-                'session'    => $result->session,
+                'term' => $result->term,
+                'session' => $result->session,
+                'period' => $result->period,
+                'result_type'=> $result->result_type,
             ]))
             ->whereNotNull('score')
             ->selectRaw('subject, ROUND(AVG(score), 2) as avg_score')
@@ -168,6 +159,7 @@ class ResultPresenter
                         'period' => PeriodicName::SECONDHALF,
                         'term' => $result->term,
                         'session' => $result->session,
+                        'result_type' => $result->result_type,
                     ]);
                 })
                 ->orderByDesc('score')
