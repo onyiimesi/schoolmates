@@ -9,15 +9,13 @@ use App\Http\Requests\GetResultRequest;
 use App\Http\Requests\MidtermRequest;
 use App\Http\Requests\ReleaseResultRequest;
 use App\Http\Requests\ResultRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Result;
-use App\Models\Staff;
-use App\Services\Cache\MemoizedCacheService;
 use App\Services\GeneralResultService;
 use App\Services\ResultService;
 use App\Traits\HttpResponses;
 use App\Traits\ResultBase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ResultController extends Controller
@@ -26,8 +24,7 @@ class ResultController extends Controller
 
     public function __construct(
         protected ResultService $resultService
-    ) {
-    }
+    ) {}
 
     public function midTerm(MidtermRequest $request)
     {
@@ -64,6 +61,7 @@ class ResultController extends Controller
                 $this->saveStudentScores($result, $request->results);
 
                 $message = $result->wasRecentlyCreated ? 'Computed Successfully' : 'Updated Successfully';
+
                 return $this->success(null, $message, $result->wasRecentlyCreated ? 201 : 200);
             });
         } catch (\Throwable $th) {
@@ -99,7 +97,7 @@ class ResultController extends Controller
         $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
         if (empty($studentIds)) {
-            return $this->error(null, "No students selected.", 400);
+            return $this->error(null, 'No students selected.', 400);
         }
 
         $clearCacheAction->handle($request, $studentIds[0], true);
@@ -113,7 +111,7 @@ class ResultController extends Controller
             ->whereIn('student_id', $studentIds)
             ->update(['status' => ResultStatus::RELEASED->value]);
 
-        return $this->success(null, "Result released");
+        return $this->success(null, 'Result released');
     }
 
     public function hold(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
@@ -122,7 +120,7 @@ class ResultController extends Controller
         $studentIds = collect($request->students)->pluck('student_id')->toArray();
 
         if (empty($studentIds)) {
-            return $this->error(null, "No students selected.", 400);
+            return $this->error(null, 'No students selected.', 400);
         }
 
         $clearCacheAction->handle($request, $studentIds[0], true);
@@ -136,7 +134,7 @@ class ResultController extends Controller
             ->whereIn('student_id', $studentIds)
             ->update(['status' => ResultStatus::WITHELD->value]);
 
-        return $this->success(null, "Result withheld");
+        return $this->success(null, 'Result withheld');
     }
 
     public function getSettings()
@@ -148,7 +146,7 @@ class ResultController extends Controller
     {
         $request->validate([
             'campus' => ['required', 'string', 'max:255'],
-            'score_option_id' => ['required', 'integer', 'exists:score_options,id']
+            'score_option_id' => ['required', 'integer', 'exists:score_options,id'],
         ]);
 
         return $this->resultService->storeSettings($request);
