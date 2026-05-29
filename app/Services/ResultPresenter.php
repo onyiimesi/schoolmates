@@ -28,7 +28,7 @@ class ResultPresenter
             ])
             ->get();
 
-        $scores = $studentResults->flatMap->studentScores;
+        $scores = $studentResults->flatMap->studentScores->filter(fn ($score) => $score->score > 0);
         $totalScore = $scores->sum('score');
         $totalSubjects = $scores->unique('subject')->count();
         $expectedScore = $totalSubjects * 100;
