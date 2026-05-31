@@ -9,6 +9,7 @@ use App\Models\Result;
 use App\Traits\HttpResponses;
 use App\Traits\ResultTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class BroadSheetController extends Controller
@@ -51,9 +52,35 @@ class BroadSheetController extends Controller
 
     private function getBroadsheetData($groupedResults)
     {
-        return $groupedResults->map(function ($studentResults, $studentId) {
+        $data = $groupedResults->map(function ($studentResults, $studentId) {
             return $this->calculateStudentSummary($studentResults, $studentId);
-        })->filter()->values()->toArray();
+        })->filter()->values();
+
+        return $this->assignPositions($data)->toArray();
+    }
+
+    private function assignPositions($data): Collection
+    {
+        $sorted = $data->sortByDesc(fn($s) => (float) $s['student_average'])->values();
+
+        $rank = 1;
+        $tieCount = 0;
+        $prevAverage = null;
+
+        return $sorted->map(function ($student) use (&$rank, &$tieCount, &$prevAverage) {
+            $average = $student['student_average']; // already a formatted string e.g. "85.50"
+
+            if ($average !== $prevAverage) {
+                $rank += $tieCount; // advance past the last tie group
+                $tieCount = 1;
+                $prevAverage = $average;
+            } else {
+                $tieCount++; // same average, widen the tie group
+            }
+
+            $student['position'] = $rank;
+            return $student;
+        });
     }
 
     private function calculateStudentSummary($studentResults, $studentId)
