@@ -156,12 +156,14 @@ class ResultPresenter
         $studentScores = $result->studentScores ?? collect();
         $positions = [];
 
+        $period = false;
+
         foreach ($studentScores as $score) {
             $subject = $score->subject;
 
             $allScores = StudentScore::with('result')
                 ->where('subject', $subject)
-                ->whereHas('result', function ($query) use ($result) {
+                ->whereHas('result', function ($query) use ($result, $period) {
                     $query->where([
                         'sch_id' => $result->sch_id,
                         'campus' => $result->campus,
@@ -169,10 +171,12 @@ class ResultPresenter
                         'term' => $result->term,
                         'session' => $result->session,
                     ])
-                    ->whereIn('period', [PeriodicName::FIRSTHALF, PeriodicName::SECONDHALF]);
+                    ->when($period, fn($q) => $q->where('period', $period));
                 })
                 ->orderByDesc('score')
-                ->get();
+                ->get()
+                ->unique(fn($entry) => $entry->result?->student_id)
+                ->values();
 
             // Compute rankings with tie handling
             $rank = 1;
@@ -180,7 +184,7 @@ class ResultPresenter
             $prevScore = null;
             $tieCount = 0;
 
-            foreach ($allScores as $index => $entry) {
+            foreach ($allScores as $entry) {
                 $entryStudentId = $entry->result?->student_id;
 
                 if ($entry->score !== $prevScore) {
