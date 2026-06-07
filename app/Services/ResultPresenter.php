@@ -156,14 +156,12 @@ class ResultPresenter
         $studentScores = $result->studentScores ?? collect();
         $positions = [];
 
-        $period = false;
-
         foreach ($studentScores as $score) {
             $subject = $score->subject;
 
             $allScores = StudentScore::with('result')
                 ->where('subject', $subject)
-                ->whereHas('result', function ($query) use ($result, $period) {
+                ->whereHas('result', function ($query) use ($result) {
                     $query->where([
                         'sch_id' => $result->sch_id,
                         'campus' => $result->campus,
@@ -171,7 +169,7 @@ class ResultPresenter
                         'term' => $result->term,
                         'session' => $result->session,
                     ])
-                    ->when($period, fn($q) => $q->where('period', PeriodicName::SECONDHALF));
+                    ->whereIn('period', [PeriodicName::FIRSTHALF, PeriodicName::SECONDHALF]);
                 })
                 ->orderByDesc('score')
                 ->get();
