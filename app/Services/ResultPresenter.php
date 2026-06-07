@@ -137,11 +137,11 @@ class ResultPresenter
     {
         return StudentScore::query()
             ->whereHas('result', fn($q) => $q->where([
-                'sch_id'     => $result->sch_id,
-                'campus'     => $result->campus,
+                'sch_id' => $result->sch_id,
+                'campus' => $result->campus,
                 'class_name' => $result->class_name,
-                'term'       => $result->term,
-                'session'    => $result->session,
+                'term' => $result->term,
+                'session' => $result->session,
             ]))
             ->whereNotNull('score')
             ->selectRaw('subject, ROUND(AVG(score), 2) as avg_score')
@@ -156,20 +156,22 @@ class ResultPresenter
         $studentScores = $result->studentScores ?? collect();
         $positions = [];
 
+        $period = false;
+
         foreach ($studentScores as $score) {
             $subject = $score->subject;
 
             $allScores = StudentScore::with('result')
                 ->where('subject', $subject)
-                ->whereHas('result', function ($query) use ($result) {
+                ->whereHas('result', function ($query) use ($result, $period) {
                     $query->where([
                         'sch_id' => $result->sch_id,
                         'campus' => $result->campus,
                         'class_name' => $result->class_name,
-                        'period' => PeriodicName::SECONDHALF,
                         'term' => $result->term,
                         'session' => $result->session,
-                    ]);
+                    ])
+                    ->when($period, fn($q) => $q->where('period', PeriodicName::SECONDHALF));
                 })
                 ->orderByDesc('score')
                 ->get();
