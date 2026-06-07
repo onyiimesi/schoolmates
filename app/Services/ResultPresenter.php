@@ -156,47 +156,53 @@ class ResultPresenter
         $studentScores = $result->studentScores ?? collect();
         $positions = [];
 
-        $period = false;
-
         foreach ($studentScores as $score) {
             $subject = $score->subject;
 
+            // Fetch scores for this subject across ALL periods (no period filter)
             $allScores = StudentScore::with('result')
                 ->where('subject', $subject)
-                ->whereHas('result', function ($query) use ($result, $period) {
+                ->whereHas('result', function ($query) use ($result) {
                     $query->where([
                         'sch_id' => $result->sch_id,
                         'campus' => $result->campus,
                         'class_name' => $result->class_name,
                         'term' => $result->term,
                         'session' => $result->session,
-                    ])
-                    ->when($period, fn($q) => $q->where('period', $period));
+                    ]);
                 })
-                ->orderByDesc('score')
-                ->get()
-                ->unique(fn($entry) => $entry->result?->student_id)
+                ->get();
+
+            // Group by student, sum their scores across all periods, sort descending
+            $studentTotals = $allScores
+                ->groupBy(fn($entry) => $entry->result?->student_id)
+                ->map(fn($entries, $studentId) => [
+                    'student_id' => $studentId,
+                    'total' => (float) $entries->sum('score'),
+                ])
+                ->sortByDesc('total')
                 ->values();
 
-            // Compute rankings with tie handling
+            // Tie-aware ranking
             $rank = 1;
             $positionMap = [];
-            $prevScore = null;
+            $prevTotal = null;
             $tieCount = 0;
 
-            foreach ($allScores as $entry) {
-                $entryStudentId = $entry->result?->student_id;
+            foreach ($studentTotals as $entry) {
+                $studentId = $entry['student_id'];
+                $total = $entry['total'];
 
-                if ($entry->score !== $prevScore) {
+                if ($total !== $prevTotal) {
                     $rank += $tieCount;
                     $tieCount = 1;
-                    $positionMap[$entryStudentId] = $rank;
+                    $positionMap[$studentId] = $rank;
                 } else {
                     $tieCount++;
-                    $positionMap[$entryStudentId] = $rank;
+                    $positionMap[$studentId] = $rank;
                 }
 
-                $prevScore = $entry->score;
+                $prevTotal = $total;
             }
 
             $positions[$subject] = $positionMap[$result->student_id] ?? null;
