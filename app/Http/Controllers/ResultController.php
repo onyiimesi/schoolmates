@@ -94,9 +94,9 @@ class ResultController extends Controller
     public function release(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
     {
         $auth = userAuth();
-        $studentIds = collect($request->students)->pluck('student_id')->toArray();
+        $studentIds = (new \Illuminate\Support\Collection($request->students))->pluck('student_id')->toArray();
 
-        if (empty($studentIds)) {
+        if (blank($studentIds)) {
             return $this->error(null, 'No students selected.', 400);
         }
 
@@ -117,9 +117,9 @@ class ResultController extends Controller
     public function hold(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
     {
         $auth = userAuth();
-        $studentIds = collect($request->students)->pluck('student_id')->toArray();
+        $studentIds = (new \Illuminate\Support\Collection($request->students))->pluck('student_id')->toArray();
 
-        if (empty($studentIds)) {
+        if (blank($studentIds)) {
             return $this->error(null, 'No students selected.', 400);
         }
 
@@ -165,11 +165,11 @@ class ResultController extends Controller
     public function saveSheetSections(Request $request)
     {
         $request->validate([
-            'campus' => 'required|string',
-            'period' => 'required|string',
-            'term' => 'required|string',
-            'sheet_ids' => 'required|array',
-            'sheet_ids.*' => 'required|integer|exists:sheets,id',
+            'campus' => ['required', 'string'],
+            'period' => ['required', 'string'],
+            'term' => ['required', 'string'],
+            'sheet_ids' => ['required', 'array'],
+            'sheet_ids.*' => ['required', 'integer', 'exists:sheets,id'],
         ]);
 
         return $this->resultService->saveSheetSections($request);

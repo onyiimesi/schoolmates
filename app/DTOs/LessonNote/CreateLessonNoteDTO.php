@@ -35,6 +35,9 @@ final readonly class CreateLessonNoteDTO
     )
     {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

@@ -42,7 +42,7 @@ class MaximumScoresController extends Controller
         $scores = MaximunScores::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)->first();
 
-        if(empty($scores)){
+        if(blank($scores)){
 
             MaximunScores::create([
                 'sch_id' => $user->sch_id,

@@ -139,7 +139,7 @@ class CampusController extends Controller
     public function uploadImage(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
 
         $path = null;
@@ -149,14 +149,14 @@ class CampusController extends Controller
             $path = $request->file('image')->store("campus/{$name}", 'public');
 
             if(App::environment(['production', 'staging'])) {
-                $res = response()->json(['image_path' => asset('public/storage/' . $path)], 200);
+                $res = new \Illuminate\Http\JsonResponse(['image_path' => asset('public/storage/' . $path)], 200);
             } else {
-                $res = response()->json(['image_path' => asset('storage/' . $path)], 200);
+                $res = new \Illuminate\Http\JsonResponse(['image_path' => asset('storage/' . $path)], 200);
             }
 
             return $res;
         }
 
-        return response()->json(['error' => 'No image uploaded'], 400);
+        return new \Illuminate\Http\JsonResponse(['error' => 'No image uploaded'], 400);
     }
 }

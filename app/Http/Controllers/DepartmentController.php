@@ -13,10 +13,10 @@ class DepartmentController extends Controller
 {
     use HttpResponses;
 
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
         $user = Auth::user();
-        $campus = request()->query('campus');
+        $campus = $request->query('campus');
 
         $depart = DepartmentResource::collection(
             Department::where('sch_id', $user->sch_id)

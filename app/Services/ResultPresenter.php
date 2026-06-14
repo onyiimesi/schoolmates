@@ -28,7 +28,7 @@ class ResultPresenter
             ])
             ->get();
 
-        $subjectScores = $result->studentScores?->filter(fn($s) => $s->score > 0) ?? collect();   
+        $subjectScores = $result->studentScores?->filter(fn($s) => $s->score > 0) ?? new \Illuminate\Support\Collection();   
         $scores = $studentResults->flatMap->studentScores;
         $totalScore = $scores->sum('score');
         $totalSubjects = $subjectScores->unique('subject')->count();
@@ -56,7 +56,7 @@ class ResultPresenter
             ->get();
 
         $studentAverages = $classResults->map(function ($r) {
-            $scores = $r->studentScores?->pluck('score') ?? collect();
+            $scores = $r->studentScores?->pluck('score') ?? new \Illuminate\Support\Collection();
             $totalSubjects = $scores->count();
             return [
                 'student_id' => $r->student_id,
@@ -148,12 +148,12 @@ class ResultPresenter
             ->groupBy('subject')
             ->pluck('avg_score', 'subject')
             ->map(fn($v) => (float) $v)
-            ->toArray();
+            ->all();
     }
 
     public function getSubjectPositions(Result $result): array
     {
-        $studentScores = $result->studentScores ?? collect();
+        $studentScores = $result->studentScores ?? new \Illuminate\Support\Collection();
         $positions = [];
 
         foreach ($studentScores as $score) {
@@ -162,7 +162,7 @@ class ResultPresenter
             // Fetch scores for this subject across ALL periods (no period filter)
             $allScores = StudentScore::with('result')
                 ->where('subject', $subject)
-                ->whereHas('result', function ($query) use ($result) {
+                ->whereHas('result', function (\Illuminate\Contracts\Database\Query\Builder $query) use ($result) {
                     $query->where([
                         'sch_id' => $result->sch_id,
                         'campus' => $result->campus,

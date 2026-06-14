@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int $id
  * @property string $sch_id
  * @property string $campus
- * @property string $campus_type
+ * @property string|null $campus_type
  * @property string $student_id
  * @property string $student_fullname
  * @property string $admission_number
@@ -19,85 +19,116 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $period
  * @property string $term
  * @property string $session
- * @property float|null $total
- * @property string|null $grade
- * @property string|null $remark
- * @property int|null $total_subject
- * @property int|null $total_student
- * @property float|null $student_average
- * @property float|null $class_average
- * @property float|null $percent_score
- * @property array|null $results
- * @property int|null $school_opened
- * @property int|null $times_present
- * @property int|null $times_absent
- * @property array|null $affective_disposition
- * @property array|null $psychomotor_skills
+ * @property string|null $school_opened
+ * @property string|null $times_present
+ * @property string|null $times_absent
  * @property string|null $teacher_comment
  * @property string|null $teacher_id
  * @property string|null $teacher_fullname
  * @property string|null $hos_comment
  * @property string|null $hos_id
  * @property string|null $hos_fullname
+ * @property string|null $total
+ * @property string|null $performance_remark
  * @property string|null $computed_midterm
  * @property string|null $computed_endterm
- * @property string $status
- * @property string $result_type
- * @property string|null $performance_remark
- * @property-read  \App\Models\StudentScore $studentScores
- * @property-read  \App\Models\Student $student
- * @property-read  \App\Models\Staff $results
+ * @property string|null $result_type Type of result, e.g., midterm, end term
+ * @property string|null $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Abacus|null $abacus
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AffectiveDisposition> $affectiveDispositions
+ * @property-read int|null $affective_dispositions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PsychomotorPerformance> $psychomotorPerformances
+ * @property-read int|null $psychomotor_performances_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PsychomotorSkill> $psychomotorskill
+ * @property-read int|null $psychomotorskill_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PupilReport> $pupilReports
+ * @property-read int|null $pupil_reports_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ResultExtraCurricular> $resultExtraCurriculars
+ * @property-read int|null $result_extra_curriculars_count
+ * @property-read \App\Models\Staff|null $results
+ * @property-read \App\Models\Student|null $student
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StudentScore> $studentScores
+ * @property-read int|null $student_scores_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereAdmissionNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereCampus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereCampusType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereClassName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereComputedEndterm($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereComputedMidterm($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereHosComment($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereHosFullname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereHosId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result wherePerformanceRemark($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result wherePeriod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereResultType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereSchId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereSchoolOpened($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereSession($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereStudentFullname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereStudentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereTeacherComment($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereTeacherFullname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereTeacherId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereTerm($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereTimesAbsent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereTimesPresent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereTotal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Result whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'sch_id',
+    'campus',
+    'campus_type',
+    'student_id',
+    'student_fullname',
+    'admission_number',
+    'class_name',
+    'period',
+    'term',
+    'session',
+    'total',
+    'grade',
+    'remark',
+    'total_subject',
+    'total_student',
+    'student_average',
+    'class_average',
+    'percent_score',
+    'results',
+    'school_opened',
+    'times_present',
+    'times_absent',
+    'affective_disposition',
+    'psychomotor_skills',
+    'teacher_comment',
+    'teacher_id',
+    'teacher_fullname',
+    'hos_comment',
+    'hos_id',
+    'hos_fullname',
+    'computed_midterm',
+    'computed_endterm',
+    'status',
+    'computed_midterm',
+    'computed_endterm',
+    'result_type',
+    'performance_remark'
+])]
 class Result extends Model implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
-
-    protected $fillable = [
-        'sch_id',
-        'campus',
-        'campus_type',
-        'student_id',
-        'student_fullname',
-        'admission_number',
-        'class_name',
-        'period',
-        'term',
-        'session',
-        'total',
-        'grade',
-        'remark',
-        'total_subject',
-        'total_student',
-        'student_average',
-        'class_average',
-        'percent_score',
-        'results',
-        'school_opened',
-        'times_present',
-        'times_absent',
-        'affective_disposition',
-        'psychomotor_skills',
-        'teacher_comment',
-        'teacher_id',
-        'teacher_fullname',
-        'hos_comment',
-        'hos_id',
-        'hos_fullname',
-        'computed_midterm',
-        'computed_endterm',
-        'status',
-        'computed_midterm',
-        'computed_endterm',
-        'result_type',
-        'performance_remark'
-    ];
-
-    protected $casts = [
-        'results' => 'array',
-        'affective_disposition' => 'array',
-        'psychomotor_skills' => 'array',
-    ];
 
     public static function createOne($staff, $data, $hos)
     {
@@ -122,7 +153,7 @@ class Result extends Model implements Auditable
         $create->teacher_fullname = $staff->surname . ' '. $staff->firstname;
         $create->hos_comment = $data->hos_comment;
         $create->hos_id = $data->hos_id;
-        $create->hos_fullname = !empty($hos) ? "{$hos->surname} {$hos->firstname}" : null;
+        $create->hos_fullname = filled($hos) ? "{$hos->surname} {$hos->firstname}" : null;
         $create->computed_endterm = 'true';
         $create->result_type = 'endterm';
         $create->status = ResultStatus::NOTRELEASED->value;
@@ -174,5 +205,13 @@ class Result extends Model implements Auditable
     public function pupilReports()
     {
         return $this->hasMany(PupilReport::class, 'result_id');
+    }
+    protected function casts(): array
+    {
+        return [
+            'results' => 'array',
+            'affective_disposition' => 'array',
+            'psychomotor_skills' => 'array',
+        ];
     }
 }

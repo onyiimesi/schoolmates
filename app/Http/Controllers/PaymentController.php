@@ -58,14 +58,14 @@ class PaymentController extends Controller
                         'amount_due' => $payment->amount_due,
                         'type' => $payment->type,
                         'status' => $payment->status,
-                        'paid_at' => Carbon::parse($payment->created_at)->format('j M Y')
+                        'paid_at' => \Illuminate\Support\Facades\Date::parse($payment->created_at)->format('j M Y')
                     ];
                 })->toArray()
             ];
         })->values()->toArray();
 
         if($data){
-            return response()->json([
+            return new \Illuminate\Http\JsonResponse([
                 'status' => "true",
                 'message' => "Payment List",
                 'data' => $data,

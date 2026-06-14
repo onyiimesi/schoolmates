@@ -163,7 +163,7 @@ trait ResultTrait
             'term' => $validated['term'],
             'session' => $validated['session'],
         ])
-            ->whereHas('student', function ($query) {
+            ->whereHas('student', function (\Illuminate\Contracts\Database\Query\Builder $query) {
                 $query->where('status', 'active');
             })
             ->with('studentScores')

@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureModels();
         $this->configureUrl();
 
-        app(SlowQueryMonitor::class)->register();
+        resolve(SlowQueryMonitor::class)->register();
 
         Result::observe(ResultObserver::class);
         StudentScore::observe(StudentScoreObserver::class);
@@ -76,5 +76,6 @@ class AppServiceProvider extends ServiceProvider
     private function configureUrl(): void
     {
         URL::formatScheme(true);
+        URL::forceHttps();
     }
 }

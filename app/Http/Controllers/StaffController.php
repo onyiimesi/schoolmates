@@ -143,7 +143,7 @@ class StaffController extends Controller
         $imagePath = uploadImage($request->image, 'staff', $cleanSchId, $staff->file_id);
         $signaturePath = uploadSignature($request->signature, 'signature', $cleanSchId, $staff->sig_id);
 
-        $type = !empty($request->teacher_type) ? $request->teacher_type : null;
+        $type = filled($request->teacher_type) ? $request->teacher_type : null;
 
         $campus = Campus::where('name', $request->campus)->first();
 

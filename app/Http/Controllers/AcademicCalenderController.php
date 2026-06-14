@@ -10,6 +10,7 @@ use App\Traits\HttpResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class AcademicCalenderController extends Controller
 {
@@ -22,7 +23,11 @@ class AcademicCalenderController extends Controller
      */
     public function index(): JsonResponse
     {
+        /**
+         * @var Staff $user
+         */
         $user = Auth::user();
+
         $data = AcademicCalenderResource::collection(
             AcademicCalender::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)->get()
@@ -31,21 +36,24 @@ class AcademicCalenderController extends Controller
         return $this->success($data, 'Academic calender list');
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function store(AcademicCalenderRequest $request): JsonResponse
     {
         $request->validated($request->all());
 
+        /**
+         * @var Staff $user
+         */
         $user = Auth::user();
-        $period = AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)->first();
 
+        $period = AcademicPeriod::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->first();
+
+        if (! $period instanceof AcademicPeriod) {
+            return $this->error(null, 'Academic period not found', 404);
+        }
+
+        $paths = null;
         if($request->file){
             $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
@@ -53,7 +61,7 @@ class AcademicCalenderController extends Controller
             $baseFolder = 'calender';
             $userFolder = $cleanSchId;
             $folderPath = public_path($baseFolder . '/' . $userFolder);
-            $folderName = env('CALENDAR_FOLDER') . '/' . $cleanSchId;
+            $folderName = config('services.calender_folder') . '/' . $cleanSchId;
             $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
@@ -86,28 +94,6 @@ class AcademicCalenderController extends Controller
         ]);
 
         return $this->success($data, 'Calender uploaded successfully', 201);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
     }
 
     /**

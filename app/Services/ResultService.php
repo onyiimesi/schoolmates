@@ -37,7 +37,7 @@ class ResultService
 
         $segments = array_map('trim', explode('-', $request->value));
 
-        $allNumeric = collect($segments)->every(fn($part) => is_numeric($part));
+        $allNumeric = (new \Illuminate\Support\Collection($segments))->every(fn($part) => is_numeric($part));
 
         if (!$allNumeric) {
             return $this->error(null, 'All score segments must be numeric', 422);
@@ -73,10 +73,10 @@ class ResultService
         return $this->success(null, $msg);
     }
 
-    public function getSchoolScoreSettings()
+    public function getSchoolScoreSettings(\Illuminate\Http\Request $request)
     {
-        $sch_id = request()->query('sch_id');
-        $campus = request()->query('campus');
+        $sch_id = $request->query('sch_id');
+        $campus = $request->query('campus');
 
         if (!$sch_id || !$campus) {
             return $this->error(null, 'school id and campus are required', 422);
@@ -135,12 +135,12 @@ class ResultService
         return $this->success(null, 'Sheet sections saved successfully');
     }
 
-    public function getSchoolSheetSettings()
+    public function getSchoolSheetSettings(\Illuminate\Http\Request $request)
     {
-        $sch_id = request()->query('sch_id');
-        $campus = request()->query('campus');
-        $period = request()->query('period');
-        $term = request()->query('term');
+        $sch_id = $request->query('sch_id');
+        $campus = $request->query('campus');
+        $period = $request->query('period');
+        $term = $request->query('term');
 
         $period = $period ? strtolower(str_replace(' ', '-', $period)) : null;
         $term = $term ? strtolower(str_replace(' ', '-', $term)) : null;

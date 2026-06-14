@@ -92,9 +92,9 @@ class GeneralController extends Controller
         return $this->success(null, 'Account Disabled Successfully');
     }
 
-    public function getAnnouncements()
+    public function getAnnouncements(\Illuminate\Http\Request $request)
     {
-        $schoolId = request()->query('sch_id');
+        $schoolId = $request->query('sch_id');
 
         if (! $schoolId) {
             return $this->error(null, 'School ID is required', 400);

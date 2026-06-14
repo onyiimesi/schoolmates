@@ -24,9 +24,9 @@ class LessonNoteResource extends JsonResource
                 'session' => (string)$this->session,
                 'staff_id' => (int)$this->staff_id,
                 'class_id' => (int)$this->class_id,
-                'class_name' => (string) optional($this->class)->class_name,
+                'class_name' => (string) $this->class?->class_name,
                 'subject_id' => (int)$this->subject_id,
-                'subject' => (string) optional($this->subject)->subject,
+                'subject' => (string) $this->subject?->subject,
                 'topic' => (string)$this->topic,
                 'description' => (string)$this->description,
                 'file' => (string)$this->file,
@@ -43,8 +43,8 @@ class LessonNoteResource extends JsonResource
                 'teaching_aid' => (string)$this->teaching_aid,
                 'week' => (int)$this->week,
                 'status' => (string)$this->status,
-                'date_submitted' => $this->date_submitted ? Carbon::parse($this->date_submitted)->format('d M Y, h:i A') : null,
-                'date_approved' => $this->date_approved ? Carbon::parse($this->date_approved)->format('d M Y, h:i A') : null,
+                'date_submitted' => $this->date_submitted ? \Illuminate\Support\Facades\Date::parse($this->date_submitted)->format('d M Y, h:i A') : null,
+                'date_approved' => $this->date_approved ? \Illuminate\Support\Facades\Date::parse($this->date_approved)->format('d M Y, h:i A') : null,
             ]
         ];
     }

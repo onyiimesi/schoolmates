@@ -31,11 +31,11 @@ class GpaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'min_mark' => 'required',
-            'max_mark' => 'required',
-            'remark' => 'required|string|max:40',
-            'grade_point' => 'required',
-            'key_range' => 'required|string',
+            'min_mark' => ['required'],
+            'max_mark' => ['required'],
+            'remark' => ['required', 'string', 'max:40'],
+            'grade_point' => ['required'],
+            'key_range' => ['required', 'string'],
         ]);
 
         $user = userAuth();

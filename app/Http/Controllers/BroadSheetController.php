@@ -36,7 +36,7 @@ class BroadSheetController extends Controller
 
         $data = $this->getBroadsheetData($groupedResults);
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'status' => true,
             'message' => "Broadsheet",
             'class_name' => $request->class_name,
@@ -132,12 +132,12 @@ class BroadSheetController extends Controller
                 $subjectName = $subjectScores->first()['subject'];
 
                 // Sum all assessments
-                $assessmentScore = collect($subjectScores)
+                $assessmentScore = (new \Illuminate\Support\Collection($subjectScores))
                     ->whereIn('result_type', ['first_assesment', 'second_assesment', 'third_assesment', 'midterm'])
                     ->sum('score');
 
                 // Sum exam (endterm)
-                $examScore = collect($subjectScores)
+                $examScore = (new \Illuminate\Support\Collection($subjectScores))
                     ->where('result_type', 'endterm')
                     ->sum('score');
 

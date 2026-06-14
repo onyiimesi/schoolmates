@@ -76,7 +76,7 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         if ($exception instanceof ThrottleRequestsException) {
-            return response()->json(['error' => "Too many attempts. Wait for a while and try again."], 429);
+            return new \Illuminate\Http\JsonResponse(['error' => "Too many attempts. Wait for a while and try again."], 429);
         }
 
         return parent::render($request, $exception);

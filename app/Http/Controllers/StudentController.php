@@ -75,7 +75,7 @@ class StudentController extends Controller
         }
 
         if (! $school->auto_generate) {
-            $request->validate([
+            $request->validateResolved([
                 'admission_number' => ['required', 'string', 'max:255', Rule::unique('students', 'admission_number')],
             ]);
         }

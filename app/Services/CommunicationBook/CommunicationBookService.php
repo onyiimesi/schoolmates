@@ -43,7 +43,7 @@ class CommunicationBookService extends Controller
 
                 $dataFile = null;
 
-                if (!empty($request->file)) {
+                if (filled($request->file)) {
                     $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
                     $dataFile = (new UploadService($request->file, 'communicationbook', $cleanSchId))->run();
                 }
@@ -99,7 +99,7 @@ class CommunicationBookService extends Controller
             ->when($targetUserId, function ($query, $userId) {
                 $query->where(function ($q) use ($userId) {
                     $q->where('sender_id', $userId)
-                        ->orWhereHas('messages', function ($q2) use ($userId) {
+                        ->orWhereHas('messages', function (\Illuminate\Contracts\Database\Query\Builder $q2) use ($userId) {
                             $q2->where('receiver_id', $userId);
                         });
                 });
@@ -194,7 +194,7 @@ class CommunicationBookService extends Controller
             ->when($targetUserId, function ($query, $userId) {
                 $query->where(function ($q) use ($userId) {
                     $q->where('sender_id', $userId)
-                        ->orWhereHas('messages', function ($q2) use ($userId) {
+                        ->orWhereHas('messages', function (\Illuminate\Contracts\Database\Query\Builder $q2) use ($userId) {
                             $q2->where('receiver_id', $userId);
                         });
                 });
@@ -212,7 +212,7 @@ class CommunicationBookService extends Controller
         $user = $this->auth();
 
         try {
-            if (!empty($request->file)) {
+            if (filled($request->file)) {
                 $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
                 $dataFile = (new UploadService($request->file, 'communicationbook', $cleanSchId))->run();
             } else {

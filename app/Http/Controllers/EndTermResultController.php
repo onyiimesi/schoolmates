@@ -22,9 +22,9 @@ class EndTermResultController extends Controller
     public function endterm(Request $request)
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'term' => 'required|string',
-            'session' => 'required|string',
+            'student_id' => ['required', 'exists:students,id'],
+            'term' => ['required', 'string'],
+            'session' => ['required', 'string'],
         ]);
 
         $user = Auth::user();
@@ -58,9 +58,9 @@ class EndTermResultController extends Controller
     public function staffEndTerm(Request $request)
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'term' => 'required|string',
-            'session' => 'required|string',
+            'student_id' => ['required', 'exists:students,id'],
+            'term' => ['required', 'string'],
+            'session' => ['required', 'string'],
         ]);
 
         $user = Auth::user();
@@ -104,7 +104,7 @@ class EndTermResultController extends Controller
         $classAverage = $this->calculateClassAverage($totalStudentsData['totalStudents'], $totalStudentsData['totalStudentsAverage']);
         $this->finalizeSubjectData($subjects, $classAverage, $user, $request, $student);
 
-        $resourceCollection = CummulativeScoreResource::collection(collect(array_values($subjects)));
+        $resourceCollection = CummulativeScoreResource::collection(new \Illuminate\Support\Collection(array_values($subjects)));
 
         return [
             'status' => 'true',
@@ -139,10 +139,10 @@ class EndTermResultController extends Controller
     public function studentaverage(Request $request): array
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'term' => 'required|string',
-            'session' => 'required|string',
-            'class_name' => 'required|string',
+            'student_id' => ['required', 'exists:students,id'],
+            'term' => ['required', 'string'],
+            'session' => ['required', 'string'],
+            'class_name' => ['required', 'string'],
         ]);
 
         $user = Auth::user();

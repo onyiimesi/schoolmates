@@ -20,7 +20,7 @@ class OutstandingController extends Controller
         $total_amount = 0;
 
         foreach ($invoice_fee as $fees) {
-            $total_amount += collect($fees)->sum('discount_amount');
+            $total_amount += (new \Illuminate\Support\Collection($fees))->sum('discount_amount');
         }
         
         $amount_paid = Payment::where('sch_id', $user->sch_id)

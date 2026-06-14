@@ -132,7 +132,7 @@ class ClassController extends Controller
     public function update(Request $request, ClassModel $class)
     {
         $validated = $request->validate([
-            'class_name' => 'required|string|max:255',
+            'class_name' => ['required', 'string', 'max:255'],
         ]);
 
         $user = Auth::user();

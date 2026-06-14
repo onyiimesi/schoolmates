@@ -48,7 +48,7 @@ class ReportsController extends Controller
         ->where('campus', $user->campus)
         ->where('report_type', $request->report_type)->first();
 
-        if(empty($report)){
+        if(blank($report)){
             $reports = Report::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -62,7 +62,7 @@ class ReportsController extends Controller
                 'data' => $reports
             ];
 
-        }else if(!empty($report)){
+        }else if(filled($report)){
 
             $report->update([
                 'attribute' => $request->attribute

@@ -22,7 +22,7 @@ class StaffsResource extends JsonResource
                 'sch_id' => (string) $this->sch_id,
                 'campus' => (string) $this->campus,
                 'designation_id' => (string) $this->designation_id,
-                'designation' => (string) optional($this->designation)->designation_name,
+                'designation' => (string) $this->designation?->designation_name,
                 'department' => (string) $this->department,
                 'surname' => (string) $this->surname,
                 'firstname' => (string) $this->firstname,
@@ -92,11 +92,11 @@ class StaffsResource extends JsonResource
         }
 
         // Legacy JSON fallback
-        return collect($subjectTeacher->subject ?? [])
+        return (new \Illuminate\Support\Collection($subjectTeacher->subject ?? []))
             ->map(fn($subject) => [
                 'id' => null,
                 'name' => $subject['name'],
             ])
-            ->toArray();
+            ->all();
     }
 }

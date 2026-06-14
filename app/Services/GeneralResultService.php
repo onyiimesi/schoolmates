@@ -74,7 +74,7 @@ class GeneralResultService
                 'session' => $params['session'],
                 'result_type' => $params['result_type'],
             ])
-            ->when(!empty($params['status']), function ($query) use ($params) {
+            ->unless(blank($params['status']), function ($query) use ($params) {
                 $query->where('status', $params['status']);
             })
             ->get();

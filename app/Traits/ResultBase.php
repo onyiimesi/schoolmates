@@ -78,7 +78,7 @@ trait ResultBase
         }
 
         // Only check HOS if no comment was provided directly
-        if (empty($request->hos_comment)) {
+        if (blank($request->hos_comment)) {
             $hos = Staff::find($request->hos_id);
             if (!$hos) {
                 return $this->error(null, "HOS needs to add comments", 400);
@@ -181,7 +181,7 @@ trait ResultBase
             $this->saveExtraCurricularActivities($result, $request->extra_curricular_activities);
         }
 
-        if (!empty($request->abacus['name'])) {
+        if (filled($request->abacus['name'])) {
             $this->saveAbacus($result, $request->abacus);
         }
 

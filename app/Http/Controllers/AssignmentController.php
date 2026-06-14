@@ -25,18 +25,18 @@ class AssignmentController extends Controller
     public function theory(Request $request): JsonResponse
     {
         $request->validate([
-            '*.period' => 'required|string',
-            '*.term' => 'required|string',
-            '*.session' => 'required|string',
-            '*.question_type' => 'required|string',
-            '*.question' => 'required|string',
-            '*.question_number' => 'required|integer',
-            '*.answer' => 'required|string',
-            '*.subject_id' => 'required|integer',
-            '*.total_question' => 'required|integer',
-            '*.question_mark' => 'required|integer',
-            '*.total_mark' => 'required|integer',
-            '*.week' => 'required|string'
+            '*.period' => ['required', 'string'],
+            '*.term' => ['required', 'string'],
+            '*.session' => ['required', 'string'],
+            '*.question_type' => ['required', 'string'],
+            '*.question' => ['required', 'string'],
+            '*.question_number' => ['required', 'integer'],
+            '*.answer' => ['required', 'string'],
+            '*.subject_id' => ['required', 'integer'],
+            '*.total_question' => ['required', 'integer'],
+            '*.question_mark' => ['required', 'integer'],
+            '*.total_mark' => ['required', 'integer'],
+            '*.week' => ['required', 'string']
         ]);
 
         return $this->assignmentService->theory($request);

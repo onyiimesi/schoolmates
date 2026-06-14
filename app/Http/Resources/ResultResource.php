@@ -12,7 +12,7 @@ class ResultResource extends JsonResource
     public function __construct($resource)
     {
         parent::__construct($resource);
-        $this->presenter = app(ResultPresenter::class);
+        $this->presenter = resolve(ResultPresenter::class);
     }
 
     public function toArray($request)
@@ -97,11 +97,11 @@ class ResultResource extends JsonResource
     private function meta($staff, $hods, $dos): array
     {
         return [
-            'teachers' => collect($staff)->filter(fn($t) => is_object($t))->map(fn($t) => [
+            'teachers' => (new \Illuminate\Support\Collection($staff))->filter(fn($t) => is_object($t))->map(fn($t) => [
                 "name" => "$t->surname $t->firstname",
                 "signature" => $t->signature
             ])->values(),
-            'hos' => collect($hods)->map(fn($h) => ["name" => "$h->surname $h->firstname", "signature" => $h->signature])->values() ?? [],
+            'hos' => (new \Illuminate\Support\Collection($hods))->map(fn($h) => ["name" => "$h->surname $h->firstname", "signature" => $h->signature])->values() ?? [],
             'dos' => $dos,
             'status' => (string)$this->status,
         ];

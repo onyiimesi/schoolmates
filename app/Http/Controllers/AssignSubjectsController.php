@@ -17,8 +17,8 @@ class AssignSubjectsController extends Controller
     public function assign(Request $request)
     {
         $request->validate([
-            'class_id' => 'required|integer|exists:class_models,id',
-            'subjects' => 'required|array',
+            'class_id' => ['required', 'integer', 'exists:class_models,id'],
+            'subjects' => ['required', 'array'],
         ]);
 
         $user = Auth::user();
@@ -68,7 +68,7 @@ class AssignSubjectsController extends Controller
 
     protected function getSubjectsToDelete($existingSubjects, $subjectsInPayload)
     {
-        $subjectNamesInPayload = collect($subjectsInPayload)->pluck('name');
+        $subjectNamesInPayload = (new \Illuminate\Support\Collection($subjectsInPayload))->pluck('name');
         return $existingSubjects->diff($subjectNamesInPayload);
     }
 

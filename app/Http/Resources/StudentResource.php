@@ -16,7 +16,7 @@ class StudentResource extends JsonResource
     public function toArray($request)
     {
         try {
-            $age = Carbon::parse($this->dob)->age;
+            $age = \Illuminate\Support\Facades\Date::parse($this->dob)->age;
         } catch (\Exception $e) {
             $age = null;
         }

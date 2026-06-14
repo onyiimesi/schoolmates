@@ -28,7 +28,7 @@ class CommunicationBookReplyResource extends JsonResource
                 'message' => (string)$this->communicationBook->message,
                 'pinned' => (string)$this->communicationBook->pinned,
                 'attachment' => (string)$this->communicationBook->file,
-                'date' => Carbon::parse($this->communicationBook->created_at)->format('d M Y h:i A')
+                'date' => \Illuminate\Support\Facades\Date::parse($this->communicationBook->created_at)->format('d M Y h:i A')
             ],
             'id' => $this->id,
             'communication_book_id' => $this->communication_book_id,
@@ -52,7 +52,7 @@ class CommunicationBookReplyResource extends JsonResource
                 'email' => $this->receiver?->email_address,
                 'designation' => (int)$this->receiver?->designation_id,
             ],
-            'date' => Carbon::parse($this->created_at)->format('d M Y h:i A'),
+            'date' => \Illuminate\Support\Facades\Date::parse($this->created_at)->format('d M Y h:i A'),
         ];
     }
 

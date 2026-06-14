@@ -22,19 +22,19 @@ class CommunicationBookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'period' => 'required|string',
-            'term' => 'required|string',
-            'session' => 'required|string',
-            'class_id' => 'required|integer|exists:class_models,id',
+            'period' => ['required', 'string'],
+            'term' => ['required', 'string'],
+            'session' => ['required', 'string'],
+            'class_id' => ['required', 'integer', 'exists:class_models,id'],
             'sender_id' => 'required|integer|exists:'. $this->getSenderTableName() .',id',
-            'sender_type' => 'required|string|in:staff,student',
-            'recipients' => 'required|array',
-            'recipients.*.recipient_id' => 'required|integer'
+            'sender_type' => ['required', 'string', 'in:staff,student'],
+            'recipients' => ['required', 'array'],
+            'recipients.*.recipient_id' => ['required', 'integer']
         ];
     }
 
-    private function getSenderTableName()
+    private function getSenderTableName(\Illuminate\Http\Request $request)
     {
-        return request('sender_type') === 'staff' ? 'staff' : 'students';
+        return $request->input('sender_type') === 'staff' ? 'staff' : 'students';
     }
 }
