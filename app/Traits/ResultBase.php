@@ -114,7 +114,18 @@ trait ResultBase
 
     protected function saveStudentScores($result, $scores)
     {
-        $result->studentScores()->delete();
+        $incomingSubjects = collect($scores)
+            ->pluck('subject')
+            ->filter()
+            ->values()
+            ->toArray();
+
+        if (!empty($incomingSubjects)) {
+            $result->studentScores()
+                ->whereIn('subject', $incomingSubjects)
+                ->delete();
+        }
+
         $result->studentScores()->createMany($scores);
     }
 
