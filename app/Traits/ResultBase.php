@@ -7,6 +7,7 @@ use App\Enum\ResultStatus;
 use App\Models\Result;
 use App\Models\Staff;
 use App\Services\GeneralResultService;
+use Illuminate\Http\Request;
 
 trait ResultBase
 {
@@ -129,7 +130,7 @@ trait ResultBase
         $result->studentScores()->createMany($scores);
     }
 
-    protected function handleExistingResult($request, $teacher, $hosId, $getsecondresult)
+    protected function handleExistingResult(Request $request, Staff $teacher, Staff $hos, Result $getsecondresult)
     {
         if ($teacher->teacher_type === "subject teacher") {
             $this->updateEndTermResult($getsecondresult, $request);
@@ -137,19 +138,19 @@ trait ResultBase
         }
 
         if ($teacher->teacher_type === "class teacher") {
-            $hosFullName = $hosId ? "{$hosId->surname} {$hosId->firstname}" : null;
+            $hosFullName = $hos ? "{$hos->surname} {$hos->firstname}" : null;
 
             $this->updateEndTermResult($getsecondresult, $request, [
-                'school_opened' => $request->school_opened,
-                'times_present' => $request->times_present,
-                'times_absent' => $request->school_opened - $request->times_present,
-                'teacher_comment' => $request->teacher_comment,
-                'performance_remark' => $request->performance_remark,
-                'teacher_id' => $request->teacher_id,
+                'school_opened' => $request->school_opened ?? $getsecondresult->school_opened,
+                'times_present' => $request->times_present ?? $getsecondresult->times_present,
+                'times_absent' => ($request->school_opened ?? $getsecondresult->school_opened) - ($request->times_present ?? $getsecondresult->times_present),
+                'teacher_comment' => $request->teacher_comment ?? $getsecondresult->teacher_comment,
+                'performance_remark' => $request->performance_remark ?? $getsecondresult->performance_remark,
+                'teacher_id' => $request->teacher_id ?? $getsecondresult->teacher_id,
                 'teacher_fullname' => "{$teacher->surname} {$teacher->firstname}",
-                'hos_comment' => $request->hos_comment,
-                'hos_id' => $request->hos_id,
-                'hos_fullname' => $hosFullName,
+                'hos_comment' => $request->hos_comment ?? $getsecondresult->hos_comment,
+                'hos_id' => $request->hos_id ?? $getsecondresult->hos_id,
+                'hos_fullname' => $hosFullName ?? $getsecondresult->hos_fullname,
                 'computed_endterm' => 'true',
                 'status' => ResultStatus::NOTRELEASED->value,
             ]);
@@ -160,7 +161,7 @@ trait ResultBase
         return $this->success(null, 'Updated Successfully');
     }
 
-    protected function updateEndTermResult($result, $request, $additionalFields = [])
+    protected function updateEndTermResult(Result $result, Request $request, array $additionalFields = [])
     {
         $fields = array_merge([
             'student_id' => $request->student_id,
@@ -176,7 +177,7 @@ trait ResultBase
         $result->update($fields);
     }
 
-    protected function saveClassTeacherData($result, $request)
+    protected function saveClassTeacherData(Result $result, Request $request)
     {
         $this->saveStudentScores($result, $request->results);
 

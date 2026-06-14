@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\ClearCacheAction;
 use App\Enum\PeriodicName;
 use App\Enum\ResultStatus;
+use App\Enum\StaffStatus;
 use App\Http\Requests\GetResultRequest;
 use App\Http\Requests\MidtermRequest;
 use App\Http\Requests\ReleaseResultRequest;
@@ -17,6 +18,7 @@ use App\Traits\ResultBase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Staff;
 
 class ResultController extends Controller
 {
@@ -90,11 +92,19 @@ class ResultController extends Controller
 
     public function endTerm(ResultRequest $request)
     {
-        $hos = null;
+        /** @var Staff */
         $teacher = Auth::user();
 
         if ($validate = $this->validateRequest($request)) {
             return $validate;
+        }
+
+        $hos = Staff::where('id', $request->hos_id)
+            ->where('status', StaffStatus::ACTIVE)
+            ->first();
+
+        if (! $hos) {
+            return $this->error(null, "HOS not found", 400);
         }
 
         try {
