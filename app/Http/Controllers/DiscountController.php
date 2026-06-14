@@ -6,14 +6,21 @@ use App\Models\Discounts;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class DiscountController extends Controller
 {
-    public function discount(){
+    /**
+     * @return array<string, mixed>
+     */
+    public function discount(): array
+    {
+        /** @var Staff $user */
         $user = Auth::user();
 
-        $discount_amount = Invoice::where('sch_id', $user->sch_id)
-        ->sum('discount_amount');
+        $discount_amount = Invoice::query()
+            ->where('sch_id', $user->sch_id)
+            ->sum('discount_amount');
 
         return [
             'status' => 'true',
@@ -22,12 +29,16 @@ class DiscountController extends Controller
         ];
     }
 
-    public function setupDiscount(Request $request){
-
+    /**
+     * @return array<string, mixed>
+     */
+    public function setupDiscount(Request $request): array
+    {
         $request->validate([
             'value' => ['required']
         ]);
 
+        /** @var Staff $user */
         $user = Auth::user();
 
         $dis = Discounts::create([

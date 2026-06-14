@@ -370,7 +370,7 @@ class CbtService {
         ->where('subject_id', $request->subject_id)
         ->get();
 
-        if(empty($data)){
+        if(blank($data)){
             return $this->error(null, "Not found!", 404);
         }
 

@@ -8,17 +8,22 @@ use App\Models\AcademicPeriod;
 use App\Models\Fee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\Response;
 
 class FeeController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function index()
+    public function index(): array
     {
+        /** @var Staff */
         $user = Auth::user();
+
         $fee = FeeResource::collection(
             Fee::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
@@ -36,17 +41,26 @@ class FeeController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function store(FeeRequest $request)
+    public function store(FeeRequest $request): array
     {
         $request->validated($request->all());
 
+        /** @var Staff */
         $user = Auth::user();
+
         $period = AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->first();
+            ->where('campus', $user->campus)
+            ->first();
+
+        if (! $period) {
+            return [
+                'status' => 'false',
+                'message' => 'Academic Period Not Found',
+                'data' => null
+            ];
+        }
 
         $fees = Fee::create([
             'sch_id' => $user->sch_id,
@@ -70,9 +84,8 @@ class FeeController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): void
     {
         //
     }
@@ -82,29 +95,22 @@ class FeeController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function update(Request $request, Fee $fee)
+    public function update(Request $request, Fee $fee): array
     {
         $fee->update($request->all());
 
-        $feess = new FeeResource($fee);
+        $data = new FeeResource($fee);
 
         return [
             "status" => 'true',
             "message" => 'Updated Successfully',
-            "data" => $feess
+            "data" => $data
         ];
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Fee $fee)
+    public function destroy(Fee $fee): Response|ResponseFactory
     {
         $fee->delete();
 

@@ -7,13 +7,17 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
+use App\Models\Student;
 
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function auth()
+    public function auth(): Staff|Student
     {
-        return Auth::user();
+        /** @var Staff|Student $user */
+        $user = Auth::user();
+        return $user;
     }
 }

@@ -8,6 +8,7 @@ use App\Traits\HttpResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class AccountBalanceController extends Controller
 {
@@ -15,6 +16,7 @@ class AccountBalanceController extends Controller
 
     public function account(): JsonResponse
     {
+        /** @var Staff $user */
         $user = Auth::user();
 
         $payment = Payment::where('sch_id', $user->sch_id)

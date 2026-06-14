@@ -8,8 +8,11 @@ use OwenIt\Auditing\Models\Audit;
 
 class AuditLogController extends Controller
 {
-    public function getAudit(){
-
+    /**
+     * @return array<string, mixed>
+     */
+    public function getAudit(): array
+    {
         $article = AuditLogResource::collection(Audit::get());
 
         return [
@@ -17,6 +20,5 @@ class AuditLogController extends Controller
             'message' => 'Audits',
             'data' => $article
         ];
-
     }
 }

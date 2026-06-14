@@ -26,7 +26,7 @@ class AcademicCalenderRequest extends FormRequest
         return [
             'title' => ['required', 'string',],
             'description' => ['required', 'string', 'max:255'],
-            'file' => ['required'],
+            'file' => ['required', 'string'],
         ];
     }
 }

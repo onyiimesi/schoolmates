@@ -27,7 +27,7 @@ class PreSchoolResultController extends Controller
         $hosId = $this->getHOS($teacher);
         $teacherDetails = $this->getTeacherDetails($request->teacher_id);
 
-        if (empty($existingResult)) {
+        if (blank($existingResult)) {
             $resultData = $this->prepareResultData($teacher, $request, $hosId, $teacherDetails);
             $computedResult = PreSchoolResult::create($resultData);
 

@@ -48,7 +48,7 @@ class SkillsController extends Controller
         ->where('campus', $user->campus)
         ->where('skill_type', $request->skill_type)->first();
 
-        if(empty($skill)){
+        if(blank($skill)){
             $skills = Skills::create([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -62,7 +62,7 @@ class SkillsController extends Controller
                 'data' => $skills
             ];
 
-        }else if(!empty($skill)){
+        }else if(filled($skill)){
 
             $skill->update([
                 'attribute' => $request->attribute

@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Services\ImageKit\ImageKitService;
 use Illuminate\Http\UploadedFile;
+use App\Models\Staff;
+use App\Models\Student;
+use Illuminate\Contracts\Mail\Mailable;
 
 if (!function_exists('defer_email')) {
-    function defer_email($email, $action)
+    function defer_email(string $email, Mailable $action): void
     {
         defer(function () use ($email, $action) {
             Mail::to($email)->send($action);
@@ -20,14 +23,14 @@ if (!function_exists('defer_email')) {
 }
 
 if (!function_exists('userAuth')) {
-    function userAuth()
+    function userAuth(): Staff|Student
     {
         return Auth::user();
     }
 }
 
 if (!function_exists('getLocation')) {
-    function getLocation($lat, $lon)
+    function getLocation(string $lat, string $lon): string
     {
         $client = new Client();
 
@@ -43,7 +46,7 @@ if (!function_exists('getLocation')) {
 }
 
 if (!function_exists('getImageKit')) {
-    function getImageKit()
+    function getImageKit(): ImageKit
     {
         return new ImageKit(
             config('services.imagekit.public_key'),
@@ -55,7 +58,7 @@ if (!function_exists('getImageKit')) {
 
 
 if (!function_exists('isDataImage')) {
-    function isDataImage($payload): bool
+    function isDataImage(string $payload): bool
     {
         return is_string($payload) && Str::startsWith($payload, 'data:image');
     }
@@ -103,7 +106,7 @@ if (!function_exists('parseDataImage')) {
 }
 
 if (!function_exists('uploadImage')) {
-    function uploadImage($file, $folder, $schId, $fileId = null): ?array
+    function uploadImage(UploadedFile|string $file, string $folder, string $schId, ?string $fileId = null): ?array
     {
         $result = null;
         $folderName = "{$folder}/{$schId}";
@@ -139,7 +142,7 @@ if (!function_exists('uploadImage')) {
 }
 
 if (!function_exists('uploadSignature')) {
-    function uploadSignature($file, $folder, $schId, $fileId = null)
+    function uploadSignature(UploadedFile|string $file, string $folder, int $schId, ?string $fileId = null): ?array
     {
         $parsed = is_string($file) ? parseDataImage($file) : null;
         if (!$parsed) {
@@ -155,7 +158,7 @@ if (!function_exists('uploadSignature')) {
 }
 
 if (!function_exists('generateUniqueId')) {
-    function generateUniqueId()
+    function generateUniqueId(): string
     {
         do {
             $id = 'STA' . strtoupper(Str::random(8));

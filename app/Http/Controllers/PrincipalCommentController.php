@@ -84,7 +84,7 @@ class PrincipalCommentController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'hos_comment' => 'required|string|max:500',
+            'hos_comment' => ['required', 'string', 'max:500'],
         ]);
 
         $principalComment = PrincipalComment::findOrFail($id);

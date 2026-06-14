@@ -22,15 +22,15 @@ class FlipClassAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'flip_class_id' => 'required|integer|exists:flip_classes,id',
-            'question_type' => 'required|string|in:objective',
-            'question' => 'required|string',
-            'answer' => 'required|string',
-            'subject_id' => 'required|exists:subjects,id',
-            'option1' => 'required|string',
-            'option2' => 'required|string',
-            'option3' => 'required|string',
-            'option4' => 'required|string'
+            'flip_class_id' => ['required', 'integer', 'exists:flip_classes,id'],
+            'question_type' => ['required', 'string', 'in:objective'],
+            'question' => ['required', 'string'],
+            'answer' => ['required', 'string'],
+            'subject_id' => ['required', 'exists:subjects,id'],
+            'option1' => ['required', 'string'],
+            'option2' => ['required', 'string'],
+            'option3' => ['required', 'string'],
+            'option4' => ['required', 'string']
         ];
     }
 }

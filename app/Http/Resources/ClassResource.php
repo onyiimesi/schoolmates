@@ -88,11 +88,11 @@ class ClassResource extends JsonResource
         }
 
         // Legacy JSON fallback — no id available
-        return collect($subjectTeacher->subject ?? [])
+        return (new \Illuminate\Support\Collection($subjectTeacher->subject ?? []))
             ->map(fn($subject) => [
                 'id' => null,
                 'name' => $subject['name'],
             ])
-            ->toArray();
+            ->all();
     }
 }

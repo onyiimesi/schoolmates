@@ -7,19 +7,21 @@ use App\Http\Resources\ExpensesResource;
 use App\Models\Expenses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class ExpensesController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function index()
+    public function index(): array
     {   
+        /** @var Staff */
         $user = Auth::user();
         
-        $exp = ExpensesResource::collection(
+        $data = ExpensesResource::collection(
             Expenses::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->get()
@@ -28,7 +30,7 @@ class ExpensesController extends Controller
         return [
             'status' => 'true',
             'message' => 'Expenses List',
-            'data' => $exp
+            'data' => $data
         ];
     }
 
@@ -36,13 +38,13 @@ class ExpensesController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function store(ExpensesRequest $request)
+    public function store(ExpensesRequest $request): array
     {
         $request->validated($request->all());
 
+        /** @var Staff */
         $user = Auth::user();
 
         $expen = Expenses::create([
@@ -71,9 +73,8 @@ class ExpensesController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): void
     {
         //
     }
@@ -82,9 +83,8 @@ class ExpensesController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id): void
     {
         //
     }
@@ -94,9 +94,8 @@ class ExpensesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): void
     {
         //
     }
@@ -105,9 +104,8 @@ class ExpensesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id): void
     {
         //
     }

@@ -94,9 +94,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/optimize', function () {
     if (App::environment(['staging', 'production'])) {
         Artisan::call('optimize:clear');
-        return response()->json(['message' => 'Cache cleared successfully!'], 200);
+        return new \Illuminate\Http\JsonResponse(['message' => 'Cache cleared successfully!'], 200);
     }
-    return response()->json(['error' => 'Unauthorized action.'], 403);
+    return new \Illuminate\Http\JsonResponse(['error' => 'Unauthorized action.'], 403);
 });
 
 Route::post('/test-email', [OtherController::class, 'send']);
@@ -105,7 +105,7 @@ Route::post('/seed/run', function () {
     $seederClass = Str::studly(request()->input('seeder_class'));
 
     if (!class_exists("Database\\Seeders\\{$seederClass}")) {
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'error' => "Seeder class '{$seederClass}' not found in Database\\Seeders namespace."
         ], 404);
     }
@@ -116,12 +116,12 @@ Route::post('/seed/run', function () {
             '--force' => true,
         ]);
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'message' => "{$seederClass} executed successfully.",
             'output' => Artisan::output(),
         ]);
     } catch (\Exception $e) {
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'error' => 'Seeder failed to run.',
             'details' => $e->getMessage(),
         ], 500);

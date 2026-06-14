@@ -30,7 +30,7 @@ class OtherController extends Controller
             '--force' => true
         ]);
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'message' => 'Migration completed successfully.',
             'output' => Artisan::output(),
         ]);
@@ -66,7 +66,7 @@ class OtherController extends Controller
                 ->where('campus', $user->campus)
                 ->get();
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'status' => 'true',
             'message' => 'List',
             'data' => $extra->map(function($name) {
@@ -90,7 +90,7 @@ class OtherController extends Controller
 
         $extra->delete();
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'status' => 'true',
             'message' => 'Deleted Successfully'
         ]);
@@ -129,7 +129,7 @@ class OtherController extends Controller
             'name' => $request->name
         ]);
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'status' => 'true',
             'message' => 'Created Successfully',
         ]);
@@ -148,7 +148,7 @@ class OtherController extends Controller
                 ->where('campus', $user->campus)
                 ->get();
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'status' => 'true',
             'message' => 'List',
             'data' => $extra->map(function($name) {
@@ -172,7 +172,7 @@ class OtherController extends Controller
 
         $extra->delete();
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'status' => 'true',
             'message' => 'Deleted Successfully'
         ]);
@@ -216,14 +216,14 @@ class OtherController extends Controller
                         'amount_due' => $payment->amount_due,
                         'type' => $payment->type,
                         'status' => $payment->status,
-                        'paid_at' => Carbon::parse($payment->created_at)->format('j M Y')
+                        'paid_at' => \Illuminate\Support\Facades\Date::parse($payment->created_at)->format('j M Y')
                     ];
                 })->toArray()
             ];
         })->values()->toArray();
 
         if($data){
-            return response()->json([
+            return new \Illuminate\Http\JsonResponse([
                 'status' => "true",
                 'message' => "Payment by invoice ID",
                 'data' => $data,
@@ -261,14 +261,14 @@ class OtherController extends Controller
     public function admissionNumberSettings(Request $request)
     {
         $request->validate([
-            'sch_id' => 'required|exists:schools,sch_id',
-            'auto_generate' => 'required|boolean',
-            'initial' => 'nullable|string|max:5',
+            'sch_id' => ['required', 'exists:schools,sch_id'],
+            'auto_generate' => ['required', 'boolean'],
+            'initial' => ['nullable', 'string', 'max:5'],
         ]);
 
         if($request->auto_generate) {
             $request->validate([
-                'initial' => 'required|string|max:5',
+                'initial' => ['required', 'string', 'max:5'],
             ]);
         }
 
@@ -305,7 +305,7 @@ class OtherController extends Controller
     public function send(Request $request)
     {
         $request->validate([
-            'to' => 'required|email',
+            'to' => ['required', 'email'],
         ]);
 
         try {
@@ -314,13 +314,13 @@ class OtherController extends Controller
                         ->subject('Email sent');
             });
 
-            return response()->json([
+            return new \Illuminate\Http\JsonResponse([
                 'success' => true,
                 'message' => "Test email sent successfully to {$request->to}"
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json([
+            return new \Illuminate\Http\JsonResponse([
                 'success' => false,
                 'message' => 'Failed to send test email.',
                 'error' => $e->getMessage()

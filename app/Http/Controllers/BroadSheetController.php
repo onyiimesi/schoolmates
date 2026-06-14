@@ -6,8 +6,11 @@ use App\Enum\PeriodicName;
 use App\Models\GradingSystem;
 use App\Models\Staff;
 use App\Models\Result;
+use App\Models\Student;
 use App\Traits\HttpResponses;
 use App\Traits\ResultTrait;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +19,9 @@ class BroadSheetController extends Controller
 {
     use HttpResponses, ResultTrait;
 
-    public function broadsheet(Request $request)
+    public function broadsheet(Request $request): JsonResponse
     {
+        /** @var Staff|Student $user */
         $user = Auth::user();
 
         $sheet = Result::where('sch_id', $user->sch_id)
@@ -33,10 +37,10 @@ class BroadSheetController extends Controller
         $signatures = Staff::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('class_assigned', $request->class_name)->get();
-
+        
         $data = $this->getBroadsheetData($groupedResults);
 
-        return response()->json([
+        return new JsonResponse([
             'status' => true,
             'message' => "Broadsheet",
             'class_name' => $request->class_name,
@@ -50,16 +54,25 @@ class BroadSheetController extends Controller
         ], 200);
     }
 
-    private function getBroadsheetData($groupedResults)
+    /**
+     * @param  Collection<int|string, EloquentCollection<int, Result>> $groupedResults
+     * @return array<int, array<string, mixed>>
+     */
+    private function getBroadsheetData($groupedResults): array
     {
+        /** @var Collection<int, array<string, mixed>> $data */
         $data = $groupedResults->map(function ($studentResults, $studentId) {
             return $this->calculateStudentSummary($studentResults, $studentId);
         })->filter()->values();
 
-        return $this->assignPositions($data)->toArray();
+        return $this->assignPositions($data)->all();
     }
 
-    private function assignPositions($data): Collection
+    /**
+     * @param  Collection<int, array<string, mixed>> $data
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function assignPositions(Collection $data): Collection
     {
         $sorted = $data->sortByDesc(fn($s) => (float) $s['student_average'])->values();
 
@@ -67,23 +80,32 @@ class BroadSheetController extends Controller
         $tieCount = 0;
         $prevAverage = null;
 
-        return $sorted->map(function ($student) use (&$rank, &$tieCount, &$prevAverage) {
-            $average = $student['student_average']; // already a formatted string e.g. "85.50"
+        /** @var Collection<int, array<string, mixed>> $result */
+        $result = $sorted->map(function (array $student) use (&$rank, &$tieCount, &$prevAverage): array {
+            /** @var string $average */
+            $average = $student['student_average'];
 
             if ($average !== $prevAverage) {
-                $rank += $tieCount; // advance past the last tie group
+                $rank += $tieCount;
                 $tieCount = 1;
                 $prevAverage = $average;
             } else {
-                $tieCount++; // same average, widen the tie group
+                $tieCount++;
             }
 
             $student['position'] = $rank;
             return $student;
         });
+
+        return $result;
     }
 
-    private function calculateStudentSummary($studentResults, $studentId)
+    /**
+     * @param  Collection<int, Result> $studentResults
+     * @param  int|string $studentId
+     * @return array<string, mixed>
+     */
+    private function calculateStudentSummary(Collection $studentResults, int|string $studentId): array
     {
         $student = $studentResults->first();
 
@@ -113,7 +135,11 @@ class BroadSheetController extends Controller
         ];
     }
 
-    private function buildSubjectScores($studentResults)
+    /**
+     * @param  Collection<int, Result> $studentResults
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildSubjectScores(Collection $studentResults): array
     {
         return $studentResults->flatMap(function ($result) {
             return $result->studentScores->map(function ($score) use ($result) {
@@ -123,21 +149,19 @@ class BroadSheetController extends Controller
                     'result_type' => $result->result_type,
                     'score' => (int) $score->score,
                 ];
-            });
+            })->all();
         })
-            ->groupBy(function ($score) {
-                return strtolower($score['subject']);
-            })
+            ->groupBy(fn (array $score): string => strtolower($score['subject']))
             ->map(function ($subjectScores) {
                 $subjectName = $subjectScores->first()['subject'];
 
                 // Sum all assessments
-                $assessmentScore = collect($subjectScores)
+                $assessmentScore = (new \Illuminate\Support\Collection($subjectScores))
                     ->whereIn('result_type', ['first_assesment', 'second_assesment', 'third_assesment', 'midterm'])
                     ->sum('score');
 
                 // Sum exam (endterm)
-                $examScore = collect($subjectScores)
+                $examScore = (new \Illuminate\Support\Collection($subjectScores))
                     ->where('result_type', 'endterm')
                     ->sum('score');
 
@@ -149,10 +173,10 @@ class BroadSheetController extends Controller
                 ];
             })
             ->values()
-            ->toArray();
+            ->all();
     }
 
-    private function calculateGrade($average)
+    private function calculateGrade(float|int $average): string
     {
         if ($average > 90) {
             return "EXCELLENT";

@@ -6,21 +6,25 @@ use App\Models\AcademicPeriod;
 use App\Models\ClassModel;
 use App\Models\SubjectClass;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Staff;
+use Illuminate\Support\Collection;
 
 class AssignSubjectsController extends Controller
 {
     use HttpResponses;
 
-    public function assign(Request $request)
+    public function assign(Request $request): JsonResponse
     {
         $request->validate([
-            'class_id' => 'required|integer|exists:class_models,id',
-            'subjects' => 'required|array',
+            'class_id' => ['required', 'integer', 'exists:class_models,id'],
+            'subjects' => ['required', 'array'],
         ]);
 
+        /** @var Staff $user */
         $user = Auth::user();
 
         $period = AcademicPeriod::where('sch_id', $user->sch_id)
@@ -28,13 +32,13 @@ class AssignSubjectsController extends Controller
             ->where('is_current_period', true)
             ->first();
 
-        if (! $period) {
+        if (! $period instanceof AcademicPeriod) {
             return $this->error(null, 'Academic period not set', 404);
         }
 
         $class = ClassModel::find($request->class_id);
 
-        if (! $class) {
+        if (! $class instanceof ClassModel) {
             return $this->error(null, 'Class does not exist', 400);
         }
 
@@ -57,8 +61,14 @@ class AssignSubjectsController extends Controller
         return $this->success(null, 'Subjects assigned successfully');
     }
 
-    protected function getExistingSubjects($user, $period, $classId)
-    {
+    /**
+     * @return Collection<int, string>
+     */
+    protected function getExistingSubjects(
+        Staff $user,
+        AcademicPeriod $period,
+        int $classId
+    ): Collection {
         return SubjectClass::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('session', $period->session)
@@ -66,14 +76,30 @@ class AssignSubjectsController extends Controller
             ->pluck('subject');
     }
 
-    protected function getSubjectsToDelete($existingSubjects, $subjectsInPayload)
-    {
-        $subjectNamesInPayload = collect($subjectsInPayload)->pluck('name');
+    /**
+     * @param Collection<int, string> $existingSubjects
+     * @param array<int, array{name: string}> $subjectsInPayload
+     *
+     * @return Collection<int, string>
+     */
+    protected function getSubjectsToDelete(
+        Collection $existingSubjects,
+        array $subjectsInPayload
+    ): Collection {
+        $subjectNamesInPayload = (new Collection($subjectsInPayload))->pluck('name');
+
         return $existingSubjects->diff($subjectNamesInPayload);
     }
 
-    protected function deleteSubjects($user, $period, $classId, $subjectsToDelete)
-    {
+    /**
+     * @param Collection<int, string> $subjectsToDelete
+     */
+    protected function deleteSubjects(
+        Staff $user,
+        AcademicPeriod $period,
+        int $classId,
+        Collection $subjectsToDelete
+    ): void {
         SubjectClass::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('session', $period->session)
@@ -82,8 +108,16 @@ class AssignSubjectsController extends Controller
             ->delete();
     }
 
-    protected function assignSubjects($user, $period, $classId, $subjectsInPayload, $class)
-    {
+    /**
+     * @param array<int, array{name: string}> $subjectsInPayload
+     */
+    protected function assignSubjects(
+        Staff $user,
+        AcademicPeriod $period,
+        int $classId,
+        array $subjectsInPayload,
+        ClassModel $class
+    ): void {
         foreach ($subjectsInPayload as $subjectData) {
             SubjectClass::updateOrCreate(
                 [

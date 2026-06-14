@@ -24,19 +24,19 @@ class AssignmentMarkRequest extends FormRequest
     public function rules()
     {
         return [
-            'period' => 'required',
-            'term' => 'required',
-            'session' => 'required',
-            'student_id' => 'required',
-            'subject_id' => 'required',
-            'question_id' => 'required',
-            'question' => 'required',
-            'question_number' => 'required',
-            'question_type' => 'required',
-            'answer' => 'required',
-            'correct_answer' => 'required',
-            'submitted' => 'required',
-            'teacher_mark' => 'required'
+            'period' => ['required'],
+            'term' => ['required'],
+            'session' => ['required'],
+            'student_id' => ['required'],
+            'subject_id' => ['required'],
+            'question_id' => ['required'],
+            'question' => ['required'],
+            'question_number' => ['required'],
+            'question_type' => ['required'],
+            'answer' => ['required'],
+            'correct_answer' => ['required'],
+            'submitted' => ['required'],
+            'teacher_mark' => ['required']
         ];
     }
 }

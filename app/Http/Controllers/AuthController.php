@@ -11,6 +11,8 @@ use App\Models\Staff;
 use App\Models\Student;
 use App\Models\User;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,7 +20,7 @@ class AuthController extends Controller
 {
     use HttpResponses;
 
-    public function login(LoginUserRequest $request)
+    public function login(LoginUserRequest $request): JsonResponse
     {
         $request->validated($request->all());
 
@@ -26,6 +28,7 @@ class AuthController extends Controller
         $studGuard = Auth::guard('studs');
 
         if ($staffGuard->attempt($request->only(['username', 'password']))) {
+            /** @var Staff $auth */
             $auth = Auth::guard('staffs')->user();
 
             if (!in_array($auth->status, haystack: ['active'])) {
@@ -46,6 +49,7 @@ class AuthController extends Controller
                 'expires_at' => $token->accessToken->expires_at
             ], 'Login successful');
         } elseif ($studGuard->attempt($request->only(['username', 'password']))) {
+            /** @var Student $auth */
             $auth = Auth::guard('studs')->user();
 
             if (!in_array($auth->status, haystack: ['active'])) {
@@ -70,7 +74,7 @@ class AuthController extends Controller
         return $this->error(null, 'Credentials do not match', 401);
     }
 
-    public function register(StoreUserRequest $request)
+    public function register(StoreUserRequest $request): JsonResponse
     {
         $request->validated($request->all());
 
@@ -86,22 +90,22 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout()
+    public function logout(Request $request): JsonResponse
     {
-        $user = request()->user();
+        /** @var Staff|Student $user */
+        $user = $request->user();
         $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
-
-        // Auth::user()->currentAccessToken()->delete();
 
         return $this->success([
             'message' => 'You have successfully logged out and your token has been deleted'
         ]);
     }
 
-    public function change(ChangePassRequest $request)
+    public function change(ChangePassRequest $request): JsonResponse
     {
         $request->validated($request->all());
 
+        /** @var Staff|Student $user */
         $user = $request->user();
 
         if (Hash::check($request->old_password, $user->password)) {

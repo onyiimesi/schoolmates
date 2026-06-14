@@ -18,25 +18,27 @@ class AssignmentController extends Controller
     public function __construct(
         protected AssignmentService $assignmentService
     ) {}
+
     public function objective(CreateObjectiveRequest $request): JsonResponse
     {
         return $this->assignmentService->objective($request);
     }
+    
     public function theory(Request $request): JsonResponse
     {
         $request->validate([
-            '*.period' => 'required|string',
-            '*.term' => 'required|string',
-            '*.session' => 'required|string',
-            '*.question_type' => 'required|string',
-            '*.question' => 'required|string',
-            '*.question_number' => 'required|integer',
-            '*.answer' => 'required|string',
-            '*.subject_id' => 'required|integer',
-            '*.total_question' => 'required|integer',
-            '*.question_mark' => 'required|integer',
-            '*.total_mark' => 'required|integer',
-            '*.week' => 'required|string'
+            '*.period' => ['required', 'string'],
+            '*.term' => ['required', 'string'],
+            '*.session' => ['required', 'string'],
+            '*.question_type' => ['required', 'string'],
+            '*.question' => ['required', 'string'],
+            '*.question_number' => ['required', 'integer'],
+            '*.answer' => ['required', 'string'],
+            '*.subject_id' => ['required', 'integer'],
+            '*.total_question' => ['required', 'integer'],
+            '*.question_mark' => ['required', 'integer'],
+            '*.total_mark' => ['required', 'integer'],
+            '*.week' => ['required', 'string']
         ]);
 
         return $this->assignmentService->theory($request);
@@ -107,22 +109,22 @@ class AssignmentController extends Controller
         return $this->assignmentService->delAssign($request);
     }
 
-    public function result(AssignmentResultRequest $request)
+    public function result(AssignmentResultRequest $request): JsonResponse
     {
         return $this->assignmentService->result($request);
     }
 
-    public function resultAssign(Request $request)
+    public function resultAssign(Request $request): JsonResponse
     {
         return $this->assignmentService->resultAssign($request);
     }
 
-    public function getStudentResult(Request $request)
+    public function getStudentResult(Request $request): JsonResponse
     {
         return $this->assignmentService->getStudentResult($request);
     }
 
-    public function publish(AssignmentPublishRequest $request)
+    public function publish(AssignmentPublishRequest $request): JsonResponse
     {
         return $this->assignmentService->publish($request);
     }

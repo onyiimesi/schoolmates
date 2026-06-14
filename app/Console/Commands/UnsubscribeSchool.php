@@ -5,26 +5,14 @@ namespace App\Console\Commands;
 use App\Models\Subscription;
 use Illuminate\Console\Command;
 
+#[\Illuminate\Console\Attributes\Description('Unsubscribe schools after 3 months')]
+#[\Illuminate\Console\Attributes\Signature('unsubscribe:school')]
 class UnsubscribeSchool extends Command
 {
     /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'unsubscribe:school';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Unsubscribe schools after 3 months';
-
-    /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         Subscription::where('status', 'active')
             ->whereDate('ends_at', '<', now())

@@ -42,7 +42,7 @@ class CommunicationBookResource extends JsonResource
 
     private function formatDate($date): string
     {
-        return Carbon::parse($date)->format('d M Y h:i A');
+        return \Illuminate\Support\Facades\Date::parse($date)->format('d M Y h:i A');
     }
 
     private function getSenderAttributes(): array

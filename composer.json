@@ -10,24 +10,27 @@
     "require": {
         "php": "^8.4",
         "geoip2/geoip2": "^3.3",
-        "guzzlehttp/guzzle": "^7.10",
+        "guzzlehttp/guzzle": "^7.11",
         "imagekit/imagekit": "^4.0",
         "jenssegers/agent": "^2.6",
-        "laravel/framework": "^13.7",
+        "laravel/framework": "^13.14",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",
         "maatwebsite/excel": "^3.1",
         "owen-it/laravel-auditing": "^14.0"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.23.1",
+        "barryvdh/laravel-ide-helper": "^3.7",
+        "driftingly/rector-laravel": "^2.5",
+        "fakerphp/faker": "^1.24.1",
+        "larastan/larastan": "^3.0",
         "laravel/boost": "^2.4",
         "laravel/pint": "^1.29",
-        "laravel/sail": "^1.58.0",
+        "laravel/sail": "^1.62.0",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.1",
-        "phpunit/phpunit": "^13.1.8",
-        "spatie/laravel-ignition": "^2.11.0"
+        "phpunit/phpunit": "^13.2",
+        "spatie/laravel-ignition": "^2.12"
     },
     "autoload": {
         "psr-4": {
@@ -45,6 +48,9 @@
         }
     },
     "scripts": {
+        "phpstan": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "rector-dry": "vendor/bin/rector process --dry-run",
+        "pint": "vendor/bin/pint",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
@@ -57,6 +63,11 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
+        ],
+        "test": [
+            "@rector-dry",
+            "@phpstan",
+            "@pint"
         ]
     },
     "extra": {

@@ -16,7 +16,7 @@ final readonly class GenerateAdmissionNumber
                         ->first();
 
         $nextSequence = $lastNumber ? intval(substr($lastNumber->admission_number, -5)) + 1 : 1;
-        $sequence = str_pad($nextSequence, 5, '0', STR_PAD_LEFT);
+        $sequence = str_pad((string) $nextSequence, 5, '0', STR_PAD_LEFT);
 
         $admissionNumber = "$schoolInitial/$monthYear/$sequence";
 

@@ -15,11 +15,10 @@ class DesignationResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => (string)$this->id,
+            'id' => $this->resource->id,
             'attributes' => [
-                'designation_name' => (string)$this->designation_name,
+                'designation_name' => $this->resource->designation_name,
             ]
-            
         ];
     }
 }

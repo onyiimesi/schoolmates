@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AssignmentMark;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Staff;
+use Illuminate\Http\JsonResponse;
 
 class AssignmentPerformanceController extends Controller
 {
     use HttpResponses;
 
-    public function chart(Request $request)
+    public function chart(Request $request): JsonResponse
     {
+        /** @var Staff $user */
         $user = Auth::user();
 
         $period = $request->input('period');

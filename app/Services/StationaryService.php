@@ -372,7 +372,7 @@ class StationaryService
 
         $items = $request->items;
 
-        $stationaryIds = collect($items)->pluck('stationary_id')->unique();
+        $stationaryIds = (new \Illuminate\Support\Collection($items))->pluck('stationary_id')->unique();
 
         $stationaryItems = Stationary::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
@@ -569,7 +569,7 @@ class StationaryService
         $query = Stationary::where('sch_id', $schId)
             ->where('campus', $campus);
 
-        if (! blank($stationaryId)) {
+        if (filled($stationaryId)) {
             $query->where('id', $stationaryId);
         }
 

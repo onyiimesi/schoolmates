@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GPA;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GpaController extends Controller
@@ -13,7 +14,7 @@ class GpaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $user = userAuth();
 
@@ -28,14 +29,14 @@ class GpaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'min_mark' => 'required',
-            'max_mark' => 'required',
-            'remark' => 'required|string|max:40',
-            'grade_point' => 'required',
-            'key_range' => 'required|string',
+            'min_mark' => ['required'],
+            'max_mark' => ['required'],
+            'remark' => ['required', 'string', 'max:40'],
+            'grade_point' => ['required'],
+            'key_range' => ['required', 'string'],
         ]);
 
         $user = userAuth();
@@ -56,9 +57,11 @@ class GpaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(GPA $gpa)
+    public function show(GPA $gpa): JsonResponse
     {
-        $gpaDetails = $gpa->select('id', 'sch_id', 'campus', 'min_mark', 'max_mark', 'remark', 'grade_point', 'key_range')->first();
+        $gpaDetails = $gpa
+            ->select('id', 'sch_id', 'campus', 'min_mark', 'max_mark', 'remark', 'grade_point', 'key_range')
+            ->first();
 
         return $this->success($gpaDetails, "GPA details");
     }
@@ -66,7 +69,7 @@ class GpaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, GPA $gpa)
+    public function update(Request $request, GPA $gpa): JsonResponse
     {
         $gpa->update([
             'min_mark' => $request->min_mark,
@@ -82,7 +85,7 @@ class GpaController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(GPA $gpa)
+    public function destroy(GPA $gpa): JsonResponse
     {
         $gpa->delete();
 

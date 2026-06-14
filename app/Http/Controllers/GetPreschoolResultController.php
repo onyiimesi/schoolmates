@@ -5,15 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PreSchoolResultResource;
 use App\Models\PreSchoolResult;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Student;
+use App\Models\Staff;
 
 class GetPreschoolResultController extends Controller
 {
     use HttpResponses;
 
-    public function getResult(Request $request)
+    public function getResult(Request $request): JsonResponse
     {
+        /** @var Staff|Student */
         $user = Auth::user();
 
         $results = PreSchoolResult::with(['preschoolresultextracurricular'])
@@ -32,8 +36,9 @@ class GetPreschoolResultController extends Controller
         return $this->success($data, 'Result Retrieved Successfully');
     }
 
-    public function getComputeResult(Request $request)
+    public function getComputeResult(Request $request): JsonResponse
     {
+        /** @var Staff|Student */
         $user = Auth::user();
 
         $computed = PreSchoolResultResource::collection(

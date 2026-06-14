@@ -7,16 +7,16 @@ use App\Http\Resources\DressCodeResource;
 use App\Models\DressCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class DressCodeController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function index()
+    public function index(): array
     {
+        /** @var Staff $user */
         $user = Auth::user();
 
         $dress = DressCodeResource::collection(
@@ -33,14 +33,13 @@ class DressCodeController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function store(DressCodeRequest $request)
+    public function store(DressCodeRequest $request): array
     {
         $request->validated($request->all());
+
+        /** @var Staff $user */
         $user = Auth::user();
 
         $dress = DressCode::create([
@@ -62,9 +61,8 @@ class DressCodeController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): void
     {
         //
     }
@@ -73,9 +71,8 @@ class DressCodeController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id): void
     {
         //
     }
@@ -85,9 +82,8 @@ class DressCodeController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): void
     {
         //
     }
@@ -96,9 +92,8 @@ class DressCodeController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id): void
     {
         //
     }

@@ -51,7 +51,7 @@ class StudentAttendanceController extends Controller
 
         $search = StudentAttendance::where("attendance_date", $request->attendance_date)->first();
 
-        if(empty($search)){
+        if(blank($search)){
 
             $studentatt = StudentAttendance::create([
                 'sch_id' => $teacher->sch_id,
@@ -72,7 +72,7 @@ class StudentAttendanceController extends Controller
                 "data" => $studentatt
             ];
 
-        }else if(!empty($search)){
+        }else if(filled($search)){
 
             $search->update([
                 'attendance_date' => $request->attendance_date,

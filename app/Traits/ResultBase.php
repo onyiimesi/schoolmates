@@ -7,6 +7,7 @@ use App\Enum\ResultStatus;
 use App\Models\Result;
 use App\Models\Staff;
 use App\Services\GeneralResultService;
+use Illuminate\Support\Collection;
 
 trait ResultBase
 {
@@ -78,7 +79,7 @@ trait ResultBase
         }
 
         // Only check HOS if no comment was provided directly
-        if (empty($request->hos_comment)) {
+        if (blank($request->hos_comment)) {
             $hos = Staff::find($request->hos_id);
             if (!$hos) {
                 return $this->error(null, "HOS needs to add comments", 400);
@@ -114,13 +115,13 @@ trait ResultBase
 
     protected function saveStudentScores($result, $scores)
     {
-        $incomingSubjects = collect($scores)
+        $incomingSubjects = (new Collection($scores))
             ->pluck('subject')
             ->filter()
             ->values()
             ->toArray();
 
-        if (!empty($incomingSubjects)) {
+        if (filled($incomingSubjects)) {
             $result->studentScores()
                 ->whereIn('subject', $incomingSubjects)
                 ->delete();
@@ -192,7 +193,7 @@ trait ResultBase
             $this->saveExtraCurricularActivities($result, $request->extra_curricular_activities);
         }
 
-        if (!empty($request->abacus['name'])) {
+        if (filled($request->abacus['name'])) {
             $this->saveAbacus($result, $request->abacus);
         }
 

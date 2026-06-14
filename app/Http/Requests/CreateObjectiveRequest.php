@@ -22,22 +22,22 @@ class CreateObjectiveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            '*.period' => 'required|string',
-            '*.term' => 'required|string',
-            '*.session' => 'required|string',
-            '*.question_type' => 'required|string',
-            '*.question' => 'required|string',
-            '*.question_number' => 'required|integer',
-            '*.answer' => 'required|string',
-            '*.subject_id' => 'required|integer',
-            '*.option1' => 'required|string',
-            '*.option2' => 'required|string',
-            '*.option3' => 'required|string',
-            '*.option4' => 'required|string',
-            '*.total_question' => 'required|integer',
-            '*.question_mark' => 'required|integer',
-            '*.total_mark' => 'required|integer',
-            '*.week' => 'required|string'
+            '*.period' => ['required', 'string'],
+            '*.term' => ['required', 'string'],
+            '*.session' => ['required', 'string'],
+            '*.question_type' => ['required', 'string'],
+            '*.question' => ['required', 'string'],
+            '*.question_number' => ['required', 'integer'],
+            '*.answer' => ['required', 'string'],
+            '*.subject_id' => ['required', 'integer'],
+            '*.option1' => ['required', 'string'],
+            '*.option2' => ['required', 'string'],
+            '*.option3' => ['required', 'string'],
+            '*.option4' => ['required', 'string'],
+            '*.total_question' => ['required', 'integer'],
+            '*.question_mark' => ['required', 'integer'],
+            '*.total_mark' => ['required', 'integer'],
+            '*.week' => ['required', 'string']
         ];
     }
 }

@@ -5,19 +5,23 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ChartAccountRequest;
 use App\Http\Resources\ChartAccountResource;
 use App\Models\ChartAccount;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class ChartAccountController extends Controller
 {
+    use HttpResponses;
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function index()
+    public function index(): array
     {
+        /** @var Staff $user */
         $user = Auth::user();
+        
         $chart = ChartAccountResource::collection(ChartAccount::where('sch_id', $user->sch_id)->get());
 
         return [
@@ -29,15 +33,13 @@ class ChartAccountController extends Controller
 
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function store(ChartAccountRequest $request)
+    public function store(ChartAccountRequest $request): array
     {
         $request->validated($request->all());
 
+        /** @var Staff $user */
         $user = Auth::user();
 
         $chartacct = ChartAccount::create([
@@ -54,47 +56,12 @@ class ChartAccountController extends Controller
         ];
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function update(Request $request, int $id): void
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy(int $id): void
     {
         //
     }

@@ -62,7 +62,7 @@ trait StaffTrait
             $request->subject_assignments
         );
 
-        return ! empty($conflicts)
+        return filled($conflicts)
             ? $this->error(['conflicts' => $conflicts], 'Some subjects are already assigned.', 409)
             : null;
     }
@@ -154,9 +154,9 @@ trait StaffTrait
             $classId = (int) $assignment['class_id'];
             $class = ClassModel::find($classId);
             $className = $class?->class_name ?? $classId;
-            $subjectNames = collect($assignment['subjects'])
+            $subjectNames = (new \Illuminate\Support\Collection($assignment['subjects']))
                 ->map(fn ($s) => strtoupper(trim($s['name'])))
-                ->toArray();
+                ->all();
 
             $query = SubjectTeacherSubject::where('sch_id', $schId)
                 ->where('campus', $campus)
@@ -191,14 +191,14 @@ trait StaffTrait
 
         foreach ($subjectAssignments as $assignment) {
             $class = ClassModel::findOrFail($assignment['class_id']);
-            $subjectNames = collect($assignment['subjects'])
+            $subjectNames = (new \Illuminate\Support\Collection($assignment['subjects']))
                 ->map(fn ($s) => strtoupper(trim($s['name'])))
-                ->toArray();
+                ->all();
 
             // Legacy JSON format — kept for backward compatibility
-            $subjectJson = collect($subjectNames)
+            $subjectJson = (new \Illuminate\Support\Collection($subjectNames))
                 ->map(fn ($name) => ['name' => $name])
-                ->toArray();
+                ->all();
 
             $subjectTeacher = SubjectTeacher::create([
                 'sch_id' => $staff->sch_id,
@@ -212,7 +212,7 @@ trait StaffTrait
             ]);
 
             // Relational rows — the flexible, queryable source of truth
-            $relationalRows = collect($subjectNames)->map(fn ($name) => [
+            $relationalRows = (new \Illuminate\Support\Collection($subjectNames))->map(fn ($name) => [
                 'sch_id' => $staff->sch_id,
                 'campus' => $staff->campus,
                 'term' => $period->term ?? null,
@@ -223,7 +223,7 @@ trait StaffTrait
                 'class_id' => $class->id,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ])->toArray();
+            ])->all();
 
             SubjectTeacherSubject::insert($relationalRows);
         }
@@ -276,7 +276,7 @@ trait StaffTrait
             $staff->id // exclude current staff's own assignments
         );
 
-        return ! empty($conflicts)
+        return filled($conflicts)
             ? $this->error(['conflicts' => $conflicts], 'Some subjects are already assigned.', 409)
             : null;
     }
@@ -382,13 +382,13 @@ trait StaffTrait
 
         foreach ($subjectAssignments as $assignment) {
             $class = ClassModel::findOrFail($assignment['class_id']);
-            $subjectNames = collect($assignment['subjects'])
+            $subjectNames = (new \Illuminate\Support\Collection($assignment['subjects']))
                 ->map(fn ($s) => strtoupper(trim($s['name'])))
-                ->toArray();
+                ->all();
 
-            $subjectJson = collect($subjectNames)
+            $subjectJson = (new \Illuminate\Support\Collection($subjectNames))
                 ->map(fn ($name) => ['name' => $name])
-                ->toArray();
+                ->all();
 
             // Update existing or create new SubjectTeacher record for this class
             $subjectTeacher = SubjectTeacher::updateOrCreate(
@@ -417,7 +417,7 @@ trait StaffTrait
             $toAdd = array_diff($subjectNames, $existing);
             $toRemove = array_diff($existing, $subjectNames);
 
-            if (! empty($toRemove)) {
+            if (filled($toRemove)) {
                SubjectTeacherSubject::where('subject_teacher_id', $subjectTeacher->id)
                     ->where('term', $period->term ?? null)
                     ->where('session', $period->session ?? null)
@@ -425,9 +425,9 @@ trait StaffTrait
                     ->delete();
             }
 
-            if (! empty($toAdd)) {
+            if (filled($toAdd)) {
                 SubjectTeacherSubject::insert(
-                    collect($toAdd)->map(fn ($name) => [
+                    (new \Illuminate\Support\Collection($toAdd))->map(fn ($name) => [
                         'sch_id' => $staff->sch_id,
                         'campus' => $staff->campus,
                         'subject_teacher_id' => $subjectTeacher->id,
@@ -438,7 +438,7 @@ trait StaffTrait
                         'session' => $period->session ?? null,
                         'created_at' => now(),
                         'updated_at' => now(),
-                    ])->toArray()
+                    ])->all()
                 );
             }
         }

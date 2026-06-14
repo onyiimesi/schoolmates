@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Student;
 use App\Services\Cache\ClearCacheService;
+use Illuminate\Http\Request;
 
 class ClearCacheAction
 {
@@ -12,7 +13,7 @@ class ClearCacheAction
     )
     {}
 
-    public function handle($request, $studentId, ?bool $clearAll = false): void
+    public function handle(Request $request, int $studentId, ?bool $clearAll = false): void
     {
         if ($clearAll) {
             $this->clearCacheService->clearAll();

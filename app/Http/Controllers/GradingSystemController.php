@@ -6,20 +6,18 @@ use App\Http\Requests\GradingSystemRequest;
 use App\Http\Resources\GradingSystemResource;
 use App\Models\GradingSystem;
 use App\Traits\HttpResponses;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
 
 class GradingSystemController extends Controller
 {
     use HttpResponses;
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+
+    public function index(): JsonResponse
     {
-        $user = Auth::user();
+        $user = userAuth();
 
         $grading = GradingSystemResource::collection(
             GradingSystem::where('sch_id', $user->sch_id)
@@ -40,7 +38,7 @@ class GradingSystemController extends Controller
     {
         $request->validated($request->all());
 
-        $user = Auth::user();
+        $user = userAuth();
 
         $grading = GradingSystem::create([
             'sch_id' => $user->sch_id,
@@ -49,33 +47,20 @@ class GradingSystemController extends Controller
             'score_to' => $request->score_to,
             'grade' => $request->grade,
             'remark' => $request->remark,
-            'created_by' => $user->surname .' '. $user->firstname .' '. $user->middlename,
+            'created_by' => "{$user->surname} {$user->firstname} {$user->middlename}",
         ]);
 
         return $this->success($grading, "Created successfully", 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(GradingSystem $grading)
+    public function show(GradingSystem $grading): JsonResponse
     {
         $grades = new GradingSystemResource($grading);
 
         return $this->success($grades, "Grading details");
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, GradingSystem $grading)
+    public function update(Request $request, GradingSystem $grading): JsonResponse
     {
         $grading->update($request->all());
         $grades = new GradingSystemResource($grading);
@@ -83,13 +68,7 @@ class GradingSystemController extends Controller
         return $this->success($grades, "Updated successfully");
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(GradingSystem $grading)
+    public function destroy(GradingSystem $grading): Response|ResponseFactory
     {
         $grading->delete();
 
