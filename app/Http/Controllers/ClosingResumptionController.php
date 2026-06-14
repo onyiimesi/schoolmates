@@ -6,20 +6,20 @@ use App\Http\Resources\ClosingResumptionResource;
 use App\Models\AcademicPeriod;
 use App\Models\ClosingResumption;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class ClosingResumptionController extends Controller
 {
     use HttpResponses;
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
+
+    public function index(Request $request): JsonResponse
     {
+        /** @var Staff $user */
         $user = Auth::user();
+
         $term = $request->query('term');
         $session = $request->query('session');
 
@@ -27,7 +27,8 @@ class ClosingResumptionController extends Controller
             return $this->error(null, 'Term and session are required', 422);
         }
 
-        $academic = AcademicPeriod::where('sch_id', $user->sch_id)
+        $academic = AcademicPeriod::query()
+            ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('term', $term)
             ->where('session', $session)
@@ -37,7 +38,8 @@ class ClosingResumptionController extends Controller
             return $this->error(null, 'Academic period not found', 404);
         }
 
-        $closingResumption = ClosingResumption::where('sch_id', $user->sch_id)
+        $closingResumption = ClosingResumption::query()
+            ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('term', $term)
             ->where('session', $session)
@@ -52,17 +54,12 @@ class ClosingResumptionController extends Controller
         return $this->success($closRes, 'Closing resumption fetched successfully');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
+        /** @var Staff $user */
         $user = Auth::user();
 
-        $clos = ClosingResumption::updateOrCreate(
+        $data = ClosingResumption::updateOrCreate(
             [
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
@@ -75,18 +72,17 @@ class ClosingResumptionController extends Controller
             ]
         );
 
-        $msg = $clos->wasRecentlyCreated ? 'Created Successfully' : 'Updated Successfully';
+        $msg = $data->wasRecentlyCreated ? 'Created Successfully' : 'Updated Successfully';
 
-        return $this->success($clos, $msg);
+        return $this->success($data, $msg);
     }
 
     /**
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(int $id): void
     {
         //
     }
@@ -95,21 +91,13 @@ class ClosingResumptionController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(int $id): void
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): void
     {
         //
     }
@@ -118,9 +106,8 @@ class ClosingResumptionController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(int $id): void
     {
         //
     }

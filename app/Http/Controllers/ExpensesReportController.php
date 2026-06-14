@@ -6,10 +6,16 @@ use App\Http\Resources\ExpensesReportResource;
 use App\Models\Expenses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class ExpensesReportController extends Controller
 {
-    public function expensesearch(Request $request){
+    /**
+     * @return array<string, mixed>
+     */
+    public function expensesearch(Request $request): array
+    {
+        /** @var Staff */
         $user = Auth::user();
 
         $search = Expenses::where('sch_id', $user->sch_id)
@@ -18,12 +24,12 @@ class ExpensesReportController extends Controller
         ->where("session", $request->session)
         ->get();
 
-        $s = ExpensesReportResource::collection($search);
+        $data = ExpensesReportResource::collection($search);
 
         return [
             'status' => 'true',
-            'message' => '',
-            'data' => $s
+            'message' => 'Expenses Report',
+            'data' => $data
         ];
     }
 }

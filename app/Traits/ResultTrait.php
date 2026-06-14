@@ -12,6 +12,7 @@ use App\Models\ExtraCurricular;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\SchoolScoreSetting;
+use App\Models\Staff;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -137,7 +138,7 @@ trait ResultTrait
     /**
      * Get the students results used in studentaverage function (EndTermResultController).
      */
-    protected function getResult(User $user, $validated): Collection
+    protected function getResult(Staff|Student $user, $validated): Collection
     {
         return Result::where([
             'sch_id' => $user->sch_id,
@@ -154,7 +155,7 @@ trait ResultTrait
     /**
      * Get the class results used in studentaverage function (EndTermResultController).
      */
-    protected function getClassResult(User $user, $validated): Collection
+    protected function getClassResult(Staff|Student $user, $validated): Collection
     {
         return Result::with('student')->where([
             'sch_id' => $user->sch_id,

@@ -9,17 +9,18 @@ use App\Enum\StaffStatus;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 
 class GeneralController extends Controller
 {
     use HttpResponses;
 
-    public function enableCampus($id)
+    public function enableCampus(int $id): JsonResponse
     {
-        $campus = Campus::find($id);
+        $campus = Campus::query()->find($id);
 
         if (! $campus) {
-            return $this->error('', 'Campus does not exist', 400);
+            return $this->error(null, 'Campus does not exist', 400);
         }
 
         $campus->update(['status' => 'active']);
@@ -27,12 +28,12 @@ class GeneralController extends Controller
         return $this->success(null, 'Enabled Successfully');
     }
 
-    public function disableCampus($id)
+    public function disableCampus(int $id): JsonResponse
     {
-        $campus = Campus::find($id);
+        $campus = Campus::query()->find($id);
 
         if (! $campus) {
-            return $this->error('', 'Campus does not exist', 400);
+            return $this->error(null, 'Campus does not exist', 400);
         }
 
         $campus->update(['status' => 'disabled']);
@@ -40,9 +41,9 @@ class GeneralController extends Controller
         return $this->success(null, 'Disabled Successfully');
     }
 
-    public function enableStaff($id)
+    public function enableStaff(int $id): JsonResponse
     {
-        $staff = Staff::find($id);
+        $staff = Staff::query()->find($id);
 
         if (! $staff) {
             return $this->error(null, 'Staff does not exist', 400);
@@ -53,12 +54,12 @@ class GeneralController extends Controller
         return $this->success(null, 'Staff enabled successfully');
     }
 
-    public function disableStaff($id)
+    public function disableStaff(int $id): JsonResponse
     {
-        $staff = Staff::find($id);
+        $staff = Staff::query()->find($id);
 
-        if(! $staff){
-            return $this->error('', 'Staff does not exist', 400);
+        if(! $staff) {
+            return $this->error(null, 'Staff does not exist', 400);
         }
 
         $staff->update(['status' => StaffStatus::DISABLED]);
@@ -66,9 +67,9 @@ class GeneralController extends Controller
         return $this->success(null, 'Staff disabled successfully');
     }
 
-    public function enableStudent($id)
+    public function enableStudent(int $id): JsonResponse
     {
-        $student = Student::find($id);
+        $student = Student::query()->find($id);
 
         if (! $student){
             return $this->error(null, 'Student does not exist', 400);
@@ -79,9 +80,9 @@ class GeneralController extends Controller
         return $this->success(null, 'Account Enabled Successfully');
     }
 
-    public function disableStudent($id)
+    public function disableStudent(int $id): JsonResponse
     {
-        $student = Student::find($id);
+        $student = Student::query()->find($id);
 
         if (! $student) {
             return $this->error(null, 'Student does not exist', 400);
@@ -92,7 +93,7 @@ class GeneralController extends Controller
         return $this->success(null, 'Account Disabled Successfully');
     }
 
-    public function getAnnouncements(\Illuminate\Http\Request $request)
+    public function getAnnouncements(Request $request): JsonResponse
     {
         $schoolId = $request->query('sch_id');
 

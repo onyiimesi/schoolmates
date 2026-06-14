@@ -7,6 +7,8 @@ use App\Models\v2\LessonNote;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
@@ -131,44 +133,44 @@ class Staff extends Authenticatable implements Auditable
         });
     }
 
-    public function school()
+    public function school(): BelongsTo
     {
         return $this->belongsTo(Schools::class, 'sch_id', 'sch_id');
     }
 
-    public function designation()
+    public function designation(): BelongsTo
     {
         return $this->belongsTo(Designation::class, 'designation_id');
     }
 
-    public function result()
+    public function result(): HasMany
     {
         return $this->hasMany(Result::class, 'teacher_id');
     }
 
-    public function subjectTeachers()
+    public function subjectTeachers(): HasMany
     {
         return $this->hasMany(SubjectTeacher::class, 'staff_id');
     }
 
-    public function lessonnotes()
+    public function lessonnotes(): HasMany
     {
         return $this->hasMany(LessonNote::class, 'staff_id');
     }
 
-    public function staffScanAttendances()
+    public function staffScanAttendances(): HasMany
     {
         return $this->hasMany(StaffScanAttendance::class, 'staff_id');
     }
 
-    public function getCampus()
+    public function getCampus(): ?Campus
     {
         return Campus::where('name', $this->campus)->first() ?? null;
     }
 
-    protected function hos(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function hos(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function () {
+        return Attribute::make(get: function () {
             $hos = self::select('id', 'surname', 'firstname', 'middlename', 'signature')
                 ->where('sch_id', $this->sch_id)
                 ->where('campus', $this->campus)

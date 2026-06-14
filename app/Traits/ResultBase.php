@@ -7,6 +7,7 @@ use App\Enum\ResultStatus;
 use App\Models\Result;
 use App\Models\Staff;
 use App\Services\GeneralResultService;
+use Illuminate\Support\Collection;
 
 trait ResultBase
 {
@@ -114,13 +115,13 @@ trait ResultBase
 
     protected function saveStudentScores($result, $scores)
     {
-        $incomingSubjects = collect($scores)
+        $incomingSubjects = (new Collection($scores))
             ->pluck('subject')
             ->filter()
             ->values()
             ->toArray();
 
-        if (!empty($incomingSubjects)) {
+        if (filled($incomingSubjects)) {
             $result->studentScores()
                 ->whereIn('subject', $incomingSubjects)
                 ->delete();

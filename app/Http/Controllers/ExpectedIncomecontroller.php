@@ -5,10 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class ExpectedIncomecontroller extends Controller
 {
-    public function expected(){
+    /**
+     * @return array<string, mixed>
+     */
+    public function expected(): array
+    {
+        /** @var Staff */
         $user = Auth::user();
 
         $amount = Invoice::where('sch_id', $user->sch_id)

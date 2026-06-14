@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\App;
 use App\Http\Requests\CampusRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\CampusResource;
+use Illuminate\Http\JsonResponse;
+use App\Models\Staff;
+use App\Models\Student;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\Response;
 
 class CampusController extends Controller
 {
@@ -18,11 +23,12 @@ class CampusController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): JsonResponse
     {
+        /** @var Staff|Student $user */
         $user = Auth::user();
+
         $campus = CampusResource::collection(
             Campus::where('sch_id', $user->sch_id)->get()
         );
@@ -30,15 +36,11 @@ class CampusController extends Controller
         return $this->success($campus, 'Campus List');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(CampusRequest $request)
+    public function store(CampusRequest $request): JsonResponse
     {
         $request->validated($request->all());
+        
+        /** @var Staff|Student $user */
         $user = Auth::user();
 
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
@@ -71,13 +73,7 @@ class CampusController extends Controller
         return $this->success(null, 'Campus Created Successfully', 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Campus $campus)
+    public function show(Campus $campus): JsonResponse
     {
         $campuss = new CampusResource($campus);
 
@@ -88,10 +84,8 @@ class CampusController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Campus $campus)
+    public function update(Request $request, Campus $campus): JsonResponse
     {
         $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $campus->sch_id);
 
@@ -123,20 +117,14 @@ class CampusController extends Controller
         return $this->success(null, 'Updated Successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Campus $campus)
+    public function destroy(Campus $campus): Response|ResponseFactory
     {
         $campus->delete();
 
         return response(null, 204);
     }
 
-    public function uploadImage(Request $request)
+    public function uploadImage(Request $request): JsonResponse
     {
         $request->validate([
             'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],

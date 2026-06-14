@@ -12,30 +12,38 @@ use App\Models\ClassModel;
 use App\Models\PreSchool;
 use App\Models\Result;
 use App\Models\Staff;
+use App\Models\Student;
 use App\Models\SubjectClass;
 use App\Traits\HttpResponses;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class ClassController extends Controller
 {
     use HttpResponses;
 
-    public function index()
+    /**
+     * @return JsonResponse|array<string, mixed>
+     */
+    public function index(): JsonResponse|array
     {
+        /** @var Staff|Student $user */
         $user = Auth::user();
 
         $staff = Staff::where('sch_id', $user->sch_id)
             ->where('username', $user->username)
             ->first();
 
-        if (! $staff) {
+        if (! $staff instanceof Staff) {
             return $this->error(null, 'Staff not found', 404);
         }
 
         $campus = $staff->getCampus();
 
-        if (! $campus) {
+        if (! $campus instanceof Campus) {
             return $this->error(null, 'Campus not found', 404);
         }
 
@@ -89,17 +97,14 @@ class ClassController extends Controller
         return $this->success($classes, 'Class List');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     */
-    public function store(ClassRequest $request)
+    public function store(ClassRequest $request): JsonResponse
     {
+        /** @var Staff $user */
         $user = Auth::user();
+
         $campus = Campus::where('name', $request->campus)->first();
 
-        if (! $campus) {
+        if (! $campus instanceof Campus) {
             return $this->error(null, 'Campus not found', 404);
         }
 
@@ -127,14 +132,14 @@ class ClassController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
      */
-    public function update(Request $request, ClassModel $class)
+    public function update(Request $request, ClassModel $class): JsonResponse
     {
         $validated = $request->validate([
             'class_name' => ['required', 'string', 'max:255'],
         ]);
 
+        /** @var Staff $user */
         $user = Auth::user();
 
         if (
@@ -161,12 +166,7 @@ class ClassController extends Controller
         return $this->success($classs, 'Class Updated Successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     */
-    public function destroy(ClassModel $class)
+    public function destroy(ClassModel $class): Response|ResponseFactory
     {
         SubjectClass::where('class_id', $class->id)->delete();
         $class->delete();

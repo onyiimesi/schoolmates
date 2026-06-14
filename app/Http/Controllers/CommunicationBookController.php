@@ -8,7 +8,9 @@ use App\Models\AcademicPeriod;
 use App\Models\CommunicationBook;
 use App\Models\Designation;
 use App\Models\Student;
+use App\Models\Staff;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,15 +18,31 @@ class CommunicationBookController extends Controller
 {
     use HttpResponses;
 
-    public function communicate(CommunicationBookRequest $request){
-
+    /**
+     * @return array<string, mixed>
+     */
+    public function communicate(CommunicationBookRequest $request): array|JsonResponse
+    {
         $request->validated($request->all());
 
+        /** @var Staff|Student $user */
         $user = Auth::user();
-        $dsg = Designation::find($user->designation_id);
-        $period = AcademicPeriod::where('sch_id', $user->sch_id)
-        ->where('campus', $user->campus)
-        ->first();
+
+        $dsg = Designation::query()->find($user->designation_id);
+
+        if (!$dsg) {
+            return $this->error(null, 'Designation not found', 404);
+        }
+
+        $period = AcademicPeriod::query()
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->first();
+
+        if (!$period) {
+            return $this->error(null, 'Period not found', 404);
+        }
+
         $stat = 'Pending';
 
         $comm = CommunicationBook::create([
@@ -50,24 +68,39 @@ class CommunicationBookController extends Controller
 
     }
 
-    public function getmessage(){
+    /**
+     * @return array<string, mixed>|JsonResponse
+     */
+    public function getmessage(): array|JsonResponse
+    {
+        /** @var Staff $user */
+        $user = Auth::user();
 
-        $stud = Auth::user();
+        if($user->designation_id == '7') {
 
-        if($stud->designation_id == '7'){
+            $student = Student::query()->find($user->id);
 
-            $student = Student::find($stud->id);
-            $period = AcademicPeriod::where('sch_id', $stud->sch_id)
-            ->where('campus', $stud->campus)
-            ->first();
+            if (! $student) {
+                return $this->error(null, 'Student not found', 404);
+            }
 
-            $msg = CommunicationBook::where('sch_id', $stud->sch_id)
-            ->where('campus', $stud->campus)
-            ->where('student_id', $student->id)
-            ->where('period', $period->period)
-            ->where('term', $period->term)
-            ->where('session', $period->session)
-            ->get();
+            $period = AcademicPeriod::query()
+                ->where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->first();
+
+            if (!$period) {
+                return $this->error(null, 'Period not found', 404);
+            }
+
+            $msg = CommunicationBook::query()
+                ->where('sch_id', $user->sch_id)
+                ->where('campus', $student->campus)
+                ->where('student_id', $student->id)
+                ->where('period', $period->period)
+                ->where('term', $period->term)
+                ->where('session', $period->session)
+                ->get();
 
             $msgs = CommunicationBookResource::collection($msg);
 
@@ -78,7 +111,7 @@ class CommunicationBookController extends Controller
             ];
 
         }else {
-            return $this->error('', "Can't perform this action", 401);
+            return $this->error(null, "Can't perform this action", 403);
         }
     }
 }

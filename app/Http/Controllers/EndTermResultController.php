@@ -12,14 +12,16 @@ use App\Models\Student;
 use App\Traits\CummulativeResult;
 use App\Traits\HttpResponses;
 use App\Traits\ResultTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class EndTermResultController extends Controller
 {
     use CummulativeResult, HttpResponses, ResultTrait;
 
-    public function endterm(Request $request)
+    public function endterm(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'student_id' => ['required', 'exists:students,id'],
@@ -27,6 +29,7 @@ class EndTermResultController extends Controller
             'session' => ['required', 'string'],
         ]);
 
+        /** @var Staff|Student */
         $user = Auth::user();
 
         $search = Result::with([
@@ -55,7 +58,7 @@ class EndTermResultController extends Controller
         return $this->success($data, 'End term result');
     }
 
-    public function staffEndTerm(Request $request)
+    public function staffEndTerm(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'student_id' => ['required', 'exists:students,id'],
@@ -63,6 +66,7 @@ class EndTermResultController extends Controller
             'session' => ['required', 'string'],
         ]);
 
+        /** @var Staff|Student */
         $user = Auth::user();
 
         $search = Result::with([
@@ -89,13 +93,27 @@ class EndTermResultController extends Controller
         return $this->success($data, 'End term result');
     }
 
-    public function cummulative(Request $request)
+    /**
+     * @return array<string, mixed>
+     */
+    public function cummulative(Request $request): array
     {
+        /** @var Staff|Student */
         $user = Auth::user();
-        $student = Student::where('sch_id', $user->sch_id)
+
+        $student = Student::query()
+            ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('id', $request->student_id)
-            ->firstOrFail();
+            ->first();
+
+        if (!$student) {
+            return [
+                'status' => 'false',
+                'message' => 'Student not found',
+                'data' => null
+            ];
+        }
 
         $results = $this->getResults($user, $request);
         $subjects = $this->initializeSubjects($results);
@@ -113,7 +131,10 @@ class EndTermResultController extends Controller
         ];
     }
 
-    public function endaverage(Request $request)
+    /**
+     * @return array<string, mixed>
+     */
+    public function endaverage(Request $request): array
     {
         $studentResults = $this->getResultsForStudent($request);
         $classResults = $this->getAllResultsForClass($request);
@@ -136,6 +157,9 @@ class EndTermResultController extends Controller
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function studentaverage(Request $request): array
     {
         $validated = $request->validate([
@@ -145,6 +169,7 @@ class EndTermResultController extends Controller
             'class_name' => ['required', 'string'],
         ]);
 
+        /** @var Staff|Student $user */
         $user = Auth::user();
 
         $results = $this->getResult($user, $validated);

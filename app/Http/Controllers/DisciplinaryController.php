@@ -4,30 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DisciplinaryRequest;
 use App\Models\DisciplinaryAction;
+use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class DisciplinaryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    use HttpResponses;
+
+    public function index(): void
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(DisciplinaryRequest $request)
+    public function store(DisciplinaryRequest $request): JsonResponse
     {
         $request->validated($request->all());
+
+        /** @var Staff $user */
         $user = Auth::user();
 
         $dis = DisciplinaryAction::create([
@@ -38,20 +34,15 @@ class DisciplinaryController extends Controller
             'fine' => $request->fine,
         ]);
 
-        return [
-            "status" => 'true',
-            "message" => 'Created Successfully',
-            "data" => $dis
-        ];
+        return $this->success($dis, "Created Successfully", 201);
     }
 
     /**
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): void
     {
         //
     }
@@ -60,21 +51,13 @@ class DisciplinaryController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id): void
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): void
     {
         //
     }
@@ -83,9 +66,8 @@ class DisciplinaryController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id): void
     {
         //
     }

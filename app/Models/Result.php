@@ -6,6 +6,9 @@ use App\Enum\ResultStatus;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -130,7 +133,16 @@ class Result extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
 
-    public static function createOne($staff, $data, $hos)
+    protected function casts(): array
+    {
+        return [
+            'results' => 'array',
+            'affective_disposition' => 'array',
+            'psychomotor_skills' => 'array',
+        ];
+    }
+
+    public static function createOne(Staff $staff, mixed $data, mixed $hos): static
     {
         $create = new self();
 
@@ -162,56 +174,48 @@ class Result extends Model implements Auditable
         return $create;
     }
 
-    public function results()
+    public function results(): BelongsTo
     {
         return $this->belongsTo(Staff::class);
     }
 
-    public function studentScores()
+    public function studentScores(): HasMany
     {
         return $this->hasMany(StudentScore::class, 'result_id');
     }
 
-    public function student()
+    public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class, 'student_id');
     }
 
-    public function affectiveDispositions()
+    public function affectiveDispositions(): HasMany
     {
         return $this->hasMany(AffectiveDisposition::class, 'result_id');
     }
 
-    public function psychomotorskill()
+    public function psychomotorskill(): HasMany
     {
         return $this->hasMany(PsychomotorSkill::class, 'result_id');
     }
 
-    public function resultExtraCurriculars()
+    public function resultExtraCurriculars(): HasMany
     {
         return $this->hasMany(ResultExtraCurricular::class, 'result_id');
     }
 
-    public function abacus()
+    public function abacus(): HasOne
     {
         return $this->hasOne(Abacus::class, 'result_id');
     }
 
-    public function psychomotorPerformances()
+    public function psychomotorPerformances(): HasMany
     {
         return $this->hasMany(PsychomotorPerformance::class, 'result_id');
     }
 
-    public function pupilReports()
+    public function pupilReports(): HasMany
     {
         return $this->hasMany(PupilReport::class, 'result_id');
-    }
-    protected function casts(): array
-    {
-        return [
-            'results' => 'array',
-            'affective_disposition' => 'array',
-            'psychomotor_skills' => 'array',
-        ];
     }
 }

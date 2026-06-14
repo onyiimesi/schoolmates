@@ -5,18 +5,24 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BankRequest;
 use App\Http\Resources\BankResource;
 use App\Models\Bank;
+use App\Models\Staff;
+use App\Models\Student;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+
 
 class BankController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function index()
+    public function index(): array
     {
+        /** @var Staff|Student $user */
         $user = Auth::user();
 
         $banks = BankResource::collection(
@@ -36,13 +42,13 @@ class BankController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function store(BankRequest $request)
+    public function store(BankRequest $request): array
     {
         $request->validated($request->all());
 
+        /** @var Staff|Student $user */
         $user = Auth::user();
 
         Bank::create([
@@ -64,10 +70,9 @@ class BankController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function show(Bank $bank)
+    public function show(Bank $bank): array
     {
         $bank_det = new BankResource($bank);
 
@@ -81,11 +86,9 @@ class BankController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return array<string, mixed>
      */
-    public function update(Request $request, Bank $bank)
+    public function update(Request $request, Bank $bank): array
     {
         $bank->update($request->all());
 
@@ -101,10 +104,9 @@ class BankController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response|ResponseFactory
      */
-    public function destroy(Bank $bank)
+    public function destroy(Bank $bank): Response|ResponseFactory
     {
         $bank->delete();
 

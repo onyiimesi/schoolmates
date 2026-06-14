@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
@@ -96,15 +97,16 @@ class PreSchoolResult extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
 
-    public function preschoolresultextracurricular()
-    {
-        return $this->hasMany(PreSchoolResultExtraCurricular::class, 'pre_school_result_id', 'id');
-    }
     protected function casts(): array
     {
         return [
             'evaluation_report' => 'array',
             'cognitive_development' => 'array'
         ];
+    }
+
+    public function preschoolresultextracurricular(): HasMany
+    {
+        return $this->hasMany(PreSchoolResultExtraCurricular::class, 'pre_school_result_id', 'id');
     }
 }

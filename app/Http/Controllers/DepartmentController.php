@@ -6,15 +6,20 @@ use App\Http\Requests\DepartmentRequest;
 use App\Http\Resources\DepartmentResource;
 use App\Models\Department;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\Response;
 
 class DepartmentController extends Controller
 {
     use HttpResponses;
 
-    public function index(\Illuminate\Http\Request $request)
+    public function index(\Illuminate\Http\Request $request): JsonResponse
     {
+        /** @var Staff $user */
         $user = Auth::user();
         $campus = $request->query('campus');
 
@@ -29,9 +34,11 @@ class DepartmentController extends Controller
         return $this->success($depart, 'All Departments Fetched Successfully');
     }
 
-    public function store(DepartmentRequest $request)
+    public function store(DepartmentRequest $request): JsonResponse
     {
         $request->validated($request->all());
+
+        /** @var Staff $user */
         $user = Auth::user();
 
         $departm = Department::create([
@@ -44,14 +51,14 @@ class DepartmentController extends Controller
         return $this->success($departm, 'Department Created Successfully');
     }
 
-    public function show(Department $department)
+    public function show(Department $department): JsonResponse
     {
         $departments = new DepartmentResource($department);
 
         return $this->success($departments, 'Department Details');
     }
 
-    public function update(Request $request, Department $department)
+    public function update(Request $request, Department $department): JsonResponse
     {
         $department->update($request->all());
 
@@ -60,13 +67,7 @@ class DepartmentController extends Controller
         return $this->success($depart, 'Updated Successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Department $department)
+    public function destroy(Department $department): Response|ResponseFactory
     {
         $department->delete();
 

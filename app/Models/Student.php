@@ -6,6 +6,8 @@ use App\Enum\StaffStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
@@ -154,27 +156,27 @@ class Student extends Authenticatable implements Auditable
         });
     }
 
-    public function school()
+    public function school(): BelongsTo
     {
         return $this->belongsTo(Schools::class, 'sch_id', 'sch_id');
     }
 
-    public function assignmentanswer()
+    public function assignmentanswer(): HasMany
     {
         return $this->hasMany(AssignmentAnswer::class);
     }
 
-    public function results()
+    public function results(): HasMany
     {
         return $this->hasMany(Result::class, 'student_id');
     }
 
-    public function getCampus()
+    public function getCampus(): ?Campus
     {
         return Campus::where('name', $this->campus)->first() ?? null;
     }
 
-    protected function hos(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function hos(): Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function () {
             return Staff::select('id', 'surname', 'firstname', 'middlename', 'signature')
@@ -202,7 +204,7 @@ class Student extends Authenticatable implements Auditable
         );
     }
 
-    protected static function studentCountByClass(User $user, string $class)
+    public static function studentCountByClass(Staff|Student $user, string $class): int
     {
         return self::where([
             'sch_id' => $user->sch_id,
@@ -210,6 +212,7 @@ class Student extends Authenticatable implements Auditable
             'present_class' => $class,
         ])->count();
     }
+
     protected function casts(): array
     {
         return [

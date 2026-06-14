@@ -57,12 +57,18 @@ class AcademicCalenderController extends Controller
         if($request->file){
             $cleanSchId = preg_replace("/[^a-zA-Z0-9]/", "", $user->sch_id);
 
-            $file = $request->file;
+            $file = (string) $request->file;
             $baseFolder = 'calender';
             $userFolder = $cleanSchId;
             $folderPath = public_path($baseFolder . '/' . $userFolder);
             $folderName = config('services.calender_folder') . '/' . $cleanSchId;
-            $extension = explode('/', explode(':', substr($file, 0, strpos($file, ';')))[1])[1];
+            preg_match('/^data:(.*)\/(.*);base64,/', $file, $matches);
+
+            if (!isset($matches[2])) {
+                throw new \InvalidArgumentException('Invalid base64 file format.');
+            }
+
+            $extension = $matches[2];
             $replace = substr($file, 0, strpos($file, ',')+1);
             $image = str_replace($replace, '', $file);
 
@@ -101,9 +107,8 @@ class AcademicCalenderController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): void
     {
         //
     }
@@ -112,9 +117,8 @@ class AcademicCalenderController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id): void
     {
         //
     }

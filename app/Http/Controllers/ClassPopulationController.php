@@ -8,6 +8,7 @@ use App\Models\Staff;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -16,36 +17,42 @@ class ClassPopulationController extends Controller
 {
     use HttpResponses;
 
-    public function getClassPopulation()
+    public function getClassPopulation(): JsonResponse
     {
-        $staff = Auth::user();
+        /** @var Staff $user */
+        $user = Auth::user();
 
-        $class = Student::where('present_class', $staff->class_assigned)
-            ->where('sch_id', $staff->sch_id)
-            ->where('campus', $staff->campus)
+        $class = Student::where('present_class', $user->class_assigned)
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
             ->count();
 
         return $this->success($class, "Class population");
     }
 
-    public function getStudentPopulation()
+    public function getStudentPopulation(): JsonResponse
     {
+        /** @var Staff $staff */
         $staff = Auth::user();
+
         $studentCount = Student::where('sch_id', $staff->sch_id)->count();
 
         return $this->success($studentCount, "Total Student Population");
     }
 
-    public function getStaffPopulation()
+    public function getStaffPopulation(): JsonResponse
     {
+        /** @var Staff $staff */
         $staff = Auth::user();
+
         $staffCount = Staff::where('sch_id', $staff->sch_id)->count();
 
         return $this->success($staffCount, "Total Staff Population");
     }
 
-    public function getTeacherPopulation()
+    public function getTeacherPopulation(): JsonResponse
     {
+        /** @var Staff $staff */
         $staff = Auth::user();
 
         $totalCount = Staff::where('designation_id', '4')
@@ -55,9 +62,11 @@ class ClassPopulationController extends Controller
         return $this->success($totalCount, "Total Teacher Population");
     }
 
-    public function getSchoolPopulation()
+    public function getSchoolPopulation(): JsonResponse
     {
+        /** @var Staff $user */
         $user = Auth::user();
+
         $cacheKey = "school_population_{$user->sch_id}";
 
         $data = Cache::remember($cacheKey, now()->addHour(), function () use ($user) {
