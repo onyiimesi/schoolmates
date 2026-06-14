@@ -34,17 +34,20 @@ class ResultController extends Controller
             return $this->error(null, "Unsupported period value: {$request->period}", 400);
         }
 
+        $match = [
+            'sch_id' => $teacher->sch_id,
+            'campus' => $teacher->campus,
+            'student_id' => $request->student_id,
+            'period' => $request->period,
+            'term' => $request->term,
+            'session' => $request->input('session'),
+            'result_type' => $request->result_type,
+        ];
+
         try {
-            return DB::transaction(function () use ($teacher, $request) {
-                $match = [
-                    'sch_id' => $teacher->sch_id,
-                    'campus' => $teacher->campus,
-                    'student_id' => $request->student_id,
-                    'period' => $request->period,
-                    'term' => $request->term,
-                    'session' => $request->input('session'),
-                    'result_type' => $request->result_type,
-                ];
+            return DB::transaction(function () use ($teacher, $request, $match) {
+
+                $existingResult = Result::where($match)->first();
 
                 $data = [
                     'campus_type' => $teacher->campus_type,
@@ -53,19 +56,35 @@ class ResultController extends Controller
                     'admission_number' => $request->admission_number,
                     'class_name' => $request->class_name,
                     'computed_midterm' => true,
-                    'teacher_comment' => $request->teacher_comment,
                     'status' => ResultStatus::NOTRELEASED->value,
                 ];
 
-                $result = Result::updateOrCreate($match, $data);
-                $this->saveStudentScores($result, $request->results);
+                // Only class teachers can set/update comments
+                if ($teacher->teacher_type === 'class teacher') {
+                    $data['teacher_comment'] = $request->teacher_comment
+                        ?? $existingResult?->teacher_comment;
+                }
 
-                $message = $result->wasRecentlyCreated ? 'Computed Successfully' : 'Updated Successfully';
+                $resultData = Result::updateOrCreate($match, $data);
 
-                return $this->success(null, $message, $result->wasRecentlyCreated ? 201 : 200);
+                $this->saveStudentScores($resultData, $request->results);
+
+                $message = $resultData->wasRecentlyCreated
+                    ? 'Computed Successfully'
+                    : 'Updated Successfully';
+
+                return $this->success(
+                    null,
+                    $message,
+                    $resultData->wasRecentlyCreated ? 201 : 200
+                );
             });
         } catch (\Throwable $th) {
-            return $this->error(null, "An error occurred: {$th->getMessage()}", 400);
+            return $this->error(
+                null,
+                "An error occurred: {$th->getMessage()}",
+                400
+            );
         }
     }
 
