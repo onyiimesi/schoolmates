@@ -15,138 +15,168 @@ class ResultPresenter
 {
     public function getGpa(Result $result): array
     {
-        $studentResults = Result::with(['studentScores' => function ($query) {
-            $query->where('score', '>', 0);
-        }])
+        $studentResults = Result::with([
+            "studentScores" => function ($query) {
+                $query->where("score", ">", 0);
+            },
+        ])
             ->where([
-                'sch_id' => $result->sch_id,
-                'campus' => $result->campus,
-                'student_id' => $result->student_id,
-                'class_name' => $result->class_name,
-                'term' => $result->term,
-                'session' => $result->session,
+                "sch_id" => $result->sch_id,
+                "campus" => $result->campus,
+                "student_id" => $result->student_id,
+                "class_name" => $result->class_name,
+                "term" => $result->term,
+                "session" => $result->session,
             ])
             ->get();
 
-        $subjectScores = $result->studentScores?->filter(fn($s) => $s->score > 0) ?? collect();   
+        $subjectScores =
+            $result->studentScores?->filter(fn($s) => $s->score > 0) ??
+            collect();
         $scores = $studentResults->flatMap->studentScores;
-        $totalScore = $scores->sum('score');
-        $totalSubjects = $subjectScores->unique('subject')->count();
+        $totalScore = $scores->sum("score");
+        $totalSubjects = $subjectScores->unique("subject")->count();
         $expectedScore = $totalSubjects * 100;
-        $gpa = ($expectedScore > 0) ? round(($totalScore / $expectedScore) * 5, 2) : 0;
+        $gpa =
+            $expectedScore > 0
+                ? round(($totalScore / $expectedScore) * 5, 2)
+                : 0;
 
         return [
-            'total_score' => $totalScore,
-            'total_subjects' => $totalSubjects,
-            'student_average' => $totalSubjects > 0 ? round($totalScore / $totalSubjects, 2) : 0,
-            'gpa' => $gpa
+            "total_score" => $totalScore,
+            "total_subjects" => $totalSubjects,
+            "student_average" =>
+                $totalSubjects > 0 ? round($totalScore / $totalSubjects, 2) : 0,
+            "gpa" => $gpa,
         ];
     }
 
     public function getClassStats(Result $result): array
     {
-        $classResults = Result::with(['studentScores' => function ($query) {
-            $query->where('score', '>', 0);
-        }])
-            ->where('sch_id', $result->sch_id)
-            ->where('campus', $result->campus)
-            ->where('class_name', $result->class_name)
-            ->where('term', $result->term)
-            ->where('session', $result->session)
+        $classResults = Result::with([
+            "studentScores" => function ($query) {
+                $query->where("score", ">", 0);
+            },
+        ])
+            ->where("sch_id", $result->sch_id)
+            ->where("campus", $result->campus)
+            ->where("class_name", $result->class_name)
+            ->where("term", $result->term)
+            ->where("session", $result->session)
             ->get();
 
-        $studentAverages = $classResults->map(function ($r) {
-            $scores = $r->studentScores?->pluck('score') ?? collect();
-            $totalSubjects = $scores->count();
-            return [
-                'student_id' => $r->student_id,
-                'average' => $totalSubjects > 0 ? $scores->sum() / $totalSubjects : 0,
-            ];
-        })->sortByDesc('average')->values();
+        $studentAverages = $classResults
+            ->groupBy("student_id")
+            ->map(function ($r) {
+                $scores = $r->studentScores?->pluck("score") ?? collect();
+                $totalSubjects = $scores->count();
+                return [
+                    "student_id" => $r->student_id,
+                    "average" =>
+                        $totalSubjects > 0
+                            ? $scores->sum() / $totalSubjects
+                            : 0,
+                ];
+            })
+            ->sortByDesc("average")
+            ->values();
 
-        $position = $studentAverages->search(fn($r) => $r['student_id'] === $result->student_id) + 1;
+        $position =
+            $studentAverages->search(
+                fn($r) => $r["student_id"] === $result->student_id,
+            ) + 1;
 
         // Calculate the sum of all student averages
-        $totalStudentAverages = $studentAverages->sum('average');
+        $totalStudentAverages = $studentAverages->sum("average");
 
         $scores = $classResults->flatMap->studentScores;
-        $classTotalScore = $scores->sum('score');
-        $classCount = $classResults->pluck('student_id')->unique()->count();
+        $classTotalScore = $scores->sum("score");
+        $classCount = $classResults->pluck("student_id")->unique()->count();
 
-        if (in_array($result->term, ['First Term', 'Second Term'])) {
+        if (in_array($result->term, ["First Term", "Second Term"])) {
             $subjectCount = $result->studentScores
-                ->where('score', '>', 0)
-                ->pluck('subject')
+                ->where("score", ">", 0)
+                ->pluck("subject")
                 ->unique()
                 ->count();
-            $classAverage = ($classCount > 0 && $subjectCount > 0)
-                ? round($classTotalScore / ($classCount * $subjectCount), 2)
-                : 0;
+            $classAverage =
+                $classCount > 0 && $subjectCount > 0
+                    ? round($classTotalScore / ($classCount * $subjectCount), 2)
+                    : 0;
         } else {
-            $classAverage = $classCount > 0 ? round($totalStudentAverages / $classCount, 2) : 0;
+            $classAverage =
+                $classCount > 0
+                    ? round($totalStudentAverages / $classCount, 2)
+                    : 0;
         }
 
-        $classGrade = GradingSystem::where('sch_id', $result->sch_id)
-            ->where('campus', $result->campus)
-            ->where('score_to', '>=', $classAverage)
+        $classGrade = GradingSystem::where("sch_id", $result->sch_id)
+            ->where("campus", $result->campus)
+            ->where("score_to", ">=", $classAverage)
             ->first();
 
-        $grade = $classAverage > 90 ? 'EXCELLENT' : ($classGrade->remark ?? '');
+        $grade = $classAverage > 90 ? "EXCELLENT" : $classGrade->remark ?? "";
 
         return [
-            'class_total_score' => $classTotalScore,
-            'class_count' => $classCount,
-            'class_average' => $classAverage,
-            'class_grade' => $grade,
-            'position' => $position,
+            "class_total_score" => $classTotalScore,
+            "class_count" => $classCount,
+            "class_average" => $classAverage,
+            "class_grade" => $grade,
+            "position" => $position,
         ];
     }
 
     public function getMetadata(Result $result, string $className): array
     {
         $class = ClassModel::where([
-            'sch_id' => $result->sch_id,
-            'campus' => $result->campus,
-            'class_name' => $className
+            "sch_id" => $result->sch_id,
+            "campus" => $result->campus,
+            "class_name" => $className,
         ])->first();
 
         $staff = Staff::where([
-            'sch_id' => $result->sch_id,
-            'campus' => $result->campus,
-            'class_assigned' => $className,
-            'status' => StaffStatus::ACTIVE,
+            "sch_id" => $result->sch_id,
+            "campus" => $result->campus,
+            "class_assigned" => $className,
+            "status" => StaffStatus::ACTIVE,
         ])->get();
 
-        $hodQuery = Staff::where('sch_id', $result->sch_id)
-            ->where('campus', $result->campus)
-            ->where('id', $result->hos_id)
-            ->where('designation_id', 3)
-            ->where('status', StaffStatus::ACTIVE)
-            ->when($class && $class->class_type !== null, fn($q) => $q->where('class_type', $class->class_type));
+        $hodQuery = Staff::where("sch_id", $result->sch_id)
+            ->where("campus", $result->campus)
+            ->where("id", $result->hos_id)
+            ->where("designation_id", 3)
+            ->where("status", StaffStatus::ACTIVE)
+            ->when(
+                $class && $class->class_type !== null,
+                fn($q) => $q->where("class_type", $class->class_type),
+            );
 
-        $dos = Schools::where('sch_id', $result->sch_id)->value('dos');
+        $dos = Schools::where("sch_id", $result->sch_id)->value("dos");
 
         return [
-            'staff' => $staff,
-            'hods' => $hodQuery->get(),
-            'dos' => $dos
+            "staff" => $staff,
+            "hods" => $hodQuery->get(),
+            "dos" => $dos,
         ];
     }
 
     public function getSubjectAverages(Result $result): array
     {
         return StudentScore::query()
-            ->whereHas('result', fn($q) => $q->where([
-                'sch_id' => $result->sch_id,
-                'campus' => $result->campus,
-                'class_name' => $result->class_name,
-                'term' => $result->term,
-                'session' => $result->session,
-            ]))
-            ->whereNotNull('score')
-            ->selectRaw('subject, ROUND(AVG(score), 2) as avg_score')
-            ->groupBy('subject')
-            ->pluck('avg_score', 'subject')
+            ->whereHas(
+                "result",
+                fn($q) => $q->where([
+                    "sch_id" => $result->sch_id,
+                    "campus" => $result->campus,
+                    "class_name" => $result->class_name,
+                    "term" => $result->term,
+                    "session" => $result->session,
+                ]),
+            )
+            ->whereNotNull("score")
+            ->selectRaw("subject, ROUND(AVG(score), 2) as avg_score")
+            ->groupBy("subject")
+            ->pluck("avg_score", "subject")
             ->map(fn($v) => (float) $v)
             ->toArray();
     }
@@ -160,15 +190,15 @@ class ResultPresenter
             $subject = $score->subject;
 
             // Fetch scores for this subject across ALL periods (no period filter)
-            $allScores = StudentScore::with('result')
-                ->where('subject', $subject)
-                ->whereHas('result', function ($query) use ($result) {
+            $allScores = StudentScore::with("result")
+                ->where("subject", $subject)
+                ->whereHas("result", function ($query) use ($result) {
                     $query->where([
-                        'sch_id' => $result->sch_id,
-                        'campus' => $result->campus,
-                        'class_name' => $result->class_name,
-                        'term' => $result->term,
-                        'session' => $result->session,
+                        "sch_id" => $result->sch_id,
+                        "campus" => $result->campus,
+                        "class_name" => $result->class_name,
+                        "term" => $result->term,
+                        "session" => $result->session,
                     ]);
                 })
                 ->get();
@@ -176,11 +206,13 @@ class ResultPresenter
             // Group by student, sum their scores across all periods, sort descending
             $studentTotals = $allScores
                 ->groupBy(fn($entry) => $entry->result?->student_id)
-                ->map(fn($entries, $studentId) => [
-                    'student_id' => $studentId,
-                    'total' => (float) $entries->sum('score'),
-                ])
-                ->sortByDesc('total')
+                ->map(
+                    fn($entries, $studentId) => [
+                        "student_id" => $studentId,
+                        "total" => (float) $entries->sum("score"),
+                    ],
+                )
+                ->sortByDesc("total")
                 ->values();
 
             // Tie-aware ranking
@@ -190,8 +222,8 @@ class ResultPresenter
             $tieCount = 0;
 
             foreach ($studentTotals as $entry) {
-                $studentId = $entry['student_id'];
-                $total = $entry['total'];
+                $studentId = $entry["student_id"];
+                $total = $entry["total"];
 
                 if ($total !== $prevTotal) {
                     $rank += $tieCount;
