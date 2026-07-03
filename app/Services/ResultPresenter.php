@@ -67,14 +67,16 @@ class ResultPresenter
 
         $studentAverages = $classResults
             ->groupBy("student_id")
-            ->map(function ($r) {
-                $scores = $r->studentScores?->pluck("score") ?? collect();
-                $totalSubjects = $scores->count();
+            ->map(function ($results, $studentId) {
+                $allScores = $results->flatMap(
+                    fn($r) => $r->studentScores?->pluck("score") ?? collect(),
+                );
+                $totalSubjects = $allScores->count();
                 return [
-                    "student_id" => $r->student_id,
+                    "student_id" => $studentId,
                     "average" =>
                         $totalSubjects > 0
-                            ? $scores->sum() / $totalSubjects
+                            ? $allScores->sum() / $totalSubjects
                             : 0,
                 ];
             })
