@@ -15,84 +15,92 @@ class GeneralResultService
 
     public function firstHalf($user, array $params)
     {
-        if ($params['period'] !== PeriodicName::FIRSTHALF) {
-            return $this->error(null, 'Invalid Period', 400);
+        if ($params["period"] !== PeriodicName::FIRSTHALF) {
+            return $this->error(null, "Invalid Period", 400);
         }
 
         $scoreSetting = $this->getScoreSetting($user);
 
         if (!$scoreSetting || !$scoreSetting->scoreOption) {
-            return $this->error(null, 'Score setting not found', 400);
+            return $this->error(null, "Score setting not found", 400);
         }
 
         $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
 
         $data = [
-            'students' => $this->getStudentsByClass($user, $params['class']),
-            'subjects' => $this->getSubjects($user, $params),
+            "students" => $this->getStudentsByClass($user, $params["class"]),
+            "subjects" => $this->getSubjects($user, $params),
         ];
 
         $assessmentTypes = $this->getAssessmentTypes($assessmentType);
 
         foreach ($assessmentTypes as $resultType) {
-            $data[$resultType] = $this->getAssessmentResults($user, $params, $resultType);
+            $data[$resultType] = $this->getAssessmentResults(
+                $user,
+                $params,
+                $resultType,
+            );
         }
 
-        return $this->success($data, 'Mid term result');
+        return $this->success($data, "Mid term result");
     }
 
     public function secondHalf($user, array $params)
     {
-        if ($params['period'] !== PeriodicName::SECONDHALF) {
-            return $this->error(null, 'Invalid Period', 400);
+        if ($params["period"] !== PeriodicName::SECONDHALF) {
+            return $this->error(null, "Invalid Period", 400);
         }
 
         $scoreSetting = $this->getScoreSetting($user);
 
         if (!$scoreSetting || !$scoreSetting->scoreOption) {
-            return $this->error(null, 'Score setting not found', 400);
+            return $this->error(null, "Score setting not found", 400);
         }
 
         $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
 
         $endTermResults = Result::with([
-            'student',
-            'studentScores',
-            'affectiveDispositions',
-            'psychomotorskill',
-            'resultExtraCurriculars',
-            'abacus',
-            'psychomotorPerformances',
-            'pupilReports',
+            "student",
+            "studentScores",
+            "affectiveDispositions",
+            "psychomotorskill",
+            "resultExtraCurriculars",
+            "abacus",
+            "psychomotorPerformances",
+            "pupilReports",
         ])
             ->where([
-                'sch_id' => $user->sch_id,
-                'campus' => $user->campus,
-                'student_id' => $params['student_id'],
-                'period' => $params['period'],
-                'term' => $params['term'],
-                'session' => $params['session'],
-                'result_type' => $params['result_type'],
+                "sch_id" => $user->sch_id,
+                "campus" => $user->campus,
+                "student_id" => $params["student_id"],
+                "period" => $params["period"],
+                "term" => $params["term"],
+                "session" => $params["session"],
+                "result_type" => $params["result_type"],
             ])
-            ->when(!empty($params['status']), function ($query) use ($params) {
-                $query->where('status', $params['status']);
+            ->when(!empty($params["status"]), function ($query) use ($params) {
+                $query->where("status", $params["status"]);
             })
             ->get();
 
         $data = [
-            'students' => $this->getStudentsByClass($user, $params['class']),
-            'subjects' => $this->getSubjects($user, $params),
-            'grading' => $this->getGrading($user),
-            'extra_curricular' => $this->getExtraCurricular($user),
-            'results' => ResultResource::collection($endTermResults),
+            "students" => $this->getStudentsByClass($user, $params["class"]),
+            "subjects" => $this->getSubjects($user, $params),
+            "grading" => $this->getGrading($user),
+            "extra_curricular" => $this->getExtraCurricular($user),
+            "results" => ResultResource::collection($endTermResults),
         ];
 
         $assessmentTypes = $this->getAssessmentTypes($assessmentType);
 
         foreach ($assessmentTypes as $resultType) {
-            $data[$resultType] = $this->getAssessmentResults($user, $params, $resultType);
+            $data[$resultType] = $this->getAssessmentResults(
+                $user,
+                $params,
+                $resultType,
+            );
         }
 
-        return $this->success($data, 'Retrieved successfully');
+        return $this->success($data, "Retrieved successfully");
     }
 }

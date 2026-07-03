@@ -24,47 +24,53 @@ class ResultController extends Controller
 {
     use HttpResponses, ResultBase;
 
-    public function __construct(
-        protected ResultService $resultService
-    ) {}
+    public function __construct(protected ResultService $resultService) {}
 
     public function midTerm(MidtermRequest $request)
     {
         $teacher = Auth::user();
 
         if ($request->period !== PeriodicName::FIRSTHALF) {
-            return $this->error(null, "Unsupported period value: {$request->period}", 400);
+            return $this->error(
+                null,
+                "Unsupported period value: {$request->period}",
+                400,
+            );
         }
 
         $match = [
-            'sch_id' => $teacher->sch_id,
-            'campus' => $teacher->campus,
-            'student_id' => $request->student_id,
-            'period' => $request->period,
-            'term' => $request->term,
-            'session' => $request->input('session'),
-            'result_type' => $request->result_type,
+            "sch_id" => $teacher->sch_id,
+            "campus" => $teacher->campus,
+            "student_id" => $request->student_id,
+            "period" => $request->period,
+            "term" => $request->term,
+            "session" => $request->input("session"),
+            "result_type" => $request->result_type,
         ];
 
         try {
-            return DB::transaction(function () use ($teacher, $request, $match) {
-
+            return DB::transaction(function () use (
+                $teacher,
+                $request,
+                $match,
+            ) {
                 $existingResult = Result::where($match)->first();
 
                 $data = [
-                    'campus_type' => $teacher->campus_type,
-                    'teacher_id' => $teacher->id,
-                    'student_fullname' => $request->student_fullname,
-                    'admission_number' => $request->admission_number,
-                    'class_name' => $request->class_name,
-                    'computed_midterm' => true,
-                    'status' => ResultStatus::NOTRELEASED->value,
+                    "campus_type" => $teacher->campus_type,
+                    "teacher_id" => $teacher->id,
+                    "student_fullname" => $request->student_fullname,
+                    "admission_number" => $request->admission_number,
+                    "class_name" => $request->class_name,
+                    "computed_midterm" => true,
+                    "status" => ResultStatus::NOTRELEASED->value,
                 ];
 
                 // Only class teachers can set/update comments
-                if ($teacher->teacher_type === 'class teacher') {
-                    $data['teacher_comment'] = $request->teacher_comment
-                        ?? $existingResult?->teacher_comment;
+                if ($teacher->teacher_type === "class teacher") {
+                    $data["teacher_comment"] =
+                        $request->teacher_comment ??
+                        $existingResult?->teacher_comment;
                 }
 
                 $resultData = Result::updateOrCreate($match, $data);
@@ -72,20 +78,20 @@ class ResultController extends Controller
                 $this->saveStudentScores($resultData, $request->results);
 
                 $message = $resultData->wasRecentlyCreated
-                    ? 'Computed Successfully'
-                    : 'Updated Successfully';
+                    ? "Computed Successfully"
+                    : "Updated Successfully";
 
                 return $this->success(
                     null,
                     $message,
-                    $resultData->wasRecentlyCreated ? 201 : 200
+                    $resultData->wasRecentlyCreated ? 201 : 200,
                 );
             });
         } catch (\Throwable $th) {
             return $this->error(
                 null,
                 "An error occurred: {$th->getMessage()}",
-                400
+                400,
             );
         }
     }
@@ -99,11 +105,11 @@ class ResultController extends Controller
             return $validate;
         }
 
-        $hos = Staff::where('id', $request->hos_id)
-            ->where('status', StaffStatus::ACTIVE)
+        $hos = Staff::where("id", $request->hos_id)
+            ->where("status", StaffStatus::ACTIVE)
             ->first();
 
-        if (! $hos) {
+        if (!$hos) {
             return $this->error(null, "HOS not found", 400);
         }
 
@@ -113,57 +119,74 @@ class ResultController extends Controller
 
                 return $existingResult === null
                     ? $this->handleNewResult($request, $teacher, $hos)
-                    : $this->handleExistingResult($request, $teacher, $hos, $existingResult);
+                    : $this->handleExistingResult(
+                        $request,
+                        $teacher,
+                        $hos,
+                        $existingResult,
+                    );
             });
         } catch (\Throwable $th) {
-            return $this->error(null, "An error occurred: {$th->getMessage()}", 400);
+            return $this->error(
+                null,
+                "An error occurred: {$th->getMessage()}",
+                400,
+            );
         }
     }
 
-    public function release(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
-    {
+    public function release(
+        ReleaseResultRequest $request,
+        ClearCacheAction $clearCacheAction,
+    ) {
         $auth = userAuth();
-        $studentIds = collect($request->students)->pluck('student_id')->toArray();
+        $studentIds = collect($request->students)
+            ->pluck("student_id")
+            ->toArray();
 
         if (empty($studentIds)) {
-            return $this->error(null, 'No students selected.', 400);
+            return $this->error(null, "No students selected.", 400);
         }
 
         $clearCacheAction->handle($request, $studentIds[0], true);
 
-        Result::where('sch_id', $auth->sch_id)
-            ->where('campus', $auth->campus)
-            ->where('period', $request->period)
-            ->where('term', $request->term)
-            ->where('session', $request->input('session'))
-            ->where('result_type', $request->result_type)
-            ->whereIn('student_id', $studentIds)
-            ->update(['status' => ResultStatus::RELEASED->value]);
+        Result::where("sch_id", $auth->sch_id)
+            ->where("campus", $auth->campus)
+            ->where("period", $request->period)
+            ->where("term", $request->term)
+            ->where("session", $request->input("session"))
+            ->where("result_type", $request->result_type)
+            ->whereIn("student_id", $studentIds)
+            ->update(["status" => ResultStatus::RELEASED->value]);
 
-        return $this->success(null, 'Result released');
+        return $this->success(null, "Result released");
     }
 
-    public function hold(ReleaseResultRequest $request, ClearCacheAction $clearCacheAction)
-    {
+    public function hold(
+        ReleaseResultRequest $request,
+        ClearCacheAction $clearCacheAction,
+    ) {
         $auth = userAuth();
-        $studentIds = collect($request->students)->pluck('student_id')->toArray();
+        $studentIds = collect($request->students)
+            ->pluck("student_id")
+            ->toArray();
 
         if (empty($studentIds)) {
-            return $this->error(null, 'No students selected.', 400);
+            return $this->error(null, "No students selected.", 400);
         }
 
         $clearCacheAction->handle($request, $studentIds[0], true);
 
-        Result::where('sch_id', $auth->sch_id)
-            ->where('campus', $auth->campus)
-            ->where('period', $request->period)
-            ->where('term', $request->term)
-            ->where('session', $request->input('session'))
-            ->where('result_type', $request->result_type)
-            ->whereIn('student_id', $studentIds)
-            ->update(['status' => ResultStatus::WITHELD->value]);
+        Result::where("sch_id", $auth->sch_id)
+            ->where("campus", $auth->campus)
+            ->where("period", $request->period)
+            ->where("term", $request->term)
+            ->where("session", $request->input("session"))
+            ->where("result_type", $request->result_type)
+            ->whereIn("student_id", $studentIds)
+            ->update(["status" => ResultStatus::WITHELD->value]);
 
-        return $this->success(null, 'Result withheld');
+        return $this->success(null, "Result withheld");
     }
 
     public function getSettings()
@@ -174,8 +197,12 @@ class ResultController extends Controller
     public function storeSettings(Request $request)
     {
         $request->validate([
-            'campus' => ['required', 'string', 'max:255'],
-            'score_option_id' => ['required', 'integer', 'exists:score_options,id'],
+            "campus" => ["required", "string", "max:255"],
+            "score_option_id" => [
+                "required",
+                "integer",
+                "exists:score_options,id",
+            ],
         ]);
 
         return $this->resultService->storeSettings($request);
@@ -194,11 +221,11 @@ class ResultController extends Controller
     public function saveSheetSections(Request $request)
     {
         $request->validate([
-            'campus' => 'required|string',
-            'period' => 'required|string',
-            'term' => 'required|string',
-            'sheet_ids' => 'required|array',
-            'sheet_ids.*' => 'required|integer|exists:sheets,id',
+            "campus" => "required|string",
+            "period" => "required|string",
+            "term" => "required|string",
+            "sheet_ids" => "required|array",
+            "sheet_ids.*" => "required|integer|exists:sheets,id",
         ]);
 
         return $this->resultService->saveSheetSections($request);
@@ -209,11 +236,17 @@ class ResultController extends Controller
         return $this->resultService->getSchoolSheetSettings();
     }
 
-    public function getResult(GetResultRequest $request, GeneralResultService $generalResultService)
-    {
+    public function getResult(
+        GetResultRequest $request,
+        GeneralResultService $generalResultService,
+    ) {
         $user = userAuth();
         $validated = $request->validated();
 
-        return $this->getStudentResults($user, $validated, $generalResultService);
+        return $this->getStudentResults(
+            $user,
+            $validated,
+            $generalResultService,
+        );
     }
 }
