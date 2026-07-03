@@ -66,14 +66,14 @@ class ResultPresenter
             ->get();
 
         $studentAverages = $classResults
-            ->groupBy("student_id")
+            ->groupBy(fn($r) => (string) $r->student_id)
             ->map(function ($results, $studentId) {
                 $allScores = $results->flatMap(
                     fn($r) => $r->studentScores?->pluck("score") ?? collect(),
                 );
                 $totalSubjects = $allScores->count();
                 return [
-                    "student_id" => $studentId,
+                    "student_id" => (string) $studentId,
                     "average" =>
                         $totalSubjects > 0
                             ? $allScores->sum() / $totalSubjects
@@ -84,16 +84,15 @@ class ResultPresenter
             ->values();
 
         $position =
-            $studentAverages->search(
-                fn($r) => $r["student_id"] === $result->student_id,
-            ) + 1;
+            $studentAverages
+                ->pluck("student_id")
+                ->search((string) $result->student_id) + 1;
 
-        // Calculate the sum of all student averages
         $totalStudentAverages = $studentAverages->sum("average");
 
         $scores = $classResults->flatMap->studentScores;
         $classTotalScore = $scores->sum("score");
-        $classCount = $classResults->pluck("student_id")->unique()->count();
+        $classCount = $studentAverages->count();
 
         if (in_array($result->term, ["First Term", "Second Term"])) {
             $subjectCount = $result->studentScores
