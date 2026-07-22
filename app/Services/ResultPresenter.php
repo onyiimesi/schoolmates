@@ -39,8 +39,8 @@ class ResultPresenter
         $expectedScore = $totalSubjects * 100;
         $gpa =
             $expectedScore > 0
-                ? round(($totalScore / $expectedScore) * 5, 2)
-                : 0;
+            ? round(($totalScore / $expectedScore) * 5, 2)
+            : 0;
 
         return [
             "total_score" => $totalScore,
@@ -76,8 +76,8 @@ class ResultPresenter
                     "student_id" => (string) $studentId,
                     "average" =>
                         $totalSubjects > 0
-                            ? $allScores->sum() / $totalSubjects
-                            : 0,
+                        ? $allScores->sum() / $totalSubjects
+                        : 0,
                 ];
             })
             ->sortByDesc("average")
@@ -102,13 +102,13 @@ class ResultPresenter
                 ->count();
             $classAverage =
                 $classCount > 0 && $subjectCount > 0
-                    ? round($classTotalScore / ($classCount * $subjectCount), 2)
-                    : 0;
+                ? round($classTotalScore / ($classCount * $subjectCount), 2)
+                : 0;
         } else {
             $classAverage =
                 $classCount > 0
-                    ? round($totalStudentAverages / $classCount, 2)
-                    : 0;
+                ? round($totalStudentAverages / $classCount, 2)
+                : 0;
         }
 
         $classGrade = GradingSystem::where("sch_id", $result->sch_id)
@@ -144,13 +144,13 @@ class ResultPresenter
 
         $hodQuery = Staff::where("sch_id", $result->sch_id)
             ->where("campus", $result->campus)
-            ->where("id", $result->hos_id)
             ->where("designation_id", 3)
             ->where("status", StaffStatus::ACTIVE)
             ->when(
                 $class && $class->class_type !== null,
                 fn($q) => $q->where("class_type", $class->class_type),
-            );
+            )
+            ->orderByRaw("id = ? DESC", [$result->hos_id]);
 
         $dos = Schools::where("sch_id", $result->sch_id)->value("dos");
 
