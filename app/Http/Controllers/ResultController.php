@@ -24,7 +24,9 @@ class ResultController extends Controller
 {
     use HttpResponses, ResultBase;
 
-    public function __construct(protected ResultService $resultService) {}
+    public function __construct(protected ResultService $resultService)
+    {
+    }
 
     public function midTerm(MidtermRequest $request)
     {
@@ -49,11 +51,7 @@ class ResultController extends Controller
         ];
 
         try {
-            return DB::transaction(function () use (
-                $teacher,
-                $request,
-                $match,
-            ) {
+            return DB::transaction(function () use ($teacher, $request, $match, ) {
                 $existingResult = Result::where($match)->first();
 
                 $data = [
