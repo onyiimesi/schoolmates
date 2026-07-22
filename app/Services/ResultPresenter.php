@@ -144,13 +144,13 @@ class ResultPresenter
 
         $hodQuery = Staff::where("sch_id", $result->sch_id)
             ->where("campus", $result->campus)
+            ->where("id", $result->hos_id)
             ->where("designation_id", 3)
             ->where("status", StaffStatus::ACTIVE)
             ->when(
                 $class && $class->class_type !== null,
                 fn($q) => $q->where("class_type", $class->class_type),
-            )
-            ->orderByRaw("id = ? DESC", [$result->hos_id]);
+            );
 
         $dos = Schools::where("sch_id", $result->sch_id)->value("dos");
 
