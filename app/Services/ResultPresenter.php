@@ -144,7 +144,6 @@ class ResultPresenter
 
         $hodQuery = Staff::where("sch_id", $result->sch_id)
             ->where("campus", $result->campus)
-            ->where("id", $result->hos_id)
             ->where("designation_id", 3)
             ->where("status", StaffStatus::ACTIVE)
             ->when(
