@@ -30,9 +30,15 @@ class AddStaffRequest extends FormRequest
             'image' => ['nullable', 'string'],
             'signature' => ['nullable', 'string'],
             'password' => ['required', 'string', Rules\Password::defaults()],
-            'teacher_type' => ['required', 'string', Rule::in(['class teacher', 'subject teacher'])],
+            'teacher_type' => [
+                Rule::requiredIf(fn() => $this->input('designation_id') == 4),
+                'exclude_unless:designation_id,4',
+                'string',
+                Rule::in(['class teacher', 'subject teacher']),
+            ],
             // Only validated when teacher_type is "class teacher" — ignored otherwise
             'class_assigned' => [
+                'exclude_unless:designation_id,4',
                 'exclude_unless:teacher_type,class teacher',
                 'required',
                 'string',
@@ -40,6 +46,7 @@ class AddStaffRequest extends FormRequest
             // Only validated when teacher_type is "subject teacher" — ignored otherwise
             // exclude_unless cascades to all subject_assignments.* children automatically
             'subject_assignments' => [
+                'exclude_unless:designation_id,4',
                 'exclude_unless:teacher_type,subject teacher',
                 'required',
                 'array',

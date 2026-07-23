@@ -51,7 +51,6 @@ class StaffController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StaffRequest $request)
@@ -195,13 +194,13 @@ class StaffController extends Controller
             'subjectTeachers' => function ($q) use ($period) {
                 if ($period) {
                     $q->where('term', $period->term)
-                      ->where('session', $period->session);
+                        ->where('session', $period->session);
                 }
             },
             'subjectTeachers.subjects' => function ($q) use ($period) {
                 if ($period) {
                     $q->where('term', $period->term)
-                      ->where('session', $period->session);
+                        ->where('session', $period->session);
                 }
             },
         ];

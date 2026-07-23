@@ -12,7 +12,8 @@ class StaffController extends Controller
 {
     public function __construct(
         private readonly StaffService $staffService
-    ) {}
+    ) {
+    }
 
     public function addStaff(AddStaffRequest $request)
     {
@@ -23,7 +24,7 @@ class StaffController extends Controller
     {
         $staff = Staff::find($id);
 
-        if (! $staff) {
+        if (!$staff) {
             return $this->error(null, 'Staff not found', 404);
         }
 
