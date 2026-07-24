@@ -36,7 +36,8 @@ trait CummulativeResult
                         'Rank' => null,
                         'Class Average' => null,
                         'Highest' => null,
-                        'Lowest' => null
+                        'Lowest' => null,
+                        '_terms_recorded' => [],
                     ];
                 }
             }
@@ -81,10 +82,19 @@ trait CummulativeResult
 
     public function updateSubjectScores(&$subject, $term, $scoreValue)
     {
-        $subject['Highest'] = is_null($subject['Highest']) ? $scoreValue : max($subject['Highest'], $scoreValue);
-        $subject['Lowest'] = is_null($subject['Lowest']) ? $scoreValue : min($subject['Lowest'], $scoreValue);
         $subject[$term] += $scoreValue;
         $subject['Total Score'] += $scoreValue;
+
+        // A score of 0 means the term wasn't done, not a real grade — so it
+        // shouldn't count toward Highest/Lowest or toward the terms-completed count.
+        if ($scoreValue > 0) {
+            $subject['Highest'] = is_null($subject['Highest']) ? $scoreValue : max($subject['Highest'], $scoreValue);
+            $subject['Lowest'] = is_null($subject['Lowest']) ? $scoreValue : min($subject['Lowest'], $scoreValue);
+
+            if (!in_array($term, $subject['_terms_recorded'], true)) {
+                $subject['_terms_recorded'][] = $term;
+            }
+        }
     }
 
     public function calculateClassAverage($totalStudents, $totalStudentsAverage)
@@ -102,6 +112,22 @@ trait CummulativeResult
             $subject['Average Score'] = ($subject['Total Score'] > 0) ? $subject['Total Score'] / 3 : 0;
             $subject['Remark'] = $this->getRemark($subject, $user);
             $subject['Class Average'] = $classAverage;
+        }
+
+        foreach ($subjects as $subjectName => &$subject) {
+            $subjectKey = $this->normalizeSubject($subjectName);
+            $subject['Rank'] = $subjectRanks[$subjectKey][$request->student_id] ?? null;
+
+            // Divide by however many terms actually have score data (2 or 3).
+            // Falls back to 3 if nothing was recorded, preserving old behavior.
+            $termsRecorded = count($subject['_terms_recorded'] ?? []);
+            $divisor = $termsRecorded > 0 ? $termsRecorded : 3;
+
+            $subject['Average Score'] = ($subject['Total Score'] > 0) ? $subject['Total Score'] / $divisor : 0;
+            $subject['Remark'] = $this->getRemark($subject, $user);
+            $subject['Class Average'] = $classAverage;
+
+            unset($subject['_terms_recorded']); // internal bookkeeping only, don't leak it
         }
     }
 
@@ -128,7 +154,7 @@ trait CummulativeResult
             ->where('campus', $user->campus)
             ->where('session', $request->session)
             ->where('class_name', $student->present_class)
-            ->whereHas('student', function($q) {
+            ->whereHas('student', function ($q) {
                 $q->where('status', StudentStatus::ACTIVE);
             })
             ->with('studentScores')
