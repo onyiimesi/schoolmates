@@ -109,8 +109,10 @@ class BroadSheetController extends Controller
         $totalScore = 0;
         foreach ($studentResults as $result) {
             foreach ($result->studentScores as $score) {
-                $subjectScores[$score->subject] = true;
-                $totalScore += (int) $score->score;
+                if ($score->score != 0) {
+                    $subjectScores[$score->subject] = true;
+                    $totalScore += (int) $score->score;
+                }
             }
         }
 
