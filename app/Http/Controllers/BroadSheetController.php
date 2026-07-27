@@ -104,16 +104,21 @@ class BroadSheetController extends Controller
     {
         $student = $studentResults->first();
 
-        $combinedScores = $this->buildSubjectScores($studentResults);
+        // Calculate average
+        $subjectScores = [];
+        $totalScore = 0;
+        foreach ($studentResults as $result) {
+            foreach ($result->studentScores as $score) {
+                $subjectScores[$score->subject] = true;
+                $totalScore += (int) $score->score;
+            }
+        }
 
-        // Only subjects the student actually offered count toward the average.
-        // A subject with no score rows, or every row recorded as 0, is treated
-        // as "not offered" and excluded from both the sum and the divisor.
-        $offeredSubjects = collect($combinedScores)->filter(fn($s) => $s['total_score'] > 0);
-
-        $totalScore = $offeredSubjects->sum('total_score');
-        $totalSubjects = $offeredSubjects->count();
+        $totalSubjects = count($subjectScores);
         $studentAverage = $totalSubjects > 0 ? $totalScore / $totalSubjects : 0;
+
+        // Build results per subject
+        $combinedScores = $this->buildSubjectScores($studentResults);
 
         return [
             "student_id" => $studentId,
