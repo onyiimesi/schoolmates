@@ -84,11 +84,7 @@ class BroadSheetController extends Controller
         $tieCount = 0;
         $prevAverage = null;
 
-        return $sorted->map(function ($student) use (
-            &$rank,
-            &$tieCount,
-            &$prevAverage,
-        ) {
+        return $sorted->map(function ($student) use (&$rank, &$tieCount, &$prevAverage, ) {
             $average = $student["student_average"]; // already a formatted string e.g. "85.50"
 
             if ($average !== $prevAverage) {
@@ -108,21 +104,16 @@ class BroadSheetController extends Controller
     {
         $student = $studentResults->first();
 
-        // Calculate average
-        $subjectScores = [];
-        $totalScore = 0;
-        foreach ($studentResults as $result) {
-            foreach ($result->studentScores as $score) {
-                $subjectScores[$score->subject] = true;
-                $totalScore += (int) $score->score;
-            }
-        }
-
-        $totalSubjects = count($subjectScores);
-        $studentAverage = $totalSubjects > 0 ? $totalScore / $totalSubjects : 0;
-
-        // Build results per subject
         $combinedScores = $this->buildSubjectScores($studentResults);
+
+        // Only subjects the student actually offered count toward the average.
+        // A subject with no score rows, or every row recorded as 0, is treated
+        // as "not offered" and excluded from both the sum and the divisor.
+        $offeredSubjects = collect($combinedScores)->filter(fn($s) => $s['total_score'] > 0);
+
+        $totalScore = $offeredSubjects->sum('total_score');
+        $totalSubjects = $offeredSubjects->count();
+        $studentAverage = $totalSubjects > 0 ? $totalScore / $totalSubjects : 0;
 
         return [
             "student_id" => $studentId,
@@ -138,9 +129,7 @@ class BroadSheetController extends Controller
     {
         return $studentResults
             ->flatMap(function ($result) {
-                return $result->studentScores->map(function ($score) use (
-                    $result,
-                ) {
+                return $result->studentScores->map(function ($score) use ($result, ) {
                     return [
                         "subject" => $score->subject,
                         "period" => $result->period,
