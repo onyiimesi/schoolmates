@@ -6,6 +6,7 @@ use App\Enum\StaffStatus;
 use App\Models\AcademicPeriod;
 use App\Models\Campus;
 use App\Models\ClassModel;
+use App\Models\PreSchool;
 use App\Models\Staff;
 use App\Models\Student;
 use App\Models\SubjectTeacher;
@@ -17,7 +18,7 @@ trait StaffTrait
 
     protected function validatePreCreationConstraints($user, ?Campus $campus, $request)
     {
-        if (! $campus) {
+        if (!$campus) {
             return $this->error(null, 'Campus does not exist', 404);
         }
 
@@ -34,24 +35,37 @@ trait StaffTrait
 
     protected function validateClassTeacherConstraint($user, $request)
     {
-        $class = ClassModel::where('sch_id', $user->sch_id)
+        $classExists = ClassModel::where('sch_id', $user->sch_id)
             ->where('campus', $request->campus)
             ->where('class_name', $request->class_assigned)
-            ->first();
+            ->exists();
 
-        if (! $class) {
-            return $this->error(null, "The class '{$request->class_assigned}' does'nt exist.", 404);
+        if (!$classExists) {
+            $preSchoolExists = PreSchool::where('sch_id', $user->sch_id)
+                ->where('campus', $request->campus)
+                ->where('name', $request->class_assigned)
+                ->exists();
+
+            if (!$preSchoolExists) {
+                return $this->error(null, "The class '{$request->class_assigned}' doesn't exist.", 404);
+            }
         }
 
         $classAlreadyTaken = Staff::where('sch_id', $user->sch_id)
             ->where('campus', $request->campus)
             ->where('class_assigned', $request->class_assigned)
             ->where('status', StaffStatus::ACTIVE)
+            ->when(
+                $request->staff_id,
+                fn($query, $staffId) => $query->where('id', '!=', $staffId)
+            )
             ->exists();
 
         if ($classAlreadyTaken) {
             return $this->error(null, "The class '{$request->class_assigned}' is already assigned.", 409);
         }
+
+        return null;
     }
 
     protected function validateSubjectTeacherConstraint($user, $request)
@@ -62,7 +76,7 @@ trait StaffTrait
             $request->subject_assignments
         );
 
-        return ! empty($conflicts)
+        return !empty($conflicts)
             ? $this->error(['conflicts' => $conflicts], 'Some subjects are already assigned.', 409)
             : null;
     }
@@ -146,7 +160,7 @@ trait StaffTrait
             ->where('is_current_period', true)
             ->first();
 
-        if (! $academicPeriod) {
+        if (!$academicPeriod) {
             return ['Academic period does not exist'];
         }
 
@@ -155,7 +169,7 @@ trait StaffTrait
             $class = ClassModel::find($classId);
             $className = $class?->class_name ?? $classId;
             $subjectNames = collect($assignment['subjects'])
-                ->map(fn ($s) => strtoupper(trim($s['name'])))
+                ->map(fn($s) => strtoupper(trim($s['name'])))
                 ->toArray();
 
             $query = SubjectTeacherSubject::where('sch_id', $schId)
@@ -192,12 +206,12 @@ trait StaffTrait
         foreach ($subjectAssignments as $assignment) {
             $class = ClassModel::findOrFail($assignment['class_id']);
             $subjectNames = collect($assignment['subjects'])
-                ->map(fn ($s) => strtoupper(trim($s['name'])))
+                ->map(fn($s) => strtoupper(trim($s['name'])))
                 ->toArray();
 
             // Legacy JSON format — kept for backward compatibility
             $subjectJson = collect($subjectNames)
-                ->map(fn ($name) => ['name' => $name])
+                ->map(fn($name) => ['name' => $name])
                 ->toArray();
 
             $subjectTeacher = SubjectTeacher::create([
@@ -212,7 +226,7 @@ trait StaffTrait
             ]);
 
             // Relational rows — the flexible, queryable source of truth
-            $relationalRows = collect($subjectNames)->map(fn ($name) => [
+            $relationalRows = collect($subjectNames)->map(fn($name) => [
                 'sch_id' => $staff->sch_id,
                 'campus' => $staff->campus,
                 'term' => $period->term ?? null,
@@ -276,7 +290,7 @@ trait StaffTrait
             $staff->id // exclude current staff's own assignments
         );
 
-        return ! empty($conflicts)
+        return !empty($conflicts)
             ? $this->error(['conflicts' => $conflicts], 'Some subjects are already assigned.', 409)
             : null;
     }
@@ -316,7 +330,7 @@ trait StaffTrait
             'signature' => $signaturePath['url'] ?? $staff->signature,
             'file_id' => $imagePath['file_id'] ?? $staff->file_id,
             'sig_id' => $signaturePath['file_id'] ?? $staff->sig_id,
-        ], fn ($value) => ! is_null($value)));
+        ], fn($value) => !is_null($value)));
 
         $staff->refresh();
 
@@ -383,11 +397,11 @@ trait StaffTrait
         foreach ($subjectAssignments as $assignment) {
             $class = ClassModel::findOrFail($assignment['class_id']);
             $subjectNames = collect($assignment['subjects'])
-                ->map(fn ($s) => strtoupper(trim($s['name'])))
+                ->map(fn($s) => strtoupper(trim($s['name'])))
                 ->toArray();
 
             $subjectJson = collect($subjectNames)
-                ->map(fn ($name) => ['name' => $name])
+                ->map(fn($name) => ['name' => $name])
                 ->toArray();
 
             // Update existing or create new SubjectTeacher record for this class
@@ -395,7 +409,7 @@ trait StaffTrait
                 [
                     'staff_id' => $staff->id,
                     'class_id' => $class->id,
-                    'term' => $period->term ?? null, 
+                    'term' => $period->term ?? null,
                     'session' => $period->session ?? null,
                 ],
                 [
@@ -411,23 +425,23 @@ trait StaffTrait
                 ->where('term', $period->term ?? null)
                 ->where('session', $period->session ?? null)
                 ->pluck('subject_name')
-                ->map(fn ($s) => strtoupper(trim($s)))
+                ->map(fn($s) => strtoupper(trim($s)))
                 ->toArray();
 
             $toAdd = array_diff($subjectNames, $existing);
             $toRemove = array_diff($existing, $subjectNames);
 
-            if (! empty($toRemove)) {
-               SubjectTeacherSubject::where('subject_teacher_id', $subjectTeacher->id)
+            if (!empty($toRemove)) {
+                SubjectTeacherSubject::where('subject_teacher_id', $subjectTeacher->id)
                     ->where('term', $period->term ?? null)
                     ->where('session', $period->session ?? null)
                     ->whereIn('subject_name', $toRemove)
                     ->delete();
             }
 
-            if (! empty($toAdd)) {
+            if (!empty($toAdd)) {
                 SubjectTeacherSubject::insert(
-                    collect($toAdd)->map(fn ($name) => [
+                    collect($toAdd)->map(fn($name) => [
                         'sch_id' => $staff->sch_id,
                         'campus' => $staff->campus,
                         'subject_teacher_id' => $subjectTeacher->id,
