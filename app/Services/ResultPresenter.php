@@ -94,12 +94,18 @@ class ResultPresenter
         $classTotalScore = $scores->sum("score");
         $classCount = $studentAverages->count();
 
-        if (in_array($result->term, ["First Term", "Second Term"])) {
+        if (
+            in_array(
+                strtolower($result->term),
+                [PeriodicName::FIRSTTERM, PeriodicName::SECONDTERM, PeriodicName::THIRDTERM]
+            )
+        ) {
             $subjectCount = $result->studentScores
                 ->where("score", ">", 0)
                 ->pluck("subject")
                 ->unique()
                 ->count();
+
             $classAverage =
                 $classCount > 0 && $subjectCount > 0
                 ? round($classTotalScore / ($classCount * $subjectCount), 2)
