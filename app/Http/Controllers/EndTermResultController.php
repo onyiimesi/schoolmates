@@ -115,18 +115,15 @@ class EndTermResultController extends Controller
 
     public function endaverage(Request $request)
     {
-        $studentsResults = $this->getResultsForStudent($request);
-        $studentResults = $this->getResultsForStudent($request, $request->student_id);
+        $studentResults = $this->getResultsForStudent($request);
         $classResults = $this->getAllResultsForClass($request);
 
         $classTotals = $this->calculateTotalScore($classResults, true);
         $studentTotals = $this->calculateTotalScore($studentResults, true);
-        $studentsTotals = $this->calculateTotalScore($studentsResults, true);
 
         $studentAverage = $this->calculateAverage($studentTotals['total'], $studentTotals['count']);
-
-        $classAverage = $studentsTotals['total'] > 0
-            ? $classTotals['total'] / $studentsTotals['total']
+        $classAverage = $studentTotals['total'] > 0
+            ? $classTotals['total'] / $studentTotals['total']
             : 0;
 
         $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
