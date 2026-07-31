@@ -84,12 +84,14 @@ trait ResultTrait
         );
     }
 
-    protected function getResultsForStudent($request)
+    protected function getResultsForStudent($request, ?int $studentId = null)
     {
         return Result::with('studentScores')
-            ->where('student_id', $request->student_id)
             ->where('class_name', $request->class_name)
             ->where('session', $request->session)
+            ->when($studentId, function ($query) use ($studentId) {
+                $query->where('student_id', $studentId);
+            })
             ->get();
     }
 

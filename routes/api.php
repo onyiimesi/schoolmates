@@ -610,7 +610,7 @@ Route::middleware("check.allowed.url")->group(function () {
             "predelextra",
         ]);
         Route::get("/role", [OtherController::class, "role"]);
-        
+
         Route::get("/broadsheet/{class_name}/{term}/{session}", [
             BroadSheetController::class,
             "broadsheet",
