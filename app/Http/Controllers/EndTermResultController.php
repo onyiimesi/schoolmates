@@ -122,9 +122,9 @@ class EndTermResultController extends Controller
         $studentTotals = $this->calculateTotalScore($studentResults, true);
 
         $studentAverage = $this->calculateAverage($studentTotals['total'], $studentTotals['count']);
-        $classAverage = $studentTotals['total'] > 0
-            ? $classTotals['total'] / $studentTotals['total']
-            : 0;
+
+        // Class average = total of all learners' scores / (number of learners × number of subjects)
+        $classAverage = $this->calculateAverage($classTotals['total'], $classTotals['count']);
 
         $grade = GradingSystem::where('score_to', '>=', $studentAverage)->first();
 

@@ -273,6 +273,7 @@ Route::middleware("check.allowed.url")->group(function () {
             )
                 ->where("session", ".+")
                 ->middleware("check.subscription.status");
+
             Route::get(
                 "/end-term-class-average/{student_id}/{class_name}/{session}",
                 [EndTermResultController::class, "endaverage"],
