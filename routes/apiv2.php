@@ -18,6 +18,7 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
     // CBT
     Route::prefix('cbt')
         ->controller(CbtController::class)
+        ->middleware('feature:cbt_management')
         ->group(function () {
             Route::post('/setup', 'addSetup');
             Route::get('/setup/{period}/{term}/{session}/{subject_id}/{question_type}', 'getSetup')
@@ -49,6 +50,7 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
     // Lesson note
     Route::prefix('lessonnote')
         ->controller(LessonNoteController::class)
+        ->middleware('feature:lesson_note_management')
         ->group(function () {
             Route::post('/add', 'addLesson');
             Route::get('/single/{lesson_id}/{class_id}/{subject_id}/{week}/{term}/{session}', 'getOneLesson')
@@ -65,6 +67,7 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
     // Communication book
     Route::prefix('communicationbook')
         ->controller(CommunicationBookController::class)
+        ->middleware('feature:communication_book_management')
         ->group(function () {
             Route::post('/', 'store');
             Route::get('/{class_id}', 'show');
@@ -79,7 +82,10 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
         });
 
     // Flip class
-    Route::prefix('flipclass')->controller(FlipClassController::class)->group(function () {
+    Route::prefix('flipclass')
+        ->controller(FlipClassController::class)
+        ->middleware('feature:flip_class_management')
+        ->group(function () {
         Route::post('/add', 'addFlipClass');
         Route::get('/single/{id}/{class_id}/{subject_id}/{week}/{term}/{session}', 'getOneFlipClass')
             ->where('session', '.+');
@@ -130,6 +136,7 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
     // Result
     Route::prefix('result')
         ->controller(ResultController::class)
+        ->middleware('feature:result_management')
         ->group(function () {
             Route::get('/settings', 'getSettings');
             Route::post('/settings/store', 'storeSettings');
@@ -144,6 +151,7 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
     // Stationary
     Route::prefix('stationary')
         ->controller(StationaryController::class)
+        ->middleware('feature:stationary_management')
         ->group(function () {
             Route::get('/report', 'getReport');
 
@@ -183,6 +191,7 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
     // Staff
     Route::prefix('staff')
         ->controller(StaffController::class)
+        ->middleware('feature:staff_management')
         ->group(function () {
             Route::post('/', 'addStaff');
             Route::patch('/{id}', 'updateStaff');

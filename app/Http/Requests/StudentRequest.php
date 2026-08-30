@@ -27,7 +27,7 @@ class StudentRequest extends FormRequest
         return [
             'surname' => ['required', 'string',],
             'firstname' => ['required', 'string', 'max:255'],
-            'middlename' => ['required', 'string', 'max:255'],
+            'middlename' => ['nullable', 'string', 'max:255'],
             'email_address' => ['required', 'string', 'max:255'],
             'password' => ['required', Rules\Password::defaults()],
             'pass_word' => ['string', 'max:255'],
