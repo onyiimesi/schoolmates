@@ -19,6 +19,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SchoolsController;
@@ -78,7 +79,6 @@ use App\Http\Controllers\PreSchoolSubjectController;
 use App\Http\Controllers\PrincipalCommentController;
 use App\Http\Controllers\StudentCreditorsController;
 use App\Http\Controllers\ClosingResumptionController;
-use App\Http\Controllers\CommunicationBookController;
 use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\StudentFeeHistoryController;
 use App\Http\Controllers\AdmissionNumSearchController;
@@ -154,96 +154,102 @@ Route::middleware("check.allowed.url")->group(function () {
     ])->where("school_id", ".+");
 
     Route::group(["middleware" => ["auth:sanctum"]], function () {
-        Route::resource("/designation", DesignationController::class);
-        Route::resource("/staff", StaffController::class);
-        Route::resource("/campus", CampusController::class);
+        Route::resource("/designation", DesignationController::class)->middleware("feature:designation_management");
+        Route::resource("/staff", StaffController::class)->middleware("feature:staff_management");
+        Route::resource("/campus", CampusController::class)->middleware("feature:campus_management");
 
         Route::controller(GeneralController::class)->group(function () {
-            Route::patch("/enablecampus/{id}", "enableCampus");
-            Route::patch("/disablecampus/{id}", "disableCampus");
+            Route::patch("/enablecampus/{id}", "enableCampus")->middleware("feature:campus_management");
+            Route::patch("/disablecampus/{id}", "disableCampus")->middleware("feature:campus_management");
 
-            Route::patch("/enablestaff/{id}", "enableStaff");
-            Route::patch("/disablestaff/{id}", "disableStaff");
+            Route::patch("/enablestaff/{id}", "enableStaff")->middleware("feature:staff_management");
+            Route::patch("/disablestaff/{id}", "disableStaff")->middleware("feature:staff_management");
 
-            Route::patch("/enablestudent/{id}", "enableStudent");
-            Route::patch("/disablestudent/{id}", "disableStudent");
+            Route::patch("/enablestudent/{id}", "enableStudent")->middleware("feature:student_management");
+            Route::patch("/disablestudent/{id}", "disableStudent")->middleware("feature:student_management");
         });
 
         Route::patch("/assignclass/{id}", [
             AssignClassController::class,
             "assign",
-        ]);
+        ])->middleware("feature:class_management");
         Route::patch("/transferstudent/{id}", [
             TransferStudentController::class,
             "transfer",
-        ]);
+        ])->middleware("feature:student_management");
 
         Route::post("/studentimport", [
             StudentImportController::class,
             "import",
-        ]);
+        ])->middleware("feature:student_management");
 
         Route::controller(AcademicPeriodController::class)->group(function () {
-            Route::post("/academicperiod", "changePeriod")->middleware(
+            Route::post("/academicperiod", "changePeriod")->middleware([
                 "check.subscription.status",
-            );
-            Route::get("/getacademicperiod", "getPeriod");
-            Route::get("/getacademicsessions", "getSessions");
+                "feature:academic_period_management",
+            ]);
+            Route::get("/getacademicperiod", "getPeriod")->middleware("feature:academic_period_management");
+            Route::get("/getacademicsessions", "getSessions")->middleware("feature:academic_period_management");
 
             Route::post(
                 "/current/academicperiod",
                 "setCurrentAcademicPeriod",
-            )->middleware("check.subscription.status");
-            Route::get("/current/academicperiod", "getCurrentAcademicPeriod");
+            )->middleware([
+                "check.subscription.status",
+                "feature:academic_period_management",
+            ]);
+            Route::get("/current/academicperiod", "getCurrentAcademicPeriod")->middleware("feature:academic_period_management");
         });
 
         Route::get("/payment/{invoice_id}/get", [
             OtherController::class,
             "paymentinvoice",
-        ]);
+        ])->middleware("feature:invoice_payment_management");
 
-        Route::resource("/vehicle", VehicleController::class);
-        Route::resource("/vehiclelog", VehicleLogController::class);
-        Route::resource("/staffattendance", StaffAttendanceController::class);
-        Route::resource("/codeconduct", CodeConductController::class);
-        Route::resource("/class", ClassController::class);
-        Route::resource("/disciplinary", DisciplinaryController::class);
-        Route::resource("/student", StudentController::class)->middleware(
+        Route::resource("/vehicle", VehicleController::class)->middleware("feature:vehicle_management");
+        Route::resource("/vehiclelog", VehicleLogController::class)->middleware("feature:vehicle_management");
+        Route::resource("/staffattendance", StaffAttendanceController::class)->middleware("feature:attendance_management");
+        Route::resource("/codeconduct", CodeConductController::class)->middleware("feature:discipline_management");
+        Route::resource("/class", ClassController::class)->middleware("feature:class_management");
+        Route::resource("/disciplinary", DisciplinaryController::class)->middleware("feature:discipline_management");
+        Route::resource("/student", StudentController::class)->middleware([
             "check.subscription.status",
-        );
-        Route::resource("/fee", FeeController::class);
-        Route::resource("/invoice", InvoiceController::class)->middleware(
+            "feature:student_management",
+        ]);
+        Route::resource("/fee", FeeController::class)->middleware("feature:fee_management");
+        Route::resource("/invoice", InvoiceController::class)->middleware([
             "check.subscription.status",
-        );
-        Route::resource("/bank", BankController::class);
-        Route::resource("/payment", PaymentController::class);
-        Route::resource("/chartaccount", ChartAccountController::class);
-        Route::resource("/expenses", ExpensesController::class);
-        Route::resource("/vendor", VendorController::class);
+            "feature:invoice_payment_management",
+        ]);
+        Route::resource("/bank", BankController::class)->middleware("feature:account_management");
+        Route::resource("/payment", PaymentController::class)->middleware("feature:invoice_payment_management");
+        Route::resource("/chartaccount", ChartAccountController::class)->middleware("feature:account_management");
+        Route::resource("/expenses", ExpensesController::class)->middleware("feature:account_management");
+        Route::resource("/vendor", VendorController::class)->middleware("feature:account_management");
         Route::resource("/profile", ProfileController::class);
-        Route::resource("/department", DepartmentController::class);
-        Route::resource("/grading", GradingSystemController::class);
-        Route::resource("/gpa", GpaController::class);
-        Route::resource("/subjects", SubjectController::class);
-        Route::resource("/studentsubjects", RegisterSubjectController::class);
-        Route::resource("/dresscode", DressCodeController::class);
+        Route::resource("/department", DepartmentController::class)->middleware("feature:department_management");
+        Route::resource("/grading", GradingSystemController::class)->middleware("feature:grading_management");
+        Route::resource("/gpa", GpaController::class)->middleware("feature:grading_management");
+        Route::resource("/subjects", SubjectController::class)->middleware("feature:subject_management");
+        Route::resource("/studentsubjects", RegisterSubjectController::class)->middleware("feature:subject_management");
+        Route::resource("/dresscode", DressCodeController::class)->middleware("feature:dresscode_management");
         Route::resource(
             "/studentattendance",
             StudentAttendanceController::class,
-        );
-        Route::resource("/academiccalender", AcademicCalenderController::class);
-        Route::resource("/timetable", TimetableController::class);
-        Route::resource("/maximumscores", MaximumScoresController::class);
+        )->middleware("feature:attendance_management");
+        Route::resource("/academiccalender", AcademicCalenderController::class)->middleware("feature:timetable_management");
+        Route::resource("/timetable", TimetableController::class)->middleware("feature:timetable_management");
+        Route::resource("/maximumscores", MaximumScoresController::class)->middleware("feature:grading_management");
         Route::resource(
             "/closingresumption",
             ClosingResumptionController::class,
-        );
-        Route::resource("/principalcomment", PrincipalCommentController::class);
-        Route::resource("/skills", SkillsController::class);
-        Route::resource("/preschool", PreSchoolController::class);
+        )->middleware("feature:timetable_management");
+        Route::resource("/principalcomment", PrincipalCommentController::class)->middleware("feature:result_management");
+        Route::resource("/skills", SkillsController::class)->middleware("feature:skills_management");
+        Route::resource("/preschool", PreSchoolController::class)->middleware("feature:preschool_management");
         Route::resource("/reports", ReportsController::class);
 
-        Route::middleware(["throttle:apis"])->group(function () {
+        Route::middleware(["throttle:apis", "feature:result_management"])->group(function () {
             //New result form
             Route::middleware("check.subscription.status")
                 ->controller(ResultController::class)
@@ -308,8 +314,9 @@ Route::middleware("check.allowed.url")->group(function () {
         });
 
         //PreSchool Subject
-        Route::controller(PreSchoolSubjectController::class)->group(
-            function () {
+        Route::controller(PreSchoolSubjectController::class)
+            ->middleware("feature:preschool_management")
+            ->group(function () {
                 Route::post("/preschoolsubject", "addSubject");
                 Route::get(
                     "/preschoolsubject/{period}/{term}/{session}",
@@ -334,208 +341,218 @@ Route::middleware("check.allowed.url")->group(function () {
         Route::get("/studentsessionsearch/{session}", [
             SessionSearchController::class,
             "sessionsearch",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:student_management");
         Route::get("/admissionnumbersearch/{admissionnumber}", [
             AdmissionNumSearchController::class,
             "admissionsearch",
-        ])->where("admissionnumber", ".+");
+        ])->where("admissionnumber", ".+")->middleware("feature:student_management");
 
         Route::get("/incomereport/{term}/{session}", [
             IncomeReportController::class,
             "incomesearch",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:financial_report_management");
         Route::get("/expensesreport/{term}/{session}", [
             ExpensesReportController::class,
             "expensesearch",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:financial_report_management");
 
         Route::get("/graduatedstudent", [
             GraduatedStudentController::class,
             "graduate",
-        ]);
+        ])->middleware("feature:student_management");
         Route::patch("/graduatestudent/{id}", [
             GraduatedStudentController::class,
             "graduatestudent",
-        ]);
+        ])->middleware("feature:student_management");
 
         Route::get("/studentcreditors", [
             StudentCreditorsController::class,
             "creditors",
-        ]);
+        ])->middleware("feature:financial_report_management");
         Route::get("/studentdebtors", [
             StudentDebtorController::class,
             "debtors",
-        ]);
+        ])->middleware("feature:financial_report_management");
 
         Route::get("/creditors/{term}/{session}", [
             StudentCreditorsController::class,
             "creditorsByTermSession",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:financial_report_management");
         Route::get("/debtors/{term}/{session}", [
             StudentDebtorController::class,
             "debtorsByTermSession",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:financial_report_management");
 
         Route::patch("/withdrawstudent/{id}", [
             WithdrawStudentController::class,
             "withdraw",
-        ]);
+        ])->middleware("feature:student_management");
         Route::patch("/acceptstudent/{id}", [
             WithdrawStudentController::class,
             "acceptStudent",
-        ]);
+        ])->middleware("feature:student_management");
         Route::patch("/promotestudent/{id}", [
             PromoteStudentController::class,
             "promote",
-        ])->middleware("check.subscription.status");
+        ])->middleware(["check.subscription.status", "feature:student_management"]);
         Route::patch("/promote-students", [
             PromoteStudentController::class,
             "promotestudents",
-        ])->middleware("check.subscription.status");
+        ])->middleware(["check.subscription.status", "feature:student_management"]);
 
         Route::get("/expectedincome", [
             ExpectedIncomecontroller::class,
             "expected",
-        ]);
+        ])->middleware("feature:financial_report_management");
         Route::get("/receivedincome", [
             ReceivedIncomeController::class,
             "received",
-        ]);
+        ])->middleware("feature:financial_report_management");
         Route::get("/outstanding", [
             OutstandingController::class,
             "outstanding",
-        ]);
-        Route::get("/discount", [DiscountController::class, "discount"]);
+        ])->middleware("feature:financial_report_management");
+        Route::get("/discount", [DiscountController::class, "discount"])->middleware("feature:fee_management");
         Route::get("/totalexpense", [
             TotalExpenseController::class,
             "totalexpense",
-        ]);
+        ])->middleware("feature:account_management");
         Route::get("/accountbalance", [
             AccountBalanceController::class,
             "account",
-        ]);
+        ])->middleware("feature:financial_report_management");
         Route::get("/studentfeehistory", [
             StudentFeeHistoryController::class,
             "feehistory",
-        ]);
+        ])->middleware("feature:fee_management");
         Route::get("/studentinvoice", [
             StudentInvoiceController::class,
             "studentinvoices",
-        ]);
+        ])->middleware("feature:invoice_payment_management");
         Route::get("/studentpreviousinvoice", [
             StudentInvoiceController::class,
             "studentprevinvoices",
-        ]);
+        ])->middleware("feature:invoice_payment_management");
         Route::get("/school", [SchoolsController::class, "schools"]);
+        Route::get("/school/plan", [PlanController::class, "plan"]);
+        Route::get("/school/features", [PlanController::class, "features"]);
         Route::get("/student/{session}/{class}", [
             StudentBySessionTermClassController::class,
             "studentsessionclassterm",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:student_management");
 
         Route::get("/studentlogindetails", [
             LoginDetailsController::class,
             "loginDetails",
-        ]);
+        ])->middleware("feature:student_management");
         Route::get("/stafflogindetails", [
             LoginDetailsController::class,
             "staffloginDetails",
-        ]); // Deprecated
+        ])->middleware("feature:staff_management"); // Deprecated
 
         // Student By Class (Principal)
         Route::get("/studentbyclass/{present_class}", [
             StudentBySessionTermClassController::class,
             "studentbyclass",
-        ]);
+        ])->middleware("feature:student_management");
         Route::get("/attendance/{date}", [
             StudentAttendanceDateController::class,
             "attendancedate",
-        ])->where("date", ".+");
+        ])->where("date", ".+")->middleware("feature:attendance_management");
 
-        Route::controller(SubjectByClassController::class)->group(function () {
-            Route::get("/subject/{class}", "subjectByClass");
-            Route::get("/subjectby/{id}", "subjectById");
-            Route::get("/subject", "subjectByCampus");
-            Route::get("/teacher-subject", "subjectByTeacher");
-            Route::get("/student-subject", "subjectByStudent");
-        });
+        Route::controller(SubjectByClassController::class)
+            ->middleware("feature:subject_management")
+            ->group(function () {
+                Route::get("/subject/{class}", "subjectByClass");
+                Route::get("/subjectby/{id}", "subjectById");
+                Route::get("/subject", "subjectByCampus");
+                Route::get("/teacher-subject", "subjectByTeacher");
+                Route::get("/student-subject", "subjectByStudent");
+            });
     });
 
     Route::group(["middleware" => ["auth:sanctum"]], function () {
-        Route::controller(ClassPopulationController::class)->group(function () {
-            Route::get("/classpopulation", "getClassPopulation");
-            Route::get("/studentpopulation", "getStudentPopulation");
-            Route::get("/staffpopulation", "getStaffPopulation");
-            Route::get("/schoolpopulation", "getSchoolPopulation");
-            Route::get("/teacherpopulation", "getTeacherPopulation");
-        });
+        Route::controller(ClassPopulationController::class)
+            ->middleware("feature:student_management")
+            ->group(function () {
+                Route::get("/classpopulation", "getClassPopulation");
+                Route::get("/studentpopulation", "getStudentPopulation");
+                Route::get("/staffpopulation", "getStaffPopulation");
+                Route::get("/schoolpopulation", "getSchoolPopulation");
+                Route::get("/teacherpopulation", "getTeacherPopulation");
+            });
 
-        Route::controller(AssignedVehicleController::class)->group(function () {
-            Route::get("/assignedvehicle", "getVehicle");
-            Route::get("/allassignedvehicle", "getVehicles");
-        });
+        Route::controller(AssignedVehicleController::class)
+            ->middleware("feature:vehicle_management")
+            ->group(function () {
+                Route::get("/assignedvehicle", "getVehicle");
+                Route::get("/allassignedvehicle", "getVehicles");
+            });
 
-        Route::post("/busrouting", [BusRoutingController::class, "route"]);
+        Route::post("/busrouting", [BusRoutingController::class, "route"])->middleware("feature:vehicle_management");
         Route::patch("/releaseresult/{term}/{session}", [
             ReleaseResultsController::class,
             "release",
-        ])->where("session", ".+");
-        Route::post("/healthreport", [HealthReportController::class, "report"]);
+        ])->where("session", ".+")->middleware("feature:result_management");
+        Route::post("/healthreport", [HealthReportController::class, "report"])->middleware("feature:health_management");
         Route::post("/vehiclemaintenance", [
             VehicleMaintenanceController::class,
             "maintenance",
-        ]);
+        ])->middleware("feature:vehicle_management");
         Route::get("/vehiclemaintenance", [
             VehicleMaintenanceController::class,
             "getmaintenance",
-        ]);
+        ])->middleware("feature:vehicle_management");
         Route::post("/setupdiscount", [
             DiscountController::class,
             "setupDiscount",
-        ]);
+        ])->middleware("feature:fee_management");
         Route::post("/transferfund", [
             TransferFundsController::class,
             "transferFunds",
-        ]);
-        Route::get("/getfunds", [TransferFundsController::class, "getFunds"]);
+        ])->middleware("feature:account_management");
+        Route::get("/getfunds", [TransferFundsController::class, "getFunds"])->middleware("feature:account_management");
         Route::get("/getsinglefund/{id}", [
             TransferFundsController::class,
             "getSingleFunds",
-        ]);
+        ])->middleware("feature:account_management");
         Route::patch("/editfund/{id}", [
             TransferFundsController::class,
             "EditFunds",
-        ]);
+        ])->middleware("feature:account_management");
         Route::delete("/deletefund/{id}", [
             TransferFundsController::class,
             "DeleteFunds",
-        ]);
+        ])->middleware("feature:account_management");
         Route::get("/studentexcelimport", [
             SubjectByClassController::class,
             "studentExcelImport",
-        ]);
+        ])->middleware("feature:student_management");
         Route::get("/invoicereport/{term}/{session}", [
             IncomeReportController::class,
             "invoicesearch",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:invoice_payment_management");
 
-        Route::get("/audits", [AuditLogController::class, "getAudit"]);
+        Route::get("/audits", [AuditLogController::class, "getAudit"])->middleware("feature:audit_management");
         // PreSchool Result
         Route::post("/preschoolresult", [
             PreSchoolResultController::class,
             "result",
-        ]);
+        ])->middleware("feature:preschool_management");
         Route::get("/preschoolresult/{student_id}/{period}/{term}/{session}", [
             GetPreschoolResultController::class,
             "getResult",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:preschool_management");
 
         Route::get("/computedresult/{period}/{term}/{session}", [
             GetPreschoolResultController::class,
             "getComputeResult",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:preschool_management");
 
         // Assignment
-        Route::controller(AssignmentController::class)->group(function () {
+        Route::controller(AssignmentController::class)
+            ->middleware("feature:assignment_management")
+            ->group(function () {
             Route::get("/assignment", "assign");
             Route::post("/objective-assignment", "objective");
             Route::post("/theory-assignment", "theory");
@@ -581,61 +598,62 @@ Route::middleware("check.allowed.url")->group(function () {
         Route::get("/assignment/performance", [
             AssignmentPerformanceController::class,
             "chart",
-        ]);
+        ])->middleware("feature:assignment_management");
 
         // Assign Subjects to class
         Route::post("/subjects-to-class", [
             AssignSubjectsController::class,
             "assign",
-        ]);
+        ])->middleware("feature:subject_management");
         Route::post("/add-dos", [SchoolsController::class, "dos"]);
         Route::get("/dos", [SchoolsController::class, "getdos"]);
 
-        Route::post("/extra-curricular", [OtherController::class, "extra"]);
-        Route::get("/extra-curricular", [OtherController::class, "getextra"]);
+        Route::post("/extra-curricular", [OtherController::class, "extra"])->middleware("feature:communication_management");
+        Route::get("/extra-curricular", [OtherController::class, "getextra"])->middleware("feature:communication_management");
         Route::delete("/delete-extra-curricular/{id}", [
             OtherController::class,
             "delextra",
-        ]);
+        ])->middleware("feature:communication_management");
 
         Route::post("/preschoolcurricular", [
             OtherController::class,
             "preextra",
-        ]);
+        ])->middleware("feature:preschool_management");
         Route::get("/preschoolcurricular", [
             OtherController::class,
             "pregetextra",
-        ]);
+        ])->middleware("feature:preschool_management");
         Route::delete("/delete-preschoolcurricular/{id}", [
             OtherController::class,
             "predelextra",
-        ]);
+        ])->middleware("feature:preschool_management");
         Route::get("/role", [OtherController::class, "role"]);
 
         Route::get("/broadsheet/{class_name}/{term}/{session}", [
             BroadSheetController::class,
             "broadsheet",
-        ])->where("session", ".+");
+        ])->where("session", ".+")->middleware("feature:result_management");
 
         // Admission Number Settings
         Route::post("admission-number/settings", [
             OtherController::class,
             "admissionNumberSettings",
-        ]);
+        ])->middleware("feature:student_management");
         Route::get("admission-number/settings/{sch_id}", [
             OtherController::class,
             "getAdmissionNumberSettings",
-        ])->where("sch_id", ".+");
+        ])->where("sch_id", ".+")->middleware("feature:student_management");
 
         // Staff by class
         Route::get("/staffbyclass/{class}", [
             OtherController::class,
             "staffByClass",
-        ]);
+        ])->middleware("feature:staff_management");
 
         // Staff & Student Attendance
         Route::prefix("scan/attendance")
             ->controller(ScanAttendanceController::class)
+            ->middleware("feature:attendance_management")
             ->group(function () {
                 Route::post("/staff", "staffAttendance");
             });
@@ -644,7 +662,7 @@ Route::middleware("check.allowed.url")->group(function () {
         Route::get("/announcements", [
             GeneralController::class,
             "getAnnouncements",
-        ]);
+        ])->middleware("feature:communication_management");
 
         Route::post("/changepassword", [AuthController::class, "change"]);
         Route::post("/logout", [AuthController::class, "logout"]);

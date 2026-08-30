@@ -32,6 +32,7 @@ class Schools extends Model implements Auditable
         'auto_generate',
         'admission_number_initial',
         'pricing_id',
+        'plan_id',
     ];
 
     protected $casts = [
@@ -41,6 +42,21 @@ class Schools extends Model implements Auditable
     public function schoolPayment()
     {
         return $this->hasOne(SchoolPayment::class, 'sch_id', 'sch_id');
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class, 'plan_id', 'id');
+    }
+
+    /**
+     * Per-school feature overrides (most specific level of control).
+     */
+    public function featureOverrides()
+    {
+        return $this->belongsToMany(Feature::class, 'school_feature', 'school_id', 'feature_id')
+            ->withPivot('is_enabled')
+            ->withTimestamps();
     }
 
     public function campuses()

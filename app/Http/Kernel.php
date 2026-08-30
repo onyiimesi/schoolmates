@@ -65,6 +65,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'check.allowed.url' => \App\Http\Middleware\CheckAllowedUrl::class,
         'check.subscription.status' => \App\Http\Middleware\CheckSubscriptionStatus::class,
+        'feature' => \App\Http\Middleware\EnsureFeatureAccess::class,
     ];
 
 }

@@ -7,6 +7,7 @@ use App\Models\Pricing;
 use App\Models\Result;
 use App\Models\SchoolPayment;
 use App\Models\Schools;
+use App\Services\PlanFeatureService;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 
@@ -52,6 +53,22 @@ class StudentLoginResource extends JsonResource
             $invoiceStatus = $this->school->activeSubscription === 'expired' ? 'pending' : 'paid';
         }
 
+        $planInfo = null;
+        $features = [];
+        try {
+            $planFeatureService = app(PlanFeatureService::class);
+            $features = $planFeatureService->schoolFeatures($this->sch_id);
+            $planInfo = $this->school->plan ? [
+                'id' => $this->school->plan->id,
+                'name' => $this->school->plan->name,
+                'slug' => $this->school->plan->slug,
+                'description' => $this->school->plan->description,
+                'is_default' => (bool) $this->school->plan->is_default,
+            ] : null;
+        } catch (\Throwable $e) {
+            // Never break the login response because of plan resolution.
+        }
+
         return [
             'id' => (string)$this->id,
             'sch_id' => (string)$this->sch_id,
@@ -80,6 +97,8 @@ class StudentLoginResource extends JsonResource
             'status' => (string)$this->status,
             'is_preschool' => (string) $this->is_preschool,
             'plan' => (string)$getplan->plan,
+            'plan_info' => $planInfo,
+            'features' => $features,
             'hos' => (object) [
                 'id' => (int) $this->hos?->id,
                 'name' => "{$this->hos?->surname} {$this->hos?->firstname} {$this->hos?->middlename}",
