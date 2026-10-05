@@ -114,6 +114,89 @@ class CbtService {
         }
     }
 
+    public function addBulkCbtQuestions($user, $request)
+    {
+        $classid = ClassModel::where([
+            "sch_id" => $user->sch_id,
+            "campus" => $user->campus,
+            "class_name" => $user->class_assigned
+        ])->value('id');
+
+        if (! $classid) {
+            return $this->error(null, "Class not found", 404);
+        }
+
+        try {
+            $parsed = $this->parseBulkQuestions($request->questions);
+
+            if (empty($parsed['questions'])) {
+                return $this->error(null, "No questions could be detected. Please check the format and try again.", 422);
+            }
+
+            if (!empty($parsed['errors'])) {
+                return $this->error($parsed['errors'], "Some questions are incomplete. Please fix them and try again.", 422);
+            }
+
+            $startNumber = CbtQuestion::where([
+                    'sch_id' => $user->sch_id,
+                    'campus' => $user->campus,
+                    'period' => $request->period,
+                    'term' => $request->term,
+                    'session' => $request->session,
+                    'class_id' => $classid,
+                    'subject_id' => $request->subject_id,
+                    'question_type' => $request->question_type,
+                ])
+                ->pluck('question_number')
+                ->map(fn ($number) => (int) $number)
+                ->max() ?? 0;
+
+            $number = $startNumber + 1;
+            $now = Carbon::now();
+            $rows = [];
+
+            foreach ($parsed['questions'] as $question) {
+                $rows[] = [
+                    'sch_id' => $user->sch_id,
+                    'campus' => $user->campus,
+                    'period' => $request->period,
+                    'term' => $request->term,
+                    'session' => $request->session,
+                    'class_id' => $classid,
+                    'cbt_setting_id' => $request->cbt_setting_id,
+                    'teacher_id' => $user->id,
+                    'subject_id' => $request->subject_id,
+                    'question_type' => $request->question_type,
+                    'question' => $question['question'],
+                    'option1' => $question['option1'],
+                    'option2' => $question['option2'],
+                    'option3' => $question['option3'],
+                    'option4' => $question['option4'],
+                    'answer' => $question['answer'],
+                    'question_mark' => $request->question_mark,
+                    'question_number' => (string) $number,
+                    'status' => 'unpublished',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+
+                $number++;
+            }
+
+            DB::transaction(function () use ($rows) {
+                CbtQuestion::insert($rows);
+            });
+
+            return $this->success([
+                'total' => count($rows),
+                'start_number' => $startNumber + 1,
+                'end_number' => $number - 1,
+            ], count($rows) . " questions added successfully", 201);
+        } catch (\Throwable $th) {
+            throw new Exception($th);
+        }
+    }
+
     public function getAllQuestions($user, $request)
     {
         $class = $user->designation_id == 7 ? $user->present_class : $user->class_assigned;
@@ -438,6 +521,157 @@ class CbtService {
         ];
 
         return $this->success($data, "Performance Chart", 200);
+    }
+
+    /**
+     * Parse a pasted block of objective questions into structured questions.
+     *
+     * Supported format (each option on its own line, the correct option marked
+     * with its letter in brackets at the end of the option text):
+     *
+     *   Choose the word that is opposite in meaning to "beautiful."
+     *   (A) Ugly (A)
+     *   (B) Attractive
+     *   (C) Pretty
+     *   (D) Lovely
+     *
+     * @return array{questions: array<int, array<string, string>>, errors: array<int, array<string, string>>}
+     */
+    private function parseBulkQuestions(?string $text): array
+    {
+        $questions = [];
+        $errors = [];
+        $current = $this->emptyBulkQuestion();
+        $expectedLetter = 'A';
+
+        // Normalize line endings and the non-breaking/unicode spaces Word & Docs add when copying.
+        $text = str_replace(
+            ["\r\n", "\r", "\xc2\xa0", "\xe2\x80\xaf", "\xe2\x80\x87"],
+            ["\n", "\n", ' ', ' ', ' '],
+            (string) $text
+        );
+
+        foreach (explode("\n", $text) as $rawLine) {
+            $line = trim($rawLine);
+
+            if ($line === '') {
+                continue;
+            }
+
+            $option = $this->matchBulkOptionLine($line);
+
+            if ($option !== null && $option['letter'] === $expectedLetter) {
+                $current['options'][$option['letter']] = $option['text'];
+
+                if ($option['marker'] !== null) {
+                    $current['answer'] = $option['marker'];
+                }
+
+                $expectedLetter = chr(ord($expectedLetter) + 1);
+                continue;
+            }
+
+            // Any non-option line after we started collecting means a new question begins.
+            if (!empty($current['options']) || !empty($current['question'])) {
+                $this->finalizeBulkQuestion($current, $questions, $errors);
+                $current = $this->emptyBulkQuestion();
+                $expectedLetter = 'A';
+            }
+
+            $current['question'][] = $this->stripQuestionNumber($line);
+        }
+
+        $this->finalizeBulkQuestion($current, $questions, $errors);
+
+        return ['questions' => $questions, 'errors' => $errors];
+    }
+
+    /**
+     * @return array{question: array<int, string>, options: array<string, string>, answer: ?string}
+     */
+    private function emptyBulkQuestion(): array
+    {
+        return ['question' => [], 'options' => [], 'answer' => null];
+    }
+
+    /**
+     * Match a single option line such as "(A) Ugly (A)", "B) Attractive" or "C. Pretty".
+     *
+     * @return array{letter: string, text: string, marker: ?string}|null
+     */
+    private function matchBulkOptionLine(string $line): ?array
+    {
+        if (!preg_match('/^\s*[\(\[]?\s*([A-Da-d])\s*[\)\].:\-]\s*(.*)$/u', $line, $matches)) {
+            return null;
+        }
+
+        $letter = strtoupper($matches[1]);
+        $text = trim($matches[2]);
+        $marker = null;
+
+        // A trailing "(A)" / "[A]" marks the correct option.
+        if (preg_match('/[\(\[]\s*([A-Da-d])\s*[\)\]]\s*$/u', $text, $markerMatches)) {
+            $marker = strtoupper($markerMatches[1]);
+            $text = trim(preg_replace('/[\(\[]\s*[A-Da-d]\s*[\)\]]\s*$/u', '', $text));
+        }
+
+        return ['letter' => $letter, 'text' => $text, 'marker' => $marker];
+    }
+
+    /**
+     * Remove a leading question number such as "1.", "2)" or "(3)".
+     */
+    private function stripQuestionNumber(string $line): string
+    {
+        return preg_replace('/^\s*(?:Q(?:uestion)?\s*)?(?:[\(\[]\s*\d+\s*[\)\]]|\d+\s*[\.\):])\s+/iu', '', $line) ?? $line;
+    }
+
+    /**
+     * Validate a parsed question and append it to the result set (or record an error).
+     */
+    private function finalizeBulkQuestion(array $current, array &$questions, array &$errors): void
+    {
+        $questionText = trim(implode(' ', $current['question']));
+
+        if ($questionText === '' && empty($current['options'])) {
+            return;
+        }
+
+        if ($questionText === '') {
+            $errors[] = ['question' => '(missing question text)', 'reason' => 'Question text is missing.'];
+            return;
+        }
+
+        $missing = [];
+        foreach (['A', 'B', 'C', 'D'] as $letter) {
+            if (!isset($current['options'][$letter]) || $current['options'][$letter] === '') {
+                $missing[] = $letter;
+            }
+        }
+
+        if (!empty($missing)) {
+            $errors[] = ['question' => $questionText, 'reason' => 'Missing option(s): ' . implode(', ', $missing) . '.'];
+            return;
+        }
+
+        $answerLetter = $current['answer'];
+
+        if ($answerLetter === null || !isset($current['options'][$answerLetter])) {
+            $errors[] = [
+                'question' => $questionText,
+                'reason' => 'Correct answer not marked. Add the correct option letter in brackets e.g. (A) at the end of the correct option.'
+            ];
+            return;
+        }
+
+        $questions[] = [
+            'question' => $questionText,
+            'option1' => $current['options']['A'],
+            'option2' => $current['options']['B'],
+            'option3' => $current['options']['C'],
+            'option4' => $current['options']['D'],
+            'answer' => $current['options'][$answerLetter],
+        ];
     }
 
 }
