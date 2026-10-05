@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v2;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v2\CbtAddAnswerRequest;
 use App\Http\Requests\v2\CbtAddQuestionRequest;
+use App\Http\Requests\v2\CbtBulkQuestionRequest;
 use App\Http\Requests\v2\CbtPublishRequest;
 use App\Http\Requests\v2\CbtResultRequest;
 use App\Http\Requests\v2\CbtSetupRequest;
@@ -14,11 +15,8 @@ use Illuminate\Support\Facades\Auth;
 
 class CbtController extends Controller
 {
-    public $cbt;
-
-    public function __construct()
+    public function __construct(public CbtService $cbt)
     {
-        $this->cbt = new CbtService;
     }
 
     public function addSetup(CbtSetupRequest $request)
@@ -37,6 +35,12 @@ class CbtController extends Controller
     {
         $user = Auth::user();
         return $this->cbt->addCbtQuestion($user, $request);
+    }
+
+    public function addBulkQuestions(CbtBulkQuestionRequest $request)
+    {
+        $user = Auth::user();
+        return $this->cbt->addBulkCbtQuestions($user, $request);
     }
 
     public function getQuestions(Request $request)

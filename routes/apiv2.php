@@ -25,6 +25,7 @@ Route::group(['middleware' => ['auth:sanctum', 'check.allowed.url']], function (
                 ->where('session', '.+');
 
             Route::post('/add/question', 'addQuestion');
+            Route::post('/add/questions', 'addBulkQuestions');
             Route::get('/questions/{period}/{term}/{session}/{subject_id}/{question_type}/get', 'getQuestions')
                 ->where('session', '.+');
             Route::patch('/update/questions', 'editQuestion');
