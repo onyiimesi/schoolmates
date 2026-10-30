@@ -11,6 +11,7 @@ use App\Models\Staff;
 use App\Models\Student;
 use App\Models\SubjectTeacher;
 use App\Models\SubjectTeacherSubject;
+use Illuminate\Http\Request;
 
 trait StaffTrait
 {
@@ -264,21 +265,10 @@ trait StaffTrait
 
     protected function validateClassTeacherUpdateConstraint($user, Staff $staff, $request): mixed
     {
-        // Same class — nothing to validate
-        if ($staff->class_assigned === $request->class_assigned) {
-            return null;
-        }
-
-        $classAlreadyTaken = Staff::where('sch_id', $user->sch_id)
-            ->where('campus', $staff->campus)
-            ->where('class_assigned', $request->class_assigned)
-            ->where('status', StaffStatus::ACTIVE)
-            ->where('id', '!=', $staff->id) // exclude self
-            ->exists();
-
-        return $classAlreadyTaken
-            ? $this->error(null, "The class '{$request->class_assigned}' is already assigned.", 409)
-            : null;
+        // Reassigning a class is allowed: if another active class teacher currently
+        // holds the requested class, they are unassigned during the update so the
+        // class can be handed over to this staff member.
+        return null;
     }
 
     protected function validateSubjectTeacherUpdateConstraint($user, Staff $staff, $request): mixed
@@ -311,6 +301,13 @@ trait StaffTrait
             $isPreschool = null;
         }
 
+        $newClassAssigned = $this->resolveClassAssigned($request, $staff);
+
+        // Moving this teacher to a different class — detach them from their old class's students.
+        if ($staff->class_assigned && $newClassAssigned && $staff->class_assigned !== $newClassAssigned) {
+            $this->clearClassTeacherStudents($staff, $staff->class_assigned);
+        }
+
         $staff->update(array_filter([
             'campus' => $request->campus,
             'campus_type' => $campus->campus_type ?? null,
@@ -324,7 +321,7 @@ trait StaffTrait
             'phoneno' => $request->phoneno,
             'address' => $request->address,
             'teacher_type' => $request->teacher_type,
-            'class_assigned' => $this->resolveClassAssigned($request, $staff),
+            'class_assigned' => $newClassAssigned,
             'is_preschool' => $isPreschool,
             'image' => $imagePath['url'] ?? $staff->image,
             'signature' => $signaturePath['url'] ?? $staff->signature,
@@ -346,7 +343,13 @@ trait StaffTrait
         // Switching TO class teacher — clean up subject teacher records
         if ($teacherType === 'class teacher') {
             $this->clearSubjectTeacherAssignments($staff);
-            $this->updateStudentTeacherInfo($staff, $request->class_assigned ?? $staff->class_assigned);
+
+            $classAssigned = $request->class_assigned ?? $staff->class_assigned;
+
+            // Hand the class over: unassign any other active teacher currently holding it.
+            $this->unassignOtherClassTeachers($staff, $classAssigned);
+
+            $this->updateStudentTeacherInfo($staff, $classAssigned);
 
             return;
         }
@@ -458,6 +461,25 @@ trait StaffTrait
         }
     }
 
+    /**
+     * Unassign any other active class teacher currently holding the given class,
+     * so the class can be handed over to the staff member being updated.
+     */
+    protected function unassignOtherClassTeachers(Staff $staff, ?string $classAssigned): void
+    {
+        if (!$classAssigned) {
+            return;
+        }
+
+        Staff::where('sch_id', $staff->sch_id)
+            ->where('campus', $staff->campus)
+            ->where('class_assigned', $classAssigned)
+            ->where('status', StaffStatus::ACTIVE)
+            ->where('id', '!=', $staff->id)
+            ->get()
+            ->each(fn (Staff $previousTeacher) => $this->clearClassTeacherAssignment($previousTeacher));
+    }
+
     protected function updateStudentTeacherInfo(Staff $staff, string $classAssigned): void
     {
         Student::where('sch_id', $staff->sch_id)
@@ -485,24 +507,32 @@ trait StaffTrait
     {
         // Remove teacher reference from students previously under this staff
         if ($staff->class_assigned) {
-            Student::where('sch_id', $staff->sch_id)
-                ->where('campus', $staff->campus)
-                ->where('present_class', $staff->class_assigned)
-                ->where('teacher_surname', $staff->surname)
-                ->update([
-                    'teacher_firstname' => null,
-                    'teacher_surname' => null,
-                    'teacher_middlename' => null,
-                ]);
+            $this->clearClassTeacherStudents($staff, $staff->class_assigned);
         }
 
         $staff->update(['class_assigned' => null]);
     }
 
     /**
+     * Remove this staff's teacher details from the students of a given class.
+     */
+    protected function clearClassTeacherStudents(Staff $staff, string $classAssigned): void
+    {
+        Student::where('sch_id', $staff->sch_id)
+            ->where('campus', $staff->campus)
+            ->where('present_class', $classAssigned)
+            ->where('teacher_surname', $staff->surname)
+            ->update([
+                'teacher_firstname' => null,
+                'teacher_surname' => null,
+                'teacher_middlename' => null,
+            ]);
+    }
+
+    /**
      * Determines what class_assigned should be on update.
      */
-    private function resolveClassAssigned($request, Staff $staff): ?string
+    private function resolveClassAssigned(Request $request, Staff $staff): ?string
     {
         $teacherType = $request->teacher_type ?? $staff->teacher_type;
 
