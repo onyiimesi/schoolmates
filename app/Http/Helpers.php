@@ -1,8 +1,12 @@
 <?php
 
+use App\Enum\PeriodicName;
+use App\Enum\StudentStatus;
 use App\Models\AcademicPeriod;
 use App\Models\AcademicSessions;
+use App\Models\Result;
 use App\Models\Stationary;
+use App\Models\Student;
 use GuzzleHttp\Client;
 use Illuminate\Database\Events\QueryExecuted;
 use ImageKit\ImageKit;
@@ -265,3 +269,65 @@ if (!function_exists('sameAcademicSession')) {
     }
 }
 
+if (!function_exists('studentsForClassSession')) {
+    /**
+     * Resolve class membership for a session. A current session uses the live
+     * roster plus students whose result rows belong to the class that session;
+     * a past session is built from its result rows so students who have since
+     * been promoted keep their historical class.
+     *
+     * Current-class students stay first so callers that rely on the first row
+     * keep their existing behaviour.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Models\Student>
+     */
+    function studentsForClassSession($user, ?string $class, ?string $session = null)
+    {
+        if (!$user || !$class) {
+            return collect();
+        }
+
+        $currentSession = currentAcademicSession($user);
+        $requestedSession = $session ?: $currentSession;
+        $isCurrentSession = $currentSession === null
+            || sameAcademicSession($currentSession, $requestedSession);
+
+        $students = collect();
+
+        if ($isCurrentSession) {
+            $students = Student::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->whereClass('present_class', $class)
+                ->where('status', StudentStatus::ACTIVE)
+                ->get();
+        }
+
+        if ($requestedSession === null) {
+            return $students;
+        }
+
+        $resultStudentIds = Result::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->whereClass('class_name', $class)
+            ->where('session', $requestedSession)
+            ->whereIn('period', [
+                PeriodicName::FIRSTHALF,
+                PeriodicName::SECONDHALF,
+            ])
+            ->whereNotIn('student_id', $students->pluck('id')->all())
+            ->distinct()
+            ->pluck('student_id');
+
+        if ($resultStudentIds->isEmpty()) {
+            return $students;
+        }
+
+        return $students->concat(
+            Student::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->whereIn('id', $resultStudentIds)
+                ->where('status', StudentStatus::ACTIVE)
+                ->get()
+        );
+    }
+}
