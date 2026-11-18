@@ -18,7 +18,7 @@ class ClassResource extends JsonResource
             'id' => (string)$this->id,
             'attributes' => [
                 'campus' => (string)$this->campus,
-                'class_name' => (string)$this->class_name,
+                'class_name' => normalizeClassName((string)$this->class_name),
                 'sub_class' => (string)$this->sub_class,
                 'teachers' => $this->resolveTeachers(),
                 'subjects' => $this->resolveAllSubjects(),

@@ -27,8 +27,12 @@ class ClassModel extends Model implements Auditable
     protected function className(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => ucfirst($value),
-            set: fn(string $value) => strtolower($value),
+            // Always return the canonical format (e.g. "SS 1", "JSS 2")
+            // regardless of how the value is stored in the DB.
+            get: fn(string $value) => normalizeClassName($value),
+            // Store in canonical format so new/updated classes are consistent
+            // and always match values in the results table.
+            set: fn(string $value) => normalizeClassName($value),
         );
     }
 
