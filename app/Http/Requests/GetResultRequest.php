@@ -15,6 +15,18 @@ class GetResultRequest extends FormRequest
     }
 
     /**
+     * Normalize the class name before validation so any casing / spacing
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('class')) {
+            $this->merge([
+                'class' => normalizeClassName($this->input('class')),
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
