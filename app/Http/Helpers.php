@@ -192,3 +192,16 @@ if (!function_exists('normalizeClassName')) {
         return $upper;
     }
 }
+
+if (!function_exists('classNameLookupKey')) {
+    /**
+     * Build a comparison key for class names so variants such as "SS 1",
+     * "Ss1" and "ss 1" all resolve to the same value.
+     */
+    function classNameLookupKey(?string $className): ?string
+    {
+        $normalized = normalizeClassName($className);
+
+        return $normalized === null ? null : str_replace(' ', '', $normalized);
+    }
+}

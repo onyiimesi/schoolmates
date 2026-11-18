@@ -20,7 +20,7 @@ class MidTermResultResource extends JsonResource
 
         $signature = Staff::where('sch_id', $auth->sch_id)
             ->where('campus', $auth->campus)
-            ->where('class_assigned', $this->class_name)
+            ->whereClass('class_assigned', $this->class_name)
             ->where('teacher_type', 'class teacher')
             ->get();
 

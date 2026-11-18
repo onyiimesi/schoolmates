@@ -8,6 +8,7 @@ use App\Observers\ResultObserver;
 use App\Observers\StudentScoreObserver;
 use Illuminate\Http\Request;
 use App\Services\SlowQueryMonitor;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureCommands();
         $this->configureModels();
+        $this->configureClassQueries();
         $this->configureUrl();
 
         app(SlowQueryMonitor::class)->register();
@@ -68,6 +70,32 @@ class AppServiceProvider extends ServiceProvider
         //Model::shouldBeStrict();
         Model::unguard();
         Model::automaticallyEagerLoadRelationships();
+    }
+
+    /**
+     * Configure class-name aware database queries.
+     *
+     * Class names are stored in several legacy formats (e.g. "Ss1", "SS1"
+     * and "SS 1"). The whereClass macro compares values using a normalized
+     * lookup key so existing data keeps working without a data migration.
+     */
+    private function configureClassQueries(): void
+    {
+        Builder::macro('whereClass', function (string $column, ?string $value, string $boolean = 'and') {
+            /** @var Builder $this */
+            if ($value === null) {
+                return $this->whereNull($column, $boolean);
+            }
+
+            $key = classNameLookupKey($value);
+            $wrapped = $this->getQuery()->getGrammar()->wrap($column);
+
+            return $this->whereRaw(
+                "REPLACE(UPPER(TRIM({$wrapped})), ' ', '') = ?",
+                [$key],
+                $boolean
+            );
+        });
     }
 
     /**

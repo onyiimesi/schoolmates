@@ -106,7 +106,7 @@ class ClassController extends Controller
         if (
             ClassModel::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('class_name', $request->class_name)
+            ->whereClass('class_name', $request->class_name)
             ->exists()
         ) {
             return $this->error(null, 'Class already exists', 409);
@@ -140,7 +140,7 @@ class ClassController extends Controller
         if (
             ClassModel::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('class_name', $validated['class_name'])
+            ->whereClass('class_name', $validated['class_name'])
             ->exists()
         ) {
             return $this->error(null, 'Class already exists', 409);
@@ -149,7 +149,7 @@ class ClassController extends Controller
         if ($class->class_name !== $validated['class_name']) {
             Result::where('sch_id', $user->sch_id)
                 ->where('campus', $user->campus)
-                ->where('class_name', $class->class_name)
+                ->whereClass('class_name', $class->class_name)
                 ->update([
                     'class_name' => $validated['class_name']
                 ]);

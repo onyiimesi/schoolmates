@@ -179,7 +179,7 @@ class PreSchoolSubjectController extends Controller
             ->where('period', $request->period)
             ->where('term', $request->term)
             ->where('session', $request->session)
-            ->where('class', $request->class)
+            ->whereClass('class', $request->class)
             ->get();
 
         $presubjects = PreSchoolSubjectClassResource::collection($subjects);

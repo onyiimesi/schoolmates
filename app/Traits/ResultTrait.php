@@ -22,7 +22,7 @@ trait ResultTrait
     {
         $data = Student::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('present_class', $class)
+            ->whereClass('present_class', $class)
             ->where('status', StudentStatus::ACTIVE)
             ->get();
 
@@ -38,7 +38,7 @@ trait ResultTrait
         ])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('class_name', $request['class'])
+            ->whereClass('class_name', $request['class'])
             ->get();
 
         return SubjectClassResource::collection($data);
@@ -88,7 +88,7 @@ trait ResultTrait
     {
         return Result::with('studentScores')
             ->where('student_id', $request->student_id)
-            ->where('class_name', $request->class_name)
+            ->whereClass('class_name', $request->class_name)
             ->where('session', $request->session)
             ->get();
     }
@@ -96,7 +96,7 @@ trait ResultTrait
     protected function getAllResultsForClass($request)
     {
         return Result::with('studentScores')
-            ->where('class_name', $request->class_name)
+            ->whereClass('class_name', $request->class_name)
             ->where('session', $request->session)
             ->get();
     }
@@ -143,10 +143,10 @@ trait ResultTrait
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
             'student_id' => $validated['student_id'],
-            'class_name' => $validated['class_name'],
             'term' => $validated['term'],
             'session' => $validated['session'],
         ])
+            ->whereClass('class_name', $validated['class_name'])
             ->with('studentScores')
             ->get();
     }
@@ -159,10 +159,10 @@ trait ResultTrait
         return Result::with('student')->where([
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
-            'class_name' => $validated['class_name'],
             'term' => $validated['term'],
             'session' => $validated['session'],
         ])
+            ->whereClass('class_name', $validated['class_name'])
             ->whereHas('student', function ($query) {
                 $query->where('status', 'active');
             })

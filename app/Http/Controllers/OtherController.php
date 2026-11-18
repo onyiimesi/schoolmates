@@ -239,7 +239,7 @@ class OtherController extends Controller
 
         $staffs = Staff::where('sch_id', $user->sch_id)
         ->where('campus', $user->campus)
-        ->where("class_assigned", $class)
+        ->whereClass("class_assigned", $class)
         ->get();
 
         $data = StaffsResource::collection($staffs);

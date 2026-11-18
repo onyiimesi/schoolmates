@@ -26,7 +26,7 @@ class BroadSheetController extends Controller
 
         $sheet = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('class_name', $className)
+            ->whereClass('class_name', $className)
             ->where('term', $request->term)
             ->whereIn('period', [
                 PeriodicName::FIRSTHALF,
@@ -39,7 +39,7 @@ class BroadSheetController extends Controller
         $groupedResults = $sheet->groupBy('student_id');
         $signatures = Staff::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('class_assigned', $className)
+            ->whereClass('class_assigned', $className)
             ->get();
 
         $data = $this->getBroadsheetData($groupedResults);
