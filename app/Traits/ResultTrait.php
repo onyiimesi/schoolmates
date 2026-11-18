@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Enum\StudentStatus;
 use App\Http\Resources\GradingSystemResource;
 use App\Http\Resources\MidTermResultResource;
 use App\Http\Resources\StudentResource;
@@ -11,18 +12,21 @@ use App\Models\ExtraCurricular;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\SchoolScoreSetting;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 trait ResultTrait
 {
-    public function getStudentsByClass($user, $class, $session = null)
+    public function getStudentsByClass($user, $class)
     {
-        // Session-aware so a historical result page lists the same cohort as
-        // the broadsheet, including students who have since been promoted.
-        return StudentResource::collection(
-            studentsForClassSession($user, $class, $session)
-        );
+        $data = Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->whereClass('present_class', $class)
+            ->where('status', StudentStatus::ACTIVE)
+            ->get();
+
+        return StudentResource::collection($data);
     }
 
     public function getSubjects($user, $request)
