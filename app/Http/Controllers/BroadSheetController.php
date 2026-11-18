@@ -38,11 +38,10 @@ class BroadSheetController extends Controller
 
         $groupedResults = $sheet->groupBy('student_id');
 
-        // Class membership is historical. Only the current session can use the
-        // live present_class roster; past sessions are built from the result
-        // rows recorded for that class and session. This keeps the current
-        // roster from leaking into a past session while preserving each
-        // historical cohort.
+        // The live roster defines class membership for the current session.
+        // Past sessions are built from the result rows recorded for that class
+        // and session. Students who have since moved to another class are not
+        // merged into the current roster.
         $currentSession = currentAcademicSession($user);
         $isCurrentSession = $currentSession === null
             || sameAcademicSession($currentSession, $request->session);
@@ -51,10 +50,7 @@ class BroadSheetController extends Controller
 
         if ($isCurrentSession) {
             // Current-session broadsheets start with the live roster so students
-            // without results still appear. Result-only students are merged in
-            // below; they may have since moved to another class (for example
-            // mid-session promotion) but their results still belong to this
-            // class and session.
+            // without results still appear.
             $students = Student::query()
                 ->where('sch_id', $user->sch_id)
                 ->where('campus', $user->campus)
@@ -68,7 +64,11 @@ class BroadSheetController extends Controller
             ->whereClass('class_assigned', $request->class_name)
             ->get();
 
-        $data = $this->getBroadsheetData($students, $groupedResults);
+        $data = $this->getBroadsheetData(
+            $students,
+            $groupedResults,
+            !$isCurrentSession,
+        );
 
         return response()->json(
             [
@@ -91,8 +91,11 @@ class BroadSheetController extends Controller
         );
     }
 
-    private function getBroadsheetData($students, $groupedResults)
-    {
+    private function getBroadsheetData(
+        $students,
+        $groupedResults,
+        bool $includeResultOnlyStudents = true,
+    ) {
         // Start with the class roster so students without results still appear.
         $entries = $students->mapWithKeys(function (Student $student) {
             return [
@@ -107,25 +110,27 @@ class BroadSheetController extends Controller
             ];
         });
 
-        // Preserve students who only exist in results (e.g. past sessions).
-        foreach ($groupedResults as $studentId => $studentResults) {
-            $studentId = (string) $studentId;
+        // Preserve students who only exist in results (past sessions). For the
+        // current session the roster above is the complete class membership.
+        if ($includeResultOnlyStudents) {
+            foreach ($groupedResults as $studentId => $studentResults) {
+                $studentId = (string) $studentId;
 
-            if ($entries->has($studentId)) {
-                continue;
+                if ($entries->has($studentId)) {
+                    continue;
+                }
+
+                $result = $studentResults->first();
+
+                $entries->put($studentId, [
+                    'student_id' => $studentId,
+                    'class_name' => normalizeClassName($result->class_name),
+                    // The student's class today. This differs from class_name
+                    // when the student has since been promoted.
+                    'present_class' => normalizeClassName($result->student?->present_class),
+                    'student_fullname' => $result->student_fullname,
+                ]);
             }
-
-            $result = $studentResults->first();
-
-            $entries->put($studentId, [
-                'student_id' => $studentId,
-                'class_name' => normalizeClassName($result->class_name),
-                // The student's class today. This differs from class_name when
-                // the student has since been promoted, and lets clients explain
-                // why the row is part of a historical class.
-                'present_class' => normalizeClassName($result->student?->present_class),
-                'student_fullname' => $result->student_fullname,
-            ]);
         }
 
         $data = $entries

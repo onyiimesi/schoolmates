@@ -43,9 +43,11 @@ class StudentBySessionTermClassController extends Controller
     {
         $user = Auth::user();
 
-        // Class membership is session-based. Reuse the same resolver as the
-        // broadsheet so promoted students are not missing from this list.
-        $searchStud = studentsForClassSession($user, $request->present_class);
+        $searchStud = Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->whereClass("present_class", $request->present_class)
+            ->where('status', StudentStatus::ACTIVE)
+            ->get();
 
         $data = StudentResource::collection($searchStud);
 
