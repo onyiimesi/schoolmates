@@ -52,27 +52,19 @@ class BroadSheetController extends Controller
         $students = collect();
 
         if ($isCurrentSession) {
-            // Students currently in the class. This keeps the current-session
-            // broadsheet in sync with the student-by-class endpoint and includes
-            // students without results.
+            // Current-session broadsheets start with the live roster so students
+            // without results still appear. Result-only students are merged in
+            // below; they may have since moved to another class (for example
+            // mid-session promotion) but their results still belong to this
+            // class and session.
             $students = Student::query()
                 ->where('sch_id', $user->sch_id)
                 ->where('campus', $user->campus)
                 ->whereClass('present_class', $request->class_name)
                 ->where('status', StudentStatus::ACTIVE)
                 ->get(['id', 'surname', 'firstname', 'middlename', 'present_class']);
-
-            // A student who has moved to another class may still have older
-            // result rows under this class. Keep the broadsheet aligned with
-            // the live roster for the current session.
-            $rosterIds = $students
-                ->pluck('id')
-                ->map(fn ($id) => (string) $id)
-                ->flip();
-
-            $groupedResults = $groupedResults
-                ->filter(fn ($results, $studentId) => $rosterIds->has((string) $studentId));
         }
+
         $signatures = Staff::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->whereClass('class_assigned', $request->class_name)
