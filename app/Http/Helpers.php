@@ -164,3 +164,31 @@ if (!function_exists('generateUniqueId')) {
         return $id;
     }
 }
+
+if (!function_exists('normalizeClassName')) {
+    /**
+     * Normalize a class name to the canonical DB format regardless of how it is sent.
+     */
+    function normalizeClassName(?string $className): ?string
+    {
+        if ($className === null) {
+            return null;
+        }
+
+        $upper = strtoupper(trim($className));
+
+        // Pattern: one or more letters, optional spaces, one or more digits,
+        // optional trailing letters (e.g. "A" for a stream/arm)
+        if (preg_match('/^([A-Z]+)\s*(\d+)\s*([A-Z]*)$/', $upper, $m)) {
+            $letters = $m[1];   // e.g. "SS", "JSS"
+            $number  = $m[2];   // e.g. "1", "2"
+            $suffix  = $m[3];   // e.g. "A" or ""
+            return $suffix !== ''
+                ? "{$letters} {$number}{$suffix}"
+                : "{$letters} {$number}";
+        }
+
+        // Not a recognisable class name pattern — return uppercased as-is.
+        return $upper;
+    }
+}
