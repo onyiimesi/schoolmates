@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enum\PeriodicName;
-use App\Enum\StudentStatus;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Staff;
-use App\Models\Student;
 use App\Traits\HttpResponses;
 use App\Traits\ResultTrait;
 use Illuminate\Http\Request;
@@ -38,37 +36,21 @@ class BroadSheetController extends Controller
 
         $groupedResults = $sheet->groupBy('student_id');
 
-        // The live roster defines class membership for the current session.
-        // Past sessions are built from the result rows recorded for that class
-        // and session. Students who have since moved to another class are not
-        // merged into the current roster.
+        // Broadsheet membership comes from the result rows recorded for the
+        // requested class, term and session. The live present_class roster is
+        // deliberately not merged in: students promoted into this class have
+        // no results for it yet, while students promoted out of it keep the
+        // results they actually earned here.
         $currentSession = currentAcademicSession($user);
         $isCurrentSession = $currentSession === null
             || sameAcademicSession($currentSession, $request->session);
-
-        $students = collect();
-
-        if ($isCurrentSession) {
-            // Current-session broadsheets start with the live roster so students
-            // without results still appear.
-            $students = Student::query()
-                ->where('sch_id', $user->sch_id)
-                ->where('campus', $user->campus)
-                ->whereClass('present_class', $request->class_name)
-                ->where('status', StudentStatus::ACTIVE)
-                ->get(['id', 'surname', 'firstname', 'middlename', 'present_class']);
-        }
 
         $signatures = Staff::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->whereClass('class_assigned', $request->class_name)
             ->get();
 
-        $data = $this->getBroadsheetData(
-            $students,
-            $groupedResults,
-            !$isCurrentSession,
-        );
+        $data = $this->getBroadsheetData($groupedResults);
 
         return response()->json(
             [
@@ -91,47 +73,24 @@ class BroadSheetController extends Controller
         );
     }
 
-    private function getBroadsheetData(
-        $students,
-        $groupedResults,
-        bool $includeResultOnlyStudents = true,
-    ) {
-        // Start with the class roster so students without results still appear.
-        $entries = $students->mapWithKeys(function (Student $student) {
+    private function getBroadsheetData($groupedResults)
+    {
+        // Build the sheet from the students who actually have result rows for
+        // this class, term and session.
+        $entries = $groupedResults->mapWithKeys(function ($studentResults, $studentId) {
+            $result = $studentResults->first();
+
             return [
-                (string) $student->id => [
-                    'student_id' => (string) $student->id,
-                    'class_name' => $student->present_class,
-                    'present_class' => $student->present_class,
-                    'student_fullname' => trim(
-                        "{$student->surname} {$student->firstname} {$student->middlename}"
-                    ),
-                ],
-            ];
-        });
-
-        // Preserve students who only exist in results (past sessions). For the
-        // current session the roster above is the complete class membership.
-        if ($includeResultOnlyStudents) {
-            foreach ($groupedResults as $studentId => $studentResults) {
-                $studentId = (string) $studentId;
-
-                if ($entries->has($studentId)) {
-                    continue;
-                }
-
-                $result = $studentResults->first();
-
-                $entries->put($studentId, [
-                    'student_id' => $studentId,
+                (string) $studentId => [
+                    'student_id' => (string) $studentId,
                     'class_name' => normalizeClassName($result->class_name),
                     // The student's class today. This differs from class_name
                     // when the student has since been promoted.
                     'present_class' => normalizeClassName($result->student?->present_class),
                     'student_fullname' => $result->student_fullname,
-                ]);
-            }
-        }
+                ],
+            ];
+        });
 
         $data = $entries
             ->map(function (array $student, $studentId) use ($groupedResults) {
