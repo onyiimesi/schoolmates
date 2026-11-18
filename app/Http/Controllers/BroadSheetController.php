@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enum\PeriodicName;
 use App\Enum\StudentStatus;
+use App\Models\AcademicPeriod;
+use App\Models\AcademicSessions;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Staff;
@@ -24,15 +26,6 @@ class BroadSheetController extends Controller
     {
         $user = Auth::user();
 
-        // Students currently in the class. This keeps the broadsheet in sync with
-        // the student-by-class endpoint and includes students without results.
-        $students = Student::query()
-            ->where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->whereClass('present_class', $request->class_name)
-            ->where('status', StudentStatus::ACTIVE)
-            ->get(['id', 'surname', 'firstname', 'middlename', 'present_class']);
-
         $sheet = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->whereClass('class_name', $request->class_name)
@@ -46,6 +39,40 @@ class BroadSheetController extends Controller
             ->get();
 
         $groupedResults = $sheet->groupBy('student_id');
+
+        // Class membership is historical. Only the current session can use the
+        // live present_class roster; past sessions are built from the result
+        // rows recorded for that class and session. This keeps the current
+        // roster from leaking into a past session while preserving each
+        // historical cohort.
+        $currentSession = $this->currentSession($user);
+        $isCurrentSession = $currentSession === null
+            || $this->sameSession($currentSession, $request->session);
+
+        $students = collect();
+
+        if ($isCurrentSession) {
+            // Students currently in the class. This keeps the current-session
+            // broadsheet in sync with the student-by-class endpoint and includes
+            // students without results.
+            $students = Student::query()
+                ->where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->whereClass('present_class', $request->class_name)
+                ->where('status', StudentStatus::ACTIVE)
+                ->get(['id', 'surname', 'firstname', 'middlename', 'present_class']);
+
+            // A student who has moved to another class may still have older
+            // result rows under this class. Keep the broadsheet aligned with
+            // the live roster for the current session.
+            $rosterIds = $students
+                ->pluck('id')
+                ->map(fn ($id) => (string) $id)
+                ->flip();
+
+            $groupedResults = $groupedResults
+                ->filter(fn ($results, $studentId) => $rosterIds->has((string) $studentId));
+        }
         $signatures = Staff::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->whereClass('class_assigned', $request->class_name)
@@ -58,6 +85,8 @@ class BroadSheetController extends Controller
                 'status' => true,
                 'message' => 'Broadsheet',
                 'class_name' => $request->class_name,
+                'current_session' => $currentSession,
+                'is_current_session' => $isCurrentSession,
                 'data' => $data,
                 'teacher' => $signatures
                     ->map(function ($teacher) {
@@ -72,6 +101,52 @@ class BroadSheetController extends Controller
         );
     }
 
+    /**
+     * Resolve the session the school is currently operating in. The academic
+     * period is the source of truth; older schools that have not set one yet
+     * fall back to their latest configured academic session.
+     */
+    private function currentSession($user): ?string
+    {
+        $session = AcademicPeriod::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('is_current_period', true)
+            ->value('session');
+
+        if ($session) {
+            return $session;
+        }
+
+        // Some schools create the new session without marking a period as
+        // current. The latest configured session is the best fallback.
+        $latestSession = AcademicSessions::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->max('academic_session');
+
+        if ($latestSession) {
+            return $latestSession;
+        }
+
+        return AcademicPeriod::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->value('session');
+    }
+
+    private function sameSession(?string $first, ?string $second): bool
+    {
+        if ($first === null || $second === null) {
+            return false;
+        }
+
+        $normalize = fn (string $session) => strtoupper(
+            preg_replace('/\s+/', '', $session)
+        );
+
+        return $normalize($first) === $normalize($second);
+    }
+
     private function getBroadsheetData($students, $groupedResults)
     {
         // Start with the class roster so students without results still appear.
@@ -80,6 +155,7 @@ class BroadSheetController extends Controller
                 (string) $student->id => [
                     'student_id' => (string) $student->id,
                     'class_name' => $student->present_class,
+                    'present_class' => $student->present_class,
                     'student_fullname' => trim(
                         "{$student->surname} {$student->firstname} {$student->middlename}"
                     ),
@@ -100,6 +176,10 @@ class BroadSheetController extends Controller
             $entries->put($studentId, [
                 'student_id' => $studentId,
                 'class_name' => normalizeClassName($result->class_name),
+                // The student's class today. This differs from class_name when
+                // the student has since been promoted, and lets clients explain
+                // why the row is part of a historical class.
+                'present_class' => normalizeClassName($result->student?->present_class),
                 'student_fullname' => $result->student_fullname,
             ]);
         }
@@ -170,6 +250,7 @@ class BroadSheetController extends Controller
         return [
             'student_id' => $student['student_id'],
             'class_name' => $student['class_name'],
+            'present_class' => $student['present_class'] ?? null,
             'student_fullname' => $student['student_fullname'],
             'results' => $combinedScores,
             'student_average' => number_format($studentAverage, 2),
