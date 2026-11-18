@@ -20,7 +20,7 @@ class ClassPopulationController extends Controller
     {
         $staff = Auth::user();
 
-        $class = Student::where('present_class', $staff->class_assigned)
+        $class = Student::query()->whereClass('present_class', $staff->class_assigned)
             ->where('sch_id', $staff->sch_id)
             ->where('campus', $staff->campus)
             ->count();

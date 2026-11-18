@@ -29,7 +29,7 @@ class StudentBySessionTermClassController extends Controller
 
         $search = Student::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where("present_class", $request->class)
+            ->whereClass("present_class", $request->class)
             ->where('status', StudentStatus::ACTIVE)
             ->get();
 
@@ -45,7 +45,7 @@ class StudentBySessionTermClassController extends Controller
 
         $searchStud = Student::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where("present_class", $request->present_class)
+            ->whereClass("present_class", $request->present_class)
             ->where('status', StudentStatus::ACTIVE)
             ->get();
 

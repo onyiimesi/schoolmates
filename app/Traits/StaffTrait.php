@@ -38,7 +38,7 @@ trait StaffTrait
     {
         $classExists = ClassModel::where('sch_id', $user->sch_id)
             ->where('campus', $request->campus)
-            ->where('class_name', $request->class_assigned)
+            ->whereClass('class_name', $request->class_assigned)
             ->exists();
 
         if (!$classExists) {
@@ -54,7 +54,7 @@ trait StaffTrait
 
         $classAlreadyTaken = Staff::where('sch_id', $user->sch_id)
             ->where('campus', $request->campus)
-            ->where('class_assigned', $request->class_assigned)
+            ->whereClass('class_assigned', $request->class_assigned)
             ->where('status', StaffStatus::ACTIVE)
             ->when(
                 $request->staff_id,
@@ -124,7 +124,7 @@ trait StaffTrait
         if ($request->teacher_type === 'class teacher') {
             Student::where('sch_id', $staff->sch_id)
                 ->where('campus', $staff->campus)
-                ->where('present_class', $request->class_assigned)
+                ->whereClass('present_class', $request->class_assigned)
                 ->update([
                     'teacher_firstname' => $staff->firstname,
                     'teacher_surname' => $staff->surname,
@@ -473,7 +473,7 @@ trait StaffTrait
 
         Staff::where('sch_id', $staff->sch_id)
             ->where('campus', $staff->campus)
-            ->where('class_assigned', $classAssigned)
+            ->whereClass('class_assigned', $classAssigned)
             ->where('status', StaffStatus::ACTIVE)
             ->where('id', '!=', $staff->id)
             ->get()
@@ -484,7 +484,7 @@ trait StaffTrait
     {
         Student::where('sch_id', $staff->sch_id)
             ->where('campus', $staff->campus)
-            ->where('present_class', $classAssigned)
+            ->whereClass('present_class', $classAssigned)
             ->update([
                 'teacher_firstname' => $staff->firstname,
                 'teacher_surname' => $staff->surname,
@@ -520,7 +520,7 @@ trait StaffTrait
     {
         Student::where('sch_id', $staff->sch_id)
             ->where('campus', $staff->campus)
-            ->where('present_class', $classAssigned)
+            ->whereClass('present_class', $classAssigned)
             ->where('teacher_surname', $staff->surname)
             ->update([
                 'teacher_firstname' => null,

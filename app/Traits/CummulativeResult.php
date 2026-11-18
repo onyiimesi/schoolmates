@@ -153,7 +153,7 @@ trait CummulativeResult
         $allResults = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('session', $request->session)
-            ->where('class_name', $student->present_class)
+            ->whereClass('class_name', $student->present_class)
             ->whereHas('student', function ($q) {
                 $q->where('status', StudentStatus::ACTIVE);
             })

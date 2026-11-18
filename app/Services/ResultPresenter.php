@@ -24,10 +24,10 @@ class ResultPresenter
                 "sch_id" => $result->sch_id,
                 "campus" => $result->campus,
                 "student_id" => $result->student_id,
-                "class_name" => $result->class_name,
                 "term" => $result->term,
                 "session" => $result->session,
             ])
+            ->whereClass("class_name", $result->class_name)
             ->get();
 
         $subjectScores =
@@ -60,7 +60,7 @@ class ResultPresenter
         ])
             ->where("sch_id", $result->sch_id)
             ->where("campus", $result->campus)
-            ->where("class_name", $result->class_name)
+            ->whereClass("class_name", $result->class_name)
             ->where("term", $result->term)
             ->where("session", $result->session)
             ->get();
@@ -174,10 +174,9 @@ class ResultPresenter
                 fn($q) => $q->where([
                     "sch_id" => $result->sch_id,
                     "campus" => $result->campus,
-                    "class_name" => $result->class_name,
                     "term" => $result->term,
                     "session" => $result->session,
-                ]),
+                ])->whereClass("class_name", $result->class_name),
             )
             ->whereNotNull("score")
             ->selectRaw("subject, ROUND(AVG(score), 2) as avg_score")
@@ -202,10 +201,9 @@ class ResultPresenter
                     $query->where([
                         "sch_id" => $result->sch_id,
                         "campus" => $result->campus,
-                        "class_name" => $result->class_name,
                         "term" => $result->term,
                         "session" => $result->session,
-                    ]);
+                    ])->whereClass("class_name", $result->class_name);
                 })
                 ->get();
 

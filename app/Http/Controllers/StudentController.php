@@ -38,7 +38,7 @@ class StudentController extends Controller
 
         $students = Student::where('sch_id', $user->sch_id)
             ->when($user->designation_id != 6, fn($query) => $query->where('campus', $user->campus))
-            ->when($class, fn($query) => $query->where('present_class', $class))
+            ->when($class, fn($query) => $query->whereClass('present_class', $class))
             ->when($status, fn($query) => $query->where('status', $status))
             ->when(
                 $search,

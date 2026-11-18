@@ -44,7 +44,7 @@ class GeneralService
 
         Student::where('sch_id', $staff->sch_id)
             ->where('campus', $staff->campus)
-            ->where('present_class', $request->class_assigned)
+            ->whereClass('present_class', $request->class_assigned)
             ->update([
                 'teacher_surname' => $teacher_firstname,
                 'teacher_firstname' => $teacher_surname,

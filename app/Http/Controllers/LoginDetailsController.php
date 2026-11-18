@@ -29,7 +29,7 @@ class LoginDetailsController extends Controller
                     "%{$search}%"
                 )
             )
-            ->when($class, fn($query) => $query->where('present_class', $class))
+            ->when($class, fn($query) => $query->whereClass('present_class', $class))
             ->latest()
             ->paginate(25);
 
