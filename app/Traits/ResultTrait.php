@@ -16,13 +16,15 @@ use Illuminate\Database\Eloquent\Collection;
 
 trait ResultTrait
 {
-    public function getStudentsByClass($user, $class, $session = null)
+    public function getStudentsByClass($user, $class, $session = null, $term = null)
     {
-        // Session-aware so a historical result page lists the same cohort as
-        // the broadsheet, including students who have since been promoted.
-        return StudentResource::collection(
-            studentsForClassSession($user, $class, $session)
-        );
+        // With a term, list the same result-bearing cohort as the broadsheet.
+        // Without one, fall back to the session-aware roster.
+        $students = $term !== null
+            ? studentsWithResultsForClassSession($user, $class, $session, $term)
+            : studentsForClassSession($user, $class, $session);
+
+        return StudentResource::collection($students);
     }
 
     public function getSubjects($user, $request)

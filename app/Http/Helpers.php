@@ -269,6 +269,50 @@ if (!function_exists('sameAcademicSession')) {
     }
 }
 
+if (!function_exists('studentsWithResultsForClassSession')) {
+    /**
+     * Resolve a class cohort from result rows only. Students without a result
+     * for the class, session and (optionally) term are excluded.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Models\Student>
+     */
+    function studentsWithResultsForClassSession(
+        $user,
+        ?string $class,
+        ?string $session,
+        ?string $term = null,
+    ) {
+        if (!$user || !$class || !$session) {
+            return collect();
+        }
+
+        $query = Result::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->whereClass('class_name', $class)
+            ->where('session', $session)
+            ->whereIn('period', [
+                PeriodicName::FIRSTHALF,
+                PeriodicName::SECONDHALF,
+            ]);
+
+        if ($term !== null) {
+            $query->where('term', $term);
+        }
+
+        $studentIds = $query->distinct()->pluck('student_id');
+
+        if ($studentIds->isEmpty()) {
+            return collect();
+        }
+
+        return Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->whereIn('id', $studentIds)
+            ->where('status', StudentStatus::ACTIVE)
+            ->get();
+    }
+}
+
 if (!function_exists('studentsForClassSession')) {
     /**
      * Resolve class membership for a session. A current session uses the live
