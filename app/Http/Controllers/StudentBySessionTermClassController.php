@@ -43,18 +43,11 @@ class StudentBySessionTermClassController extends Controller
     {
         $user = Auth::user();
 
-        // Match the broadsheet: only students who have results for this class
-        // in the current session. This keeps newly promoted students without
-        // results out of the class list.
-        $currentSession = currentAcademicSession($user);
-
-        $searchStud = $currentSession
-            ? studentsWithResultsForClassSession(
-                $user,
-                $request->present_class,
-                $currentSession,
-            )
-            : studentsForClassSession($user, $request->present_class);
+        $searchStud = Student::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->whereClass("present_class", $request->present_class)
+            ->where('status', StudentStatus::ACTIVE)
+            ->get();
 
         $data = StudentResource::collection($searchStud);
 
