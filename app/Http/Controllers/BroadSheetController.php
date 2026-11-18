@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enum\PeriodicName;
 use App\Enum\StudentStatus;
-use App\Models\AcademicPeriod;
-use App\Models\AcademicSessions;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Staff;
@@ -45,9 +43,9 @@ class BroadSheetController extends Controller
         // rows recorded for that class and session. This keeps the current
         // roster from leaking into a past session while preserving each
         // historical cohort.
-        $currentSession = $this->currentSession($user);
+        $currentSession = currentAcademicSession($user);
         $isCurrentSession = $currentSession === null
-            || $this->sameSession($currentSession, $request->session);
+            || sameAcademicSession($currentSession, $request->session);
 
         $students = collect();
 
@@ -91,52 +89,6 @@ class BroadSheetController extends Controller
             ],
             200,
         );
-    }
-
-    /**
-     * Resolve the session the school is currently operating in. The academic
-     * period is the source of truth; older schools that have not set one yet
-     * fall back to their latest configured academic session.
-     */
-    private function currentSession($user): ?string
-    {
-        $session = AcademicPeriod::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->where('is_current_period', true)
-            ->value('session');
-
-        if ($session) {
-            return $session;
-        }
-
-        // Some schools create the new session without marking a period as
-        // current. The latest configured session is the best fallback.
-        $latestSession = AcademicSessions::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->max('academic_session');
-
-        if ($latestSession) {
-            return $latestSession;
-        }
-
-        return AcademicPeriod::where('sch_id', $user->sch_id)
-            ->where('campus', $user->campus)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->value('session');
-    }
-
-    private function sameSession(?string $first, ?string $second): bool
-    {
-        if ($first === null || $second === null) {
-            return false;
-        }
-
-        $normalize = fn (string $session) => strtoupper(
-            preg_replace('/\s+/', '', $session)
-        );
-
-        return $normalize($first) === $normalize($second);
     }
 
     private function getBroadsheetData($students, $groupedResults)
