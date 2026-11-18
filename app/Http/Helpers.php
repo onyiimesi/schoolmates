@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\AcademicPeriod;
+use App\Models\AcademicSessions;
 use App\Models\Stationary;
 use GuzzleHttp\Client;
 use Illuminate\Database\Events\QueryExecuted;
@@ -203,5 +205,62 @@ if (!function_exists('classNameLookupKey')) {
         $normalized = normalizeClassName($className);
 
         return $normalized === null ? null : str_replace(' ', '', $normalized);
+    }
+}
+
+if (!function_exists('currentAcademicSession')) {
+    /**
+     * Resolve the session the school is currently operating in. The academic
+     * period is the source of truth; older schools that have not set one yet
+     * fall back to their latest configured academic session.
+     */
+    function currentAcademicSession($user): ?string
+    {
+        if (!$user) {
+            return null;
+        }
+
+        $session = AcademicPeriod::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->where('is_current_period', true)
+            ->value('session');
+
+        if ($session) {
+            return $session;
+        }
+
+        // Some schools create the new session without marking a period as
+        // current. The latest configured session is the best fallback.
+        $latestSession = AcademicSessions::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->max('academic_session');
+
+        if ($latestSession) {
+            return $latestSession;
+        }
+
+        return AcademicPeriod::where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->value('session');
+    }
+}
+
+if (!function_exists('sameAcademicSession')) {
+    /**
+     * Compare two session labels, ignoring whitespace and casing.
+     */
+    function sameAcademicSession(?string $first, ?string $second): bool
+    {
+        if ($first === null || $second === null) {
+            return false;
+        }
+
+        $normalize = fn (string $session) => strtoupper(
+            preg_replace('/\s+/', '', $session)
+        );
+
+        return $normalize($first) === $normalize($second);
     }
 }
