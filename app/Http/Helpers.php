@@ -305,11 +305,22 @@ if (!function_exists('studentsWithResultsForClassSession')) {
             return collect();
         }
 
-        return Student::where('sch_id', $user->sch_id)
+        $students = Student::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->whereIn('id', $studentIds)
             ->where('status', StudentStatus::ACTIVE)
             ->get();
+
+        // These students are being returned for the requested class, so show
+        // that class in the response even if they have since been promoted.
+        // This only changes the in-memory model; nothing is persisted.
+        $displayClass = normalizeClassName($class);
+
+        $students->each(function (Student $student) use ($displayClass) {
+            $student->present_class = $displayClass;
+        });
+
+        return $students;
     }
 }
 
