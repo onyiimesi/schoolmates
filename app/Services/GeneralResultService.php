@@ -42,6 +42,13 @@ class GeneralResultService
             );
         }
 
+        $hasMatchingResults = collect($assessmentTypes)
+            ->contains(fn ($resultType) => $data[$resultType]->isNotEmpty());
+
+        if ($notice = $this->resultClassNotice($user, $params, $assessmentTypes, $hasMatchingResults)) {
+            $data["result_class_notice"] = $notice;
+        }
+
         return $this->success($data, "Mid term result");
     }
 
@@ -102,6 +109,62 @@ class GeneralResultService
             );
         }
 
+        if ($notice = $this->resultClassNotice(
+            $user,
+            $params,
+            [$params["result_type"]],
+            $endTermResults->isNotEmpty(),
+            true,
+        )) {
+            $data["result_class_notice"] = $notice;
+        }
+
         return $this->success($data, "Retrieved successfully");
+    }
+
+    /**
+     * Explain why a class-filtered result lookup returned nothing.
+     */
+    private function resultClassNotice(
+        $user,
+        array $params,
+        array $resultTypes,
+        bool $hasMatchingResults,
+        bool $applyStatus = false,
+    ): ?array {
+        if ($hasMatchingResults) {
+            return null;
+        }
+
+        $query = Result::where([
+            "sch_id" => $user->sch_id,
+            "campus" => $user->campus,
+            "student_id" => $params["student_id"],
+            "period" => $params["period"],
+            "term" => $params["term"],
+            "session" => $params["session"],
+        ])->whereIn("result_type", $resultTypes);
+
+        if ($applyStatus && !empty($params["status"])) {
+            $query->where("status", $params["status"]);
+        }
+
+        $result = $query->get()->first(function (Result $result) use ($params) {
+            return classNameLookupKey($result->class_name) !== classNameLookupKey($params["class"]);
+        });
+
+        if (!$result) {
+            return null;
+        }
+
+        $requestedClass = normalizeClassName($params["class"]);
+        $actualClass = normalizeClassName($result->class_name);
+
+        return [
+            "requested_class" => $requestedClass,
+            "actual_class" => $actualClass,
+            "result_type" => $result->result_type,
+            "message" => "No result found for {$requestedClass} in {$params["session"]} {$params["term"]} ({$params["period"]}). The available result is for {$actualClass}.",
+        ];
     }
 }
