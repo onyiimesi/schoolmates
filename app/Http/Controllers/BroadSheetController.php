@@ -20,13 +20,9 @@ class BroadSheetController extends Controller
     {
         $user = Auth::user();
 
-        // Normalize the class name so variants like "Ss1" or "SS1" resolve
-        // to the canonical DB format (e.g. "SS 1") without breaking existing callers.
-        $className = normalizeClassName($request->class_name);
-
         $sheet = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->whereClass('class_name', $className)
+            ->whereClass('class_name', $request->class_name)
             ->where('term', $request->term)
             ->whereIn('period', [
                 PeriodicName::FIRSTHALF,
@@ -39,7 +35,7 @@ class BroadSheetController extends Controller
         $groupedResults = $sheet->groupBy('student_id');
         $signatures = Staff::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->whereClass('class_assigned', $className)
+            ->whereClass('class_assigned', $request->class_name)
             ->get();
 
         $data = $this->getBroadsheetData($groupedResults);
@@ -48,7 +44,7 @@ class BroadSheetController extends Controller
             [
                 'status' => true,
                 'message' => 'Broadsheet',
-                'class_name' => $className,
+                'class_name' => $request->class_name,
                 'data' => $data,
                 'teacher' => $signatures
                     ->map(function ($teacher) {
