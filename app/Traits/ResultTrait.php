@@ -80,6 +80,7 @@ trait ResultTrait
                     'session' => $params['session'],
                     'result_type' => $resultType,
                 ])
+                ->whereClass('class_name', $params['class'])
                 ->get()
         );
     }
