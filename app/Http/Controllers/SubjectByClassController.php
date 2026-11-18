@@ -38,7 +38,7 @@ class SubjectByClassController extends Controller
             }])
             ->where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('class_name', normalizeClassName($request->class))
+            ->where('class_name', $request->class)
             ->get();
 
         $data = SubjectClassResource::collection($subjects);
@@ -110,7 +110,7 @@ class SubjectByClassController extends Controller
         $class = ClassModel::where([
             'sch_id' => $user->sch_id,
             'campus' => $user->campus,
-            'class_name' => normalizeClassName($user->class_assigned)
+            'class_name' => $user->class_assigned
         ])
         ->firstOrFail();
 
@@ -132,7 +132,7 @@ class SubjectByClassController extends Controller
         $class = ClassModel::where([
                 'sch_id' => $user->sch_id,
                 'campus' => $user->campus,
-                'class_name' => normalizeClassName($user->class_assigned)
+                'class_name' => $user->class_assigned
             ])
             ->firstOrFail();
 
@@ -164,7 +164,7 @@ class SubjectByClassController extends Controller
         if ($user->teacher_type == "subject teacher") {
             $sub = SubjectTeacher::where('sch_id', $user->sch_id)
                 ->where('campus', $user->campus)
-                ->where('class_name', normalizeClassName($user->class_assigned))
+                ->where('class_name', $user->class_assigned)
                 ->where('staff_id', $user->id)
                 ->get();
             $subs = SubjectResource::collection($sub);
@@ -172,7 +172,7 @@ class SubjectByClassController extends Controller
         } else {
             $subject = ClassModel::where('sch_id', $user->sch_id)
                 ->where('campus', $user->campus)
-                ->where('class_name', normalizeClassName($user->class_assigned))
+                ->where('class_name', $user->class_assigned)
                 ->get();
             $subs = SubjectClassResultResource::collection($subject);
         }
@@ -191,7 +191,7 @@ class SubjectByClassController extends Controller
         $subject = SubjectResource::collection(
             Subject::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
-            ->where('class_name', normalizeClassName($user->present_class))
+            ->where('class_name', $user->present_class)
             ->get()
         );
 
