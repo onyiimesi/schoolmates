@@ -28,12 +28,7 @@ class GeneralResultService
         $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
 
         $data = [
-            "students" => $this->getStudentsByClass(
-                $user,
-                $params["class"],
-                $params["session"] ?? null,
-                $params["term"] ?? null,
-            ),
+            "students" => $this->getStudentsByClass($user, $params["class"]),
             "subjects" => $this->getSubjects($user, $params),
         ];
 
@@ -97,12 +92,7 @@ class GeneralResultService
             ->get();
 
         $data = [
-            "students" => $this->getStudentsByClass(
-                $user,
-                $params["class"],
-                $params["session"] ?? null,
-                $params["term"] ?? null,
-            ),
+            "students" => $this->getStudentsByClass($user, $params["class"]),
             "subjects" => $this->getSubjects($user, $params),
             "grading" => $this->getGrading($user),
             "extra_curricular" => $this->getExtraCurricular($user),
