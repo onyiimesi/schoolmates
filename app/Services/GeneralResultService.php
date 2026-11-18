@@ -32,6 +32,7 @@ class GeneralResultService
                 $user,
                 $params["class"],
                 $params["session"] ?? null,
+                $params["term"] ?? null,
             ),
             "subjects" => $this->getSubjects($user, $params),
         ];
@@ -100,6 +101,7 @@ class GeneralResultService
                 $user,
                 $params["class"],
                 $params["session"] ?? null,
+                $params["term"] ?? null,
             ),
             "subjects" => $this->getSubjects($user, $params),
             "grading" => $this->getGrading($user),
