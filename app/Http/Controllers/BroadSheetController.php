@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enum\PeriodicName;
+use App\Enum\StudentStatus;
 use App\Models\GradingSystem;
 use App\Models\Result;
 use App\Models\Staff;
+use App\Models\Student;
 use App\Traits\HttpResponses;
 use App\Traits\ResultTrait;
 use Illuminate\Http\Request;
@@ -16,9 +18,20 @@ class BroadSheetController extends Controller
 {
     use HttpResponses, ResultTrait;
 
+    private ?Collection $gradingSystems = null;
+
     public function broadsheet(Request $request)
     {
         $user = Auth::user();
+
+        // Students currently in the class. This keeps the broadsheet in sync with
+        // the student-by-class endpoint and includes students without results.
+        $students = Student::query()
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->whereClass('present_class', $request->class_name)
+            ->where('status', StudentStatus::ACTIVE)
+            ->get(['id', 'surname', 'firstname', 'middlename', 'present_class']);
 
         $sheet = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
@@ -38,7 +51,7 @@ class BroadSheetController extends Controller
             ->whereClass('class_assigned', $request->class_name)
             ->get();
 
-        $data = $this->getBroadsheetData($groupedResults);
+        $data = $this->getBroadsheetData($students, $groupedResults);
 
         return response()->json(
             [
@@ -59,16 +72,45 @@ class BroadSheetController extends Controller
         );
     }
 
-    private function getBroadsheetData($groupedResults)
+    private function getBroadsheetData($students, $groupedResults)
     {
-        $data = $groupedResults
-            ->map(function ($studentResults, $studentId) {
+        // Start with the class roster so students without results still appear.
+        $entries = $students->mapWithKeys(function (Student $student) {
+            return [
+                (string) $student->id => [
+                    'student_id' => (string) $student->id,
+                    'class_name' => $student->present_class,
+                    'student_fullname' => trim(
+                        "{$student->surname} {$student->firstname} {$student->middlename}"
+                    ),
+                ],
+            ];
+        });
+
+        // Preserve students who only exist in results (e.g. past sessions).
+        foreach ($groupedResults as $studentId => $studentResults) {
+            $studentId = (string) $studentId;
+
+            if ($entries->has($studentId)) {
+                continue;
+            }
+
+            $result = $studentResults->first();
+
+            $entries->put($studentId, [
+                'student_id' => $studentId,
+                'class_name' => normalizeClassName($result->class_name),
+                'student_fullname' => $result->student_fullname,
+            ]);
+        }
+
+        $data = $entries
+            ->map(function (array $student, $studentId) use ($groupedResults) {
                 return $this->calculateStudentSummary(
-                    $studentResults,
-                    $studentId,
+                    $groupedResults->get((string) $studentId, collect()),
+                    $student,
                 );
             })
-            ->filter()
             ->values();
 
         return $this->assignPositions($data)->toArray();
@@ -101,10 +143,8 @@ class BroadSheetController extends Controller
         });
     }
 
-    private function calculateStudentSummary($studentResults, $studentId)
+    private function calculateStudentSummary($studentResults, array $student)
     {
-        $student = $studentResults->first();
-
         // Calculate average — use the already-eager-loaded relation collection
         // directly to avoid any false N+1 concerns from static analysers.
         $subjectScores = [];
@@ -128,9 +168,9 @@ class BroadSheetController extends Controller
         $combinedScores = $this->buildSubjectScores($studentResults);
 
         return [
-            'student_id' => $studentId,
-            'class_name' => $student->class_name,
-            'student_fullname' => $student->student_fullname,
+            'student_id' => $student['student_id'],
+            'class_name' => $student['class_name'],
+            'student_fullname' => $student['student_fullname'],
             'results' => $combinedScores,
             'student_average' => number_format($studentAverage, 2),
             'grade' => $this->calculateGrade($studentAverage),
@@ -188,12 +228,27 @@ class BroadSheetController extends Controller
 
     private function calculateGrade($average)
     {
-        if ($average > 90) {
-            return 'EXCELLENT';
+        if ($this->gradingSystems === null) {
+            $user = Auth::user();
+
+            $this->gradingSystems = GradingSystem::where('sch_id', $user->sch_id)
+                ->where('campus', $user->campus)
+                ->get();
         }
 
-        $grade = GradingSystem::where('score_to', '>=', $average)->first();
+        $average = round((float) $average, 2);
 
-        return $grade->remark ?? '';
+        // The score columns are stored as strings, so compare them numerically
+        // in PHP rather than relying on the database's string comparison.
+        $grade = $this->gradingSystems->first(function (GradingSystem $grading) use ($average) {
+            return $average >= (float) $grading->score_from
+                && $average <= (float) $grading->score_to;
+        });
+
+        if ($grade) {
+            return $grade->remark;
+        }
+
+        return $average > 90 ? 'EXCELLENT' : '';
     }
 }
