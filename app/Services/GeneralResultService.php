@@ -40,17 +40,14 @@ class GeneralResultService
         $assessmentTypes = $this->getAssessmentTypes($assessmentType);
 
         foreach ($assessmentTypes as $resultType) {
-            $data[$resultType] = $this->getAssessmentResults(
+            $data[$resultType] = $this->getAssessmentResultsForRequest(
                 $user,
                 $params,
                 $resultType,
             );
         }
 
-        $hasMatchingResults = collect($assessmentTypes)
-            ->contains(fn ($resultType) => $data[$resultType]->isNotEmpty());
-
-        if ($notice = $this->resultClassNotice($user, $params, $assessmentTypes, $hasMatchingResults)) {
+        if ($notice = $this->resultClassNotice($user, $params, $assessmentTypes)) {
             $data["result_class_notice"] = $notice;
         }
 
@@ -71,7 +68,7 @@ class GeneralResultService
 
         $assessmentType = (int) $scoreSetting->scoreOption->assessment_type;
 
-        $endTermResults = Result::with([
+        $endTermQuery = Result::with([
             "student",
             "studentScores",
             "affectiveDispositions",
@@ -90,11 +87,19 @@ class GeneralResultService
                 "session" => $params["session"],
                 "result_type" => $params["result_type"],
             ])
-            ->whereClass("class_name", $params["class"])
             ->when(!empty($params["status"]), function ($query) use ($params) {
                 $query->where("status", $params["status"]);
-            })
+            });
+
+        // Prefer the requested class, but fall back to the class the result
+        // was actually recorded under so promoted students still see it.
+        $endTermResults = (clone $endTermQuery)
+            ->whereClass("class_name", $params["class"])
             ->get();
+
+        if ($endTermResults->isEmpty()) {
+            $endTermResults = $endTermQuery->get();
+        }
 
         $data = [
             "students" => $this->getStudentsByClass(
@@ -112,7 +117,7 @@ class GeneralResultService
         $assessmentTypes = $this->getAssessmentTypes($assessmentType);
 
         foreach ($assessmentTypes as $resultType) {
-            $data[$resultType] = $this->getAssessmentResults(
+            $data[$resultType] = $this->getAssessmentResultsForRequest(
                 $user,
                 $params,
                 $resultType,
@@ -123,7 +128,6 @@ class GeneralResultService
             $user,
             $params,
             [$params["result_type"]],
-            $endTermResults->isNotEmpty(),
             true,
         )) {
             $data["result_class_notice"] = $notice;
@@ -133,19 +137,29 @@ class GeneralResultService
     }
 
     /**
-     * Explain why a class-filtered result lookup returned nothing.
+     * Return the result for the requested class when it exists, otherwise fall
+     * back to the class the result was actually recorded under.
+     */
+    private function getAssessmentResultsForRequest($user, array $params, string $resultType)
+    {
+        $matching = $this->getAssessmentResults($user, $params, $resultType, true);
+
+        if ($matching->isNotEmpty()) {
+            return $matching;
+        }
+
+        return $this->getAssessmentResults($user, $params, $resultType, false);
+    }
+
+    /**
+     * Explain when the returned result was recorded under a different class.
      */
     private function resultClassNotice(
         $user,
         array $params,
         array $resultTypes,
-        bool $hasMatchingResults,
         bool $applyStatus = false,
     ): ?array {
-        if ($hasMatchingResults) {
-            return null;
-        }
-
         $query = Result::where([
             "sch_id" => $user->sch_id,
             "campus" => $user->campus,
@@ -174,7 +188,7 @@ class GeneralResultService
             "requested_class" => $requestedClass,
             "actual_class" => $actualClass,
             "result_type" => $result->result_type,
-            "message" => "No result found for {$requestedClass} in {$params["session"]} {$params["term"]} ({$params["period"]}). The available result is for {$actualClass}.",
+            "message" => "The requested class is {$requestedClass}, but the result for {$params["session"]} {$params["term"]} ({$params["period"]}) is recorded under {$actualClass}.",
         ];
     }
 }
