@@ -66,21 +66,23 @@ trait ResultTrait
             ->first();
     }
 
-    protected function getAssessmentResults($user, $params, string $resultType)
+    protected function getAssessmentResults($user, $params, string $resultType, bool $applyClass = true)
     {
-        return MidTermResultResource::collection(
-            Result::with(['student', 'studentScores'])
-                ->where([
-                    'sch_id' => $user->sch_id,
-                    'campus' => $user->campus,
-                    'student_id' => $params['student_id'],
-                    'term' => $params['term'],
-                    'session' => $params['session'],
-                    'result_type' => $resultType,
-                ])
-                ->whereClass('class_name', $params['class'])
-                ->get()
-        );
+        $query = Result::with(['student', 'studentScores'])
+            ->where([
+                'sch_id' => $user->sch_id,
+                'campus' => $user->campus,
+                'student_id' => $params['student_id'],
+                'term' => $params['term'],
+                'session' => $params['session'],
+                'result_type' => $resultType,
+            ]);
+
+        if ($applyClass) {
+            $query->whereClass('class_name', $params['class']);
+        }
+
+        return MidTermResultResource::collection($query->get());
     }
 
     protected function getResultsForStudent($request)
