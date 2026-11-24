@@ -5,17 +5,64 @@ namespace App\Traits;
 use App\Enum\StudentStatus;
 use App\Models\GradingSystem;
 use App\Models\Result;
+use App\Models\SchoolScoreSetting;
 
 trait CummulativeResult
 {
     public function getResults($user, $request)
     {
-        return Result::where('sch_id', $user->sch_id)
+        $query = Result::where('sch_id', $user->sch_id)
             ->where('campus', $user->campus)
             ->where('student_id', $request->student_id)
             ->where('session', $request->session)
-            ->with('studentScores')
-            ->get();
+            ->with('studentScores');
+
+        // Match the evaluation report: only the assessment types configured
+        // for the school plus the end-term exam contribute to a term total.
+        $resultTypes = $this->getCumulativeResultTypes($user);
+
+        if (!empty($resultTypes)) {
+            $query->whereIn('result_type', $resultTypes);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Result types that make up a term's evaluation total.
+     *
+     * Returns an empty array when the school has no score setting, so existing
+     * behaviour is preserved instead of dropping scores.
+     */
+    protected function getCumulativeResultTypes($user): array
+    {
+        $setting = SchoolScoreSetting::with('scoreOption')
+            ->where('sch_id', $user->sch_id)
+            ->where('campus', $user->campus)
+            ->first();
+
+        $assessmentType = (int) ($setting?->scoreOption?->assessment_type ?? 0);
+
+        $types = match ($assessmentType) {
+            1 => ['midterm'],
+            2 => ['first_assesment', 'second_assesment'],
+            3 => ['first_assesment', 'second_assesment', 'third_assesment'],
+            4 => [
+                'first_assesment',
+                'second_assesment',
+                'third_assesment',
+                'fourth_assesment',
+            ],
+            default => [],
+        };
+
+        if (empty($types)) {
+            return [];
+        }
+
+        $types[] = 'endterm';
+
+        return $types;
     }
 
     public function initializeSubjects($results)
