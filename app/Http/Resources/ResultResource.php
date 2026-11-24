@@ -43,7 +43,7 @@ class ResultResource extends JsonResource
             "student_image" => (string) $this->student?->image,
             "admission_number" => (string) $this->admission_number,
             "gender" => (string) $this->student?->gender,
-            "class_name" => (string) $this->class_name,
+            "class_name" => (string) normalizeClassName($this->class_name),
             "period" => (string) $this->period,
             "term" => (string) $this->term,
             "session" => (string) $this->session,

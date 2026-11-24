@@ -30,11 +30,10 @@ class StudentLoginResource extends JsonResource
             $getplan = Pricing::where('id', $school->pricing_id)->first();
         }
 
-        $classid = ClassModel::where([
-            "sch_id" => $this->sch_id,
-            "campus" => $this->campus,
-            "class_name" => $this->present_class
-        ])->value('id');
+        $classid = ClassModel::where("sch_id", $this->sch_id)
+            ->where("campus", $this->campus)
+            ->whereClass("class_name", $this->present_class)
+            ->value('id');
 
         $baseQuery = Result::where('sch_id', $this->sch_id)
             ->where('term', $this->school->currentAcademicPeriod?->term)

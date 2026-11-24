@@ -135,18 +135,16 @@ class ResultPresenter
 
     public function getMetadata(Result $result, string $className): array
     {
-        $class = ClassModel::where([
-            "sch_id" => $result->sch_id,
-            "campus" => $result->campus,
-            "class_name" => $className,
-        ])->first();
+        $class = ClassModel::where("sch_id", $result->sch_id)
+            ->where("campus", $result->campus)
+            ->whereClass("class_name", $className)
+            ->first();
 
-        $staff = Staff::where([
-            "sch_id" => $result->sch_id,
-            "campus" => $result->campus,
-            "class_assigned" => $className,
-            "status" => StaffStatus::ACTIVE,
-        ])->get();
+        $staff = Staff::where("sch_id", $result->sch_id)
+            ->where("campus", $result->campus)
+            ->where("status", StaffStatus::ACTIVE)
+            ->whereClass("class_assigned", $className)
+            ->get();
 
         $hodQuery = Staff::where("sch_id", $result->sch_id)
             ->where("campus", $result->campus)

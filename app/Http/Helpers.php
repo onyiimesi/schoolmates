@@ -181,17 +181,28 @@ if (!function_exists('normalizeClassName')) {
             return null;
         }
 
-        $upper = strtoupper(trim($className));
+        $upper = preg_replace('/\s+/', ' ', strtoupper(trim($className)));
 
         // Pattern: one or more letters, optional spaces, one or more digits,
-        // optional trailing letters (e.g. "A" for a stream/arm)
-        if (preg_match('/^([A-Z]+)\s*(\d+)\s*([A-Z]*)$/', $upper, $m)) {
-            $letters = $m[1];   // e.g. "SS", "JSS"
-            $number  = $m[2];   // e.g. "1", "2"
-            $suffix  = $m[3];   // e.g. "A" or ""
-            return $suffix !== ''
-                ? "{$letters} {$number}{$suffix}"
-                : "{$letters} {$number}";
+        // then an optional suffix (e.g. "SS 1A" or "Year 6 Diamond").
+        if (preg_match('/^([A-Z]+)\s*(\d+)\s*(.*)$/', $upper, $m)) {
+            $letters = $m[1];           // e.g. "SS", "JSS", "YEAR"
+            $number  = $m[2];           // e.g. "1", "6"
+            $suffix  = trim($m[3]);     // e.g. "A", "DIAMOND"
+
+            if ($suffix === '') {
+                return "{$letters} {$number}";
+            }
+
+            // A single trailing letter is an arm (e.g. "SS 1A"), so keep it
+            // attached to the number.
+            if (preg_match('/^[A-Z]$/', $suffix)) {
+                return "{$letters} {$number}{$suffix}";
+            }
+
+            // A stream/name (e.g. "Year 6 Diamond") keeps its space so it does
+            // not become "YEAR 6DIAMOND".
+            return "{$letters} {$number} {$suffix}";
         }
 
         // Not a recognisable class name pattern — return uppercased as-is.
