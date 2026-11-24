@@ -77,11 +77,10 @@ class CbtService {
 
     public function addCbtQuestion($user, $request)
     {
-        $classid = ClassModel::where([
-            "sch_id" => $user->sch_id,
-            "campus" => $user->campus,
-            "class_name" => $user->class_assigned
-        ])->value('id');
+        $classid = ClassModel::where("sch_id", $user->sch_id)
+            ->where("campus", $user->campus)
+            ->whereClass("class_name", $user->class_assigned)
+            ->value('id');
 
         try {
             DB::transaction(function() use($user, $classid, $request) {
@@ -116,11 +115,10 @@ class CbtService {
 
     public function addBulkCbtQuestions($user, $request)
     {
-        $classid = ClassModel::where([
-            "sch_id" => $user->sch_id,
-            "campus" => $user->campus,
-            "class_name" => $user->class_assigned
-        ])->value('id');
+        $classid = ClassModel::where("sch_id", $user->sch_id)
+            ->where("campus", $user->campus)
+            ->whereClass("class_name", $user->class_assigned)
+            ->value('id');
 
         if (! $classid) {
             return $this->error(null, "Class not found", 404);
@@ -201,11 +199,10 @@ class CbtService {
     {
         $class = $user->designation_id == 7 ? $user->present_class : $user->class_assigned;
 
-        $classid = ClassModel::where([
-            "sch_id" => $user->sch_id,
-            "campus" => $user->campus,
-            "class_name" => $class
-        ])->value('id');
+        $classid = ClassModel::where("sch_id", $user->sch_id)
+            ->where("campus", $user->campus)
+            ->whereClass("class_name", $class)
+            ->value('id');
 
         if (!$classid) {
             return $this->error(null, "Class not found", 404);

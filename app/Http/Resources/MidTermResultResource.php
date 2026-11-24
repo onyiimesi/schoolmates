@@ -30,7 +30,7 @@ class MidTermResultResource extends JsonResource
                 'student_id' => (string)$this->student_id,
                 'student_fullname' => (string)$this->student_fullname,
                 'admission_number' => (string)$this->admission_number,
-                'class_name' => (string)$this->class_name,
+                'class_name' => (string)normalizeClassName($this->class_name),
                 'period' => (string)$this->period,
                 'term' => (string)$this->term,
                 'session' => (string)$this->session,

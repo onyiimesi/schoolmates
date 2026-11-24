@@ -27,11 +27,10 @@ class LoginResource extends JsonResource
             Pricing::where('id', $plan->pricing_id)->first() :
             Schools::with('pricing')->where('sch_id', $this->sch_id)->first();
 
-        $classid = ClassModel::where([
-            "sch_id" => $this->sch_id,
-            "campus" => $this->campus,
-            "class_name" => $this->class_assigned
-        ])->value('id');
+        $classid = ClassModel::where("sch_id", $this->sch_id)
+            ->where("campus", $this->campus)
+            ->whereClass("class_name", $this->class_assigned)
+            ->value('id');
 
         $baseQuery = Result::where('sch_id', $this->sch_id)
             ->where('term', $this->school->currentAcademicPeriod?->term)
